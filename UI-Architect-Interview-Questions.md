@@ -34,48 +34,22 @@
 
 **Layered Architecture Pattern:**
 
-<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- Main Layer Boxes -->
-  <rect x="50" y="50" width="700" height="100" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="8"/>
-  <rect x="50" y="170" width="700" height="100" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="8"/>
-  <rect x="50" y="290" width="700" height="100" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="8"/>
-  <rect x="50" y="410" width="700" height="100" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="8"/>
-  
-  <!-- Layer Labels -->
-  <text x="400" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#1976d2">Presentation Layer</text>
-  <text x="400" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#7b1fa2">Application Layer</text>
-  <text x="400" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#388e3c">Domain Layer</text>
-  <text x="400" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#f57c00">Infrastructure Layer</text>
-  
-  <!-- Components within layers -->
-  <text x="150" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0d47a1">React/Angular Components</text>
-  <text x="400" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0d47a1">Pages/Containers</text>
-  <text x="650" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0d47a1">UI Components Library</text>
-  
-  <text x="200" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4a148c">Services</text>
-  <text x="400" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4a148c">State Management</text>
-  <text x="600" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4a148c">API Clients</text>
-  
-  <text x="200" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1b5e20">Business Logic</text>
-  <text x="400" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1b5e20">Models/Entities</text>
-  <text x="600" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1b5e20">Validation Rules</text>
-  
-  <text x="200" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e65100">HTTP Client</text>
-  <text x="400" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e65100">Storage</text>
-  <text x="600" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e65100">External APIs</text>
-  
-  <!-- Arrows showing data flow -->
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-      refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
-    </marker>
-  </defs>
-  
-  <path d="M 400 150 L 400 170" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 400 270 L 400 290" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 400 390 L 400 410" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-</svg>
+```mermaid
+graph TB
+    A[Presentation Layer<br/>React/Angular Components<br/>Pages/Containers<br/>UI Components Library] 
+    B[Application Layer<br/>Services<br/>State Management<br/>API Clients]
+    C[Domain Layer<br/>Business Logic<br/>Models/Entities<br/>Validation Rules]
+    D[Infrastructure Layer<br/>HTTP Client<br/>Storage<br/>External APIs]
+    
+    A --> B
+    B --> C
+    C --> D
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style C fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style D fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+```
 
 #### Layer Explanations
 
@@ -429,54 +403,23 @@ export class AuthInterceptor implements HttpInterceptor {
 
 **1. Micro-Frontend Architecture**
 
-<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- Shell Application (center) -->
-  <rect x="350" y="50" width="200" height="80" fill="#e1f5fe" stroke="#0277bd" stroke-width="3" rx="8"/>
-  <text x="450" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0277bd">Shell Application</text>
-  <text x="450" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#0277bd">Orchestrator</text>
-  
-  <!-- Feature A (top left) -->
-  <rect x="50" y="200" width="180" height="120" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="8"/>
-  <text x="140" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#7b1fa2">Feature A</text>
-  <text x="140" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4a148c">Angular App</text>
-  <text x="140" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4a148c">Team A</text>
-  <text x="140" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#6a1b9a">Independent Deployment</text>
-  
-  <!-- Feature B (top right) -->
-  <rect x="670" y="200" width="180" height="120" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="8"/>
-  <text x="760" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#388e3c">Feature B</text>
-  <text x="760" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1b5e20">React App</text>
-  <text x="760" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1b5e20">Team B</text>
-  <text x="760" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2e7d32">Independent Deployment</text>
-  
-  <!-- Feature C (bottom left) -->
-  <rect x="50" y="400" width="180" height="120" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="8"/>
-  <text x="140" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f57c00">Feature C</text>
-  <text x="140" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e65100">Vue App</text>
-  <text x="140" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#e65100">Team C</text>
-  <text x="140" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#ef6c00">Independent Deployment</text>
-  
-  <!-- Shared Libraries (bottom right) -->
-  <rect x="670" y="400" width="180" height="120" fill="#fce4ec" stroke="#c2185b" stroke-width="2" rx="8"/>
-  <text x="760" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#c2185b">Shared Libraries</text>
-  <text x="760" y="440" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#880e4f">Design System</text>
-  <text x="760" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#880e4f">Utilities</text>
-  <text x="760" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#880e4f">API Clients</text>
-  
-  <!-- Connection arrows -->
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-      refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-    </marker>
-  </defs>
-  
-  <!-- Shell to Features -->
-  <path d="M 380 130 L 200 200" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 520 130 L 700 200" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 380 130 L 200 400" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 520 130 L 700 400" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-</svg>
+**1. Micro-Frontend Architecture**
+
+```mermaid
+graph TB
+    Shell[Shell Application<br/>🎯 Orchestrator<br/>Routing & Auth]
+    
+    Shell --> FeatureA[Feature A<br/>📱 Angular App<br/>👥 Team A<br/>🚀 Independent Deploy]
+    Shell --> FeatureB[Feature B<br/>⚛️ React App<br/>👥 Team B<br/>🚀 Independent Deploy]
+    Shell --> FeatureC[Feature C<br/>🟢 Vue App<br/>👥 Team C<br/>🚀 Independent Deploy]
+    Shell --> Shared[Shared Libraries<br/>🎨 Design System<br/>🔧 Utilities<br/>📡 API Clients]
+    
+    style Shell fill:#e1f5fe,stroke:#0277bd,stroke-width:3px
+    style FeatureA fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style FeatureB fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style FeatureC fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Shared fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+```
 
 **2. Module Federation Implementation**
 
@@ -2076,76 +2019,30 @@ const userTableConfig: TableConfig<User> = {
 
 **Performance Monitoring Architecture**
 
-<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- User Experience (top center) -->
-  <rect x="300" y="30" width="200" height="60" fill="#e8eaf6" stroke="#3f51b5" stroke-width="2" rx="8"/>
-  <text x="400" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#3f51b5">User Experience</text>
-  <text x="400" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#3f51b5">Core Metrics</text>
-  
-  <!-- Core Web Vitals (second row) -->
-  <rect x="150" y="130" width="500" height="60" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2" rx="8"/>
-  <text x="400" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#9c27b0">Core Web Vitals</text>
-  <text x="400" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#9c27b0">Performance Indicators</text>
-  
-  <!-- Individual Core Web Vitals -->
-  <rect x="50" y="220" width="140" height="80" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="6"/>
-  <text x="120" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ff9800">LCP</text>
-  <text x="120" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#e65100">Largest</text>
-  <text x="120" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#e65100">Contentful</text>
-  <text x="120" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#e65100">Paint</text>
-  
-  <rect x="210" y="220" width="140" height="80" fill="#e8f5e8" stroke="#4caf50" stroke-width="2" rx="6"/>
-  <text x="280" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#4caf50">FID</text>
-  <text x="280" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2e7d32">First Input</text>
-  <text x="280" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2e7d32">Delay</text>
-  
-  <rect x="370" y="220" width="140" height="80" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="6"/>
-  <text x="440" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2196f3">CLS</text>
-  <text x="440" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565c0">Cumulative</text>
-  <text x="440" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565c0">Layout Shift</text>
-  
-  <!-- Performance Monitoring (left side) -->
-  <rect x="50" y="350" width="180" height="60" fill="#fce4ec" stroke="#e91e63" stroke-width="2" rx="8"/>
-  <text x="140" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#e91e63">Performance</text>
-  <text x="140" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#e91e63">Monitoring</text>
-  
-  <!-- Monitoring Types -->
-  <rect x="50" y="440" width="120" height="60" fill="#f1f8e9" stroke="#689f38" stroke-width="2" rx="6"/>
-  <text x="110" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#689f38">Real User</text>
-  <text x="110" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#689f38">Monitoring</text>
-  <text x="110" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#33691e">User Analytics</text>
-  
-  <rect x="190" y="440" width="120" height="60" fill="#fff8e1" stroke="#fbc02d" stroke-width="2" rx="6"/>
-  <text x="250" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#fbc02d">Synthetic</text>
-  <text x="250" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#fbc02d">Monitoring</text>
-  <text x="250" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#f57f17">Automated Testing</text>
-  
-  <rect x="330" y="440" width="120" height="60" fill="#f3e5f5" stroke="#8e24aa" stroke-width="2" rx="6"/>
-  <text x="390" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#8e24aa">Performance</text>
-  <text x="390" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#8e24aa">Budgets</text>
-  <text x="390" y="490" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6a1b9a">Bundle Size Limits</text>
-  
-  <!-- Connection arrows -->
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-      refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-    </marker>
-  </defs>
-  
-  <!-- User Experience to Core Web Vitals -->
-  <path d="M 400 90 L 400 130" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  
-  <!-- Core Web Vitals to individual metrics -->
-  <path d="M 300 190 L 120 220" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 400 190 L 280 220" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 500 190 L 440 220" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  
-  <!-- Performance Monitoring to monitoring types -->
-  <path d="M 140 410 L 110 440" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 140 410 L 250 440" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 140 410 L 390 440" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-</svg>
+```mermaid
+graph TB
+    UX[👤 User Experience<br/>Core Metrics]
+    
+    UX --> CWV[🎯 Core Web Vitals<br/>Performance Indicators]
+    
+    CWV --> LCP[🎨 LCP<br/>Largest Contentful Paint<br/>⏱️ Loading Performance]
+    CWV --> FID[⚡ FID<br/>First Input Delay<br/>📱 Interactivity]
+    CWV --> CLS[📐 CLS<br/>Cumulative Layout Shift<br/>🔧 Visual Stability]
+    
+    PM[📊 Performance Monitoring] --> RUM[👥 Real User Monitoring<br/>📈 User Analytics]
+    PM --> SM[🤖 Synthetic Monitoring<br/>🧪 Automated Testing]
+    PM --> PB[📏 Performance Budgets<br/>📦 Bundle Size Limits]
+    
+    style UX fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+    style CWV fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style LCP fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style FID fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style CLS fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style PM fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+    style RUM fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style SM fill:#fff8e1,stroke:#fbc02d,stroke-width:2px
+    style PB fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+```
 
 #### 1. Code Splitting and Lazy Loading
 
@@ -2772,85 +2669,29 @@ export const usePerformanceMonitoring = () => {
 
 **Micro-Frontend Architecture Pattern**
 
-<svg viewBox="0 0 900 700" xmlns="http://www.w3.org/2000/svg">
-  <!-- Browser (top) -->
-  <rect x="350" y="30" width="200" height="60" fill="#e8eaf6" stroke="#3f51b5" stroke-width="3" rx="8"/>
-  <text x="450" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#3f51b5">Browser</text>
-  <text x="450" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#3f51b5">Runtime Environment</text>
-  
-  <!-- Shell Application -->
-  <rect x="300" y="130" width="300" height="100" fill="#e1f5fe" stroke="#0277bd" stroke-width="3" rx="8"/>
-  <text x="450" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0277bd">Shell Application (Host)</text>
-  
-  <!-- Shell Application components -->
-  <text x="350" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#01579b">Routing</text>
-  <text x="420" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#01579b">Authentication</text>
-  <text x="480" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#01579b">Layout</text>
-  <text x="550" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#01579b">Navigation</text>
-  
-  <!-- Micro-Frontend A -->
-  <rect x="50" y="280" width="200" height="150" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="8"/>
-  <text x="150" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#7b1fa2">Micro-Frontend A</text>
-  <text x="150" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#4a148c">User Management</text>
-  <text x="150" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6a1b9a">Angular/React</text>
-  <text x="150" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6a1b9a">Team A</text>
-  <text x="150" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#8e24aa">Independent</text>
-  <text x="150" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#8e24aa">Development & Deploy</text>
-  
-  <!-- Micro-Frontend B -->
-  <rect x="280" y="280" width="200" height="150" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="8"/>
-  <text x="380" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#388e3c">Micro-Frontend B</text>
-  <text x="380" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#1b5e20">Product Catalog</text>
-  <text x="380" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#2e7d32">Vue/React</text>
-  <text x="380" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#2e7d32">Team B</text>
-  <text x="380" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#43a047">Independent</text>
-  <text x="380" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#43a047">Development & Deploy</text>
-  
-  <!-- Micro-Frontend C -->
-  <rect x="510" y="280" width="200" height="150" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="8"/>
-  <text x="610" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#f57c00">Micro-Frontend C</text>
-  <text x="610" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#e65100">Order Management</text>
-  <text x="610" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ef6c00">Svelte/React</text>
-  <text x="610" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#ef6c00">Team C</text>
-  <text x="610" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ff8f00">Independent</text>
-  <text x="610" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ff8f00">Development & Deploy</text>
-  
-  <!-- Shared Libraries -->
-  <rect x="750" y="280" width="200" height="150" fill="#fce4ec" stroke="#c2185b" stroke-width="2" rx="8"/>
-  <text x="850" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#c2185b">Shared Libraries</text>
-  <text x="850" y="335" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#880e4f">Design System</text>
-  <text x="850" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#880e4f">Utilities</text>
-  <text x="850" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#880e4f">API Clients</text>
-  <text x="850" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#880e4f">Authentication</text>
-  <text x="850" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ad1457">Shared Dependencies</text>
-  
-  <!-- Module Federation Connections -->
-  <rect x="250" y="480" width="400" height="60" fill="#f5f5f5" stroke="#757575" stroke-width="1" rx="8"/>
-  <text x="450" y="505" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#424242">Module Federation</text>
-  <text x="450" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#616161">Dynamic Loading • Runtime Integration • Shared Dependencies</text>
-  
-  <!-- Connection arrows -->
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-      refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-    </marker>
-  </defs>
-  
-  <!-- Browser to Shell -->
-  <path d="M 450 90 L 450 130" stroke="#666" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
-  
-  <!-- Shell to Micro-Frontends -->
-  <path d="M 350 230 L 150 280" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 450 230 L 380 280" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 550 230 L 610 280" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 600 230 L 850 280" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  
-  <!-- Federation connections -->
-  <path d="M 150 430 L 350 480" stroke="#757575" stroke-width="1" stroke-dasharray="5,5" fill="none"/>
-  <path d="M 380 430 L 450 480" stroke="#757575" stroke-width="1" stroke-dasharray="5,5" fill="none"/>
-  <path d="M 610 430 L 550 480" stroke="#757575" stroke-width="1" stroke-dasharray="5,5" fill="none"/>
-</svg>
+```mermaid
+graph TB
+    Browser[🌐 Browser<br/>Runtime Environment]
+    
+    Browser --> Shell[🏠 Shell Application Host<br/>🔗 Routing • 🔐 Authentication<br/>📱 Layout • 🧭 Navigation]
+    
+    Shell --> MFA[🎯 Micro-Frontend A<br/>👥 User Management<br/>⚛️ Angular/React • 👥 Team A<br/>🚀 Independent Deploy]
+    Shell --> MFB[🛍️ Micro-Frontend B<br/>📦 Product Catalog<br/>🟢 Vue/React • 👥 Team B<br/>🚀 Independent Deploy]
+    Shell --> MFC[📋 Micro-Frontend C<br/>🛒 Order Management<br/>🔶 Svelte/React • 👥 Team C<br/>🚀 Independent Deploy]
+    Shell --> Shared[📚 Shared Libraries<br/>🎨 Design System<br/>🔧 Utilities • 📡 API Clients<br/>🔐 Authentication]
+    
+    MFA -.->|Module Federation| Federation[⚡ Module Federation<br/>🔄 Dynamic Loading<br/>🎯 Runtime Integration<br/>📦 Shared Dependencies]
+    MFB -.->|Module Federation| Federation
+    MFC -.->|Module Federation| Federation
+    
+    style Browser fill:#e8eaf6,stroke:#3f51b5,stroke-width:3px
+    style Shell fill:#e1f5fe,stroke:#0277bd,stroke-width:3px
+    style MFA fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style MFB fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style MFC fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Shared fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    style Federation fill:#f5f5f5,stroke:#757575,stroke-width:1px
+```
 
 #### Module Federation Implementation
 
@@ -3478,91 +3319,32 @@ const DefaultErrorFallback: React.FC = () => (
 #### State Management Decision Matrix
 
 **State Management Selection Criteria**
-<svg viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
-  <!-- Root Node -->
-  <rect x="300" y="30" width="200" height="60" fill="#e8f5e8" stroke="#4caf50" stroke-width="3" rx="8"/>
-  <text x="400" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#4caf50">Application State</text>
-  <text x="400" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#4caf50">Needs</text>
 
-  <!-- Application Size Decision -->
-  <path d="M 400 90 L 400 150" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <polygon points="350,150 450,150 400,200" fill="#fff3e0" stroke="#ff9800" stroke-width="2"/>
-  <text x="400" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f57c00">Application Size?</text>
-
-  <!-- Small/Medium Branch -->
-  <path d="M 350 175 L 200 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="270" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Small/Medium</text>
-
-  <rect x="100" y="250" width="200" height="60" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="8"/>
-  <text x="200" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2196f3">Local State +</text>
-  <text x="200" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#2196f3">Context API</text>
-
-  <!-- Large/Enterprise Branch -->
-  <path d="M 450 175 L 600 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="530" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Large/Enterprise</text>
-
-  <polygon points="550,250 650,250 600,300" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2"/>
-  <text x="600" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#9c27b0">Complexity Level?</text>
-
-  <!-- High Complexity Branch -->
-  <path d="M 575 275 L 450 350" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="500" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">High Complexity</text>
-
-  <rect x="350" y="350" width="200" height="60" fill="#ffebee" stroke="#f44336" stroke-width="2" rx="8"/>
-  <text x="450" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f44336">Redux/NgRx</text>
-  <text x="450" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#d32f2f">Enterprise Grade</text>
-
-  <!-- Medium Complexity Branch -->
-  <path d="M 625 275 L 700 350" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="670" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">Medium Complexity</text>
-
-  <rect x="600" y="350" width="200" height="60" fill="#f1f8e9" stroke="#8bc34a" stroke-width="2" rx="8"/>
-  <text x="700" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#8bc34a">Zustand/Valtio</text>
-  <text x="700" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#689f38">Lightweight</text>
-
-  <!-- State Sharing Decision from Context API -->
-  <path d="M 200 310 L 200 370" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <polygon points="150,370 250,370 200,420" fill="#fff8e1" stroke="#ffc107" stroke-width="2"/>
-  <text x="200" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#f57c00">State Sharing</text>
-  <text x="200" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#f57c00">Needs?</text>
-
-  <!-- Minimal State Sharing -->
-  <path d="M 175 395 L 100 450" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="130" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">Minimal</text>
-
-  <rect x="20" y="450" width="160" height="50" fill="#e8f5e8" stroke="#4caf50" stroke-width="2" rx="6"/>
-  <text x="100" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4caf50">Component State</text>
-  <text x="100" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#388e3c">Local Only</text>
-
-  <!-- Moderate State Sharing -->
-  <path d="M 225 395 L 300 450" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="270" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">Moderate</text>
-
-  <rect x="220" y="450" width="160" height="50" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="6"/>
-  <text x="300" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2196f3">Context API</text>
-  <text x="300" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#1976d2">Cross-Component</text>
-
-  <!-- Benefits -->
-  <rect x="350" y="450" width="160" height="80" fill="#fffde7" stroke="#ffeb3b" stroke-width="1" rx="6"/>
-  <text x="430" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#f57c00">Redux Benefits:</text>
-  <text x="430" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#ef6c00">Time Travel Debug</text>
-  <text x="430" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#ef6c00">Predictable Updates</text>
-  <text x="430" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#ef6c00">DevTools</text>
-
-  <rect x="550" y="450" width="160" height="80" fill="#f1f8e9" stroke="#8bc34a" stroke-width="1" rx="6"/>
-  <text x="630" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#689f38">Zustand Benefits:</text>
-  <text x="630" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#558b2f">Simple API</text>
-  <text x="630" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#558b2f">TypeScript Support</text>
-  <text x="630" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#558b2f">Less Boilerplate</text>
-
-  <!-- Arrow definitions -->
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7"
-      refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-    </marker>
-  </defs>
-</svg>`
+```mermaid
+flowchart TD
+    Start[🎯 Application State Needs] --> Size{📏 Application Size?}
+    
+    Size -->|Small/Medium| LocalContext[📱 Local State +<br/>Context API]
+    Size -->|Large/Enterprise| Complexity{🔧 Complexity Level?}
+    
+    Complexity -->|High Complexity| Redux[🏢 Redux/NgRx<br/>Enterprise Grade<br/>✅ Time Travel Debug<br/>✅ Predictable Updates<br/>✅ DevTools]
+    Complexity -->|Medium Complexity| Zustand[⚡ Zustand/Valtio<br/>Lightweight<br/>✅ Simple API<br/>✅ TypeScript Support<br/>✅ Less Boilerplate]
+    
+    LocalContext --> Sharing{🔄 State Sharing Needs?}
+    
+    Sharing -->|Minimal| Component[🔗 Component State<br/>Local Only]
+    Sharing -->|Moderate| Context[⚛️ Context API<br/>Cross-Component]
+    
+    style Start fill:#e8f5e8,stroke:#4caf50,stroke-width:3px
+    style Size fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style LocalContext fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style Complexity fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style Redux fill:#ffebee,stroke:#f44336,stroke-width:2px
+    style Zustand fill:#f1f8e9,stroke:#8bc34a,stroke-width:2px
+    style Sharing fill:#fff8e1,stroke:#ffc107,stroke-width:2px
+    style Component fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style Context fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+````
 
 #### 1. Redux (React) - Comprehensive State Management
 
@@ -4212,103 +3994,53 @@ const UserManagement: React.FC = () => {
 
 **Data Flow Architecture**
 
-<svg viewBox="0 0 800 650" xmlns="http://www.w3.org/2000/svg">
-  <!-- User Action (start) -->
-  <rect x="50" y="50" width="120" height="60" fill="#e8f5e8" stroke="#4caf50" stroke-width="2" rx="8"/>
-  <text x="110" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#4caf50">User Action</text>
-  <text x="110" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#388e3c">Click/Input</text>
-
-  <!-- Action Creator -->
-  <rect x="220" y="50" width="120" height="60" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="8"/>
-  <text x="280" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2196f3">Action Creator</text>
-  <text x="280" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1976d2">Dispatch</text>
-
-  <!-- Middleware/Effects -->
-  <rect x="390" y="50" width="120" height="60" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2" rx="8"/>
-  <text x="450" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">Middleware/</text>
-  <text x="450" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9c27b0">Effects</text>
-
-  <!-- API Call -->
-  <rect x="560" y="50" width="120" height="60" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="8"/>
-  <text x="620" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ff9800">API Call</text>
-  <text x="620" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#f57c00">HTTP Request</text>
-
-  <!-- Response Decision Diamond -->
-  <polygon points="620,150 670,200 620,250 570,200" fill="#ffebee" stroke="#f44336" stroke-width="2"/>
-  <text x="620" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f44336">Response</text>
-  <text x="620" y="210" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#d32f2f">Success/Error</text>
-
-  <!-- Success Action -->
-  <rect x="450" y="300" width="120" height="60" fill="#e8f5e8" stroke="#4caf50" stroke-width="2" rx="8"/>
-  <text x="510" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#4caf50">Success</text>
-  <text x="510" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#4caf50">Action</text>
-
-  <!-- Error Action -->
-  <rect x="620" y="300" width="120" height="60" fill="#ffebee" stroke="#f44336" stroke-width="2" rx="8"/>
-  <text x="680" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f44336">Error</text>
-  <text x="680" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#f44336">Action</text>
-
-  <!-- Reducer/Store Update -->
-  <rect x="290" y="400" width="150" height="60" fill="#e1f5fe" stroke="#0277bd" stroke-width="2" rx="8"/>
-  <text x="365" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0277bd">Reducer/Store</text>
-  <text x="365" y="445" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0277bd">Update</text>
-
-  <!-- Component Re-render -->
-  <rect x="50" y="500" width="150" height="60" fill="#f1f8e9" stroke="#689f38" stroke-width="2" rx="8"/>
-  <text x="125" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#689f38">Component</text>
-  <text x="125" y="545" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#689f38">Re-render</text>
-
-  <!-- Side Effects Layer -->
-  <rect x="250" y="150" width="300" height="120" fill="#fafafa" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="5,5" rx="8"/>
-  <text x="400" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#616161">Side Effects Layer</text>
-
-  <!-- Side Effects Components -->
-  <text x="290" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#757575">Redux-Saga</text>
-  <text x="380" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#757575">Redux-Thunk</text>
-  <text x="470" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#757575">NgRx Effects</text>
-  <text x="400" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#757575">Custom Middleware</text>
-
-  <text x="290" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9e9e9e">Generator Functions</text>
-  <text x="380" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9e9e9e">Promise Based</text>
-  <text x="470" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#9e9e9e">Reactive Streams</text>
-
-  <!-- Error Handling Layer -->
-  <rect x="500" y="450" width="250" height="120" fill="#fff8e1" stroke="#fbc02d" stroke-width="1" stroke-dasharray="5,5" rx="8"/>
-  <text x="625" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f57c00">Error Handling</text>
-
-  <text x="550" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Global Error Handler</text>
-  <text x="700" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Error Boundary</text>
-  <text x="550" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Retry Logic</text>
-  <text x="700" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Fallback UI</text>
-
-  <!-- Connection arrows -->
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7"
-      refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-    </marker>
-  </defs>
-
-  <!-- Main flow arrows -->
-  <path d="M 170 80 L 220 80" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 340 80 L 390 80" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 510 80 L 560 80" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 620 110 L 620 150" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-
-  <!-- Success/Error paths -->
-  <path d="M 590 230 L 530 300" stroke="#4caf50" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="550" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4caf50">Success</text>
-
-  <path d="M 650 230 L 680 300" stroke="#f44336" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="670" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#f44336">Error</text>
-
-  <!-- Convergence to reducer -->
-  <path d="M 510 360 L 390 400" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 680 360 L 415 400" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-
-  <!-- Final flow -->
-  <path d="M 365 460 L 125 500" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-</svg>
+```mermaid
+flowchart TD
+    UserAction[👤 User Action<br/>Click/Input] --> ActionCreator[🎯 Action Creator<br/>Dispatch]
+    
+    ActionCreator --> Middleware[⚙️ Middleware/Effects]
+    
+    Middleware --> APICall[🌐 API Call<br/>HTTP Request]
+    
+    APICall --> Response{📡 Response<br/>Success/Error?}
+    
+    Response -->|Success ✅| SuccessAction[✅ Success Action]
+    Response -->|Error ❌| ErrorAction[❌ Error Action]
+    
+    SuccessAction --> Reducer[🔄 Reducer/Store<br/>Update]
+    ErrorAction --> Reducer
+    
+    Reducer --> ComponentRender[🎨 Component<br/>Re-render]
+    
+    subgraph SideEffects["🔧 Side Effects Layer"]
+        ReduxSaga[Redux-Saga<br/>Generator Functions]
+        ReduxThunk[Redux-Thunk<br/>Promise Based]
+        NgRxEffects[NgRx Effects<br/>Reactive Streams]
+        CustomMiddleware[Custom Middleware]
+    end
+    
+    subgraph ErrorHandling["⚠️ Error Handling"]
+        GlobalError[Global Error Handler]
+        ErrorBoundary[Error Boundary]
+        RetryLogic[Retry Logic]
+        FallbackUI[Fallback UI]
+    end
+    
+    Middleware -.-> SideEffects
+    ErrorAction -.-> ErrorHandling
+    
+    style UserAction fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style ActionCreator fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style Middleware fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style APICall fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style Response fill:#ffebee,stroke:#f44336,stroke-width:2px
+    style SuccessAction fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style ErrorAction fill:#ffebee,stroke:#f44336,stroke-width:2px
+    style Reducer fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style ComponentRender fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style SideEffects fill:#fafafa,stroke:#9e9e9e,stroke-width:1px
+    style ErrorHandling fill:#fff8e1,stroke:#fbc02d,stroke-width:1px
+```
 
 #### 1. Redux-Saga for Complex Async Flows
 
@@ -4965,87 +4697,64 @@ const userService = {
 
 **Testing Pyramid for Frontend Applications**
 
-<svg viewBox="0 0 700 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- Unit Tests Base (largest layer) -->
-  <polygon points="100,450 600,450 500,350 200,350" fill="#e8f5e8" stroke="#4caf50" stroke-width="3"/>
-  <text x="350" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#4caf50">Unit Tests</text>
-  <text x="350" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#2e7d32">(50-70%)</text>
-  <text x="350" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#388e3c">Fast • Isolated • Many</text>
-
-  <!-- Unit Tests Details -->
-  <text x="200" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2e7d32">Pure Functions</text>
-  <text x="350" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2e7d32">Component Logic</text>
-  <text x="500" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2e7d32">Services/Utilities</text>
-
-  <text x="200" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#4caf50">Jest • Vitest</text>
-  <text x="350" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#4caf50">Component Testing</text>
-  <text x="500" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#4caf50">Mocking • Stubbing</text>
-
-  <!-- Integration Tests Middle -->
-  <polygon points="150,350 550,350 450,250 250,250" fill="#e3f2fd" stroke="#2196f3" stroke-width="3"/>
-  <text x="350" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2196f3">Integration Tests</text>
-  <text x="350" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1565c0">(20-30%)</text>
-  <text x="350" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1976d2">Component Interactions</text>
-
-  <!-- Integration Tests Details -->
-  <text x="250" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1565c0">Component Integration</text>
-  <text x="350" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1565c0">API Integration</text>
-  <text x="450" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#1565c0">State Management</text>
-
-  <text x="250" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2196f3">React Testing Library</text>
-  <text x="350" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2196f3">HTTP Mocking</text>
-  <text x="450" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2196f3">Store Testing</text>
-
-  <!-- E2E Tests Top (smallest layer) -->
-  <polygon points="200,250 500,250 400,150 300,150" fill="#ffebee" stroke="#f44336" stroke-width="3"/>
-  <text x="350" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#f44336">E2E Tests</text>
-  <text x="350" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#c62828">(10-20%)</text>
-  <text x="350" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#d32f2f">User Journeys</text>
-
-  <!-- E2E Tests Details -->
-  <text x="300" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#c62828">Critical User Journeys</text>
-  <text x="350" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#c62828">Cross-browser Testing</text>
-  <text x="400" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#c62828">Performance Testing</text>
-
-  <!-- Tools Labels -->
-  <rect x="520" y="100" width="150" height="120" fill="#f5f5f5" stroke="#9e9e9e" stroke-width="1" rx="8"/>
-  <text x="595" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#424242">Testing Tools</text>
-
-  <text x="595" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#f44336">E2E: Playwright, Cypress</text>
-  <text x="595" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2196f3">Integration: RTL, TestBed</text>
-  <text x="595" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4caf50">Unit: Jest, Vitest, Jasmine</text>
-
-  <text x="595" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#757575">Characteristics:</text>
-  <text x="595" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#757575">Speed: Fast → Slow</text>
-  <text x="595" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#757575">Cost: Low → High</text>
-
-  <!-- Quality Indicators -->
-  <rect x="30" y="100" width="140" height="100" fill="#fff8e1" stroke="#ffc107" stroke-width="1" rx="8"/>
-  <text x="100" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#f57c00">Quality Metrics</text>
-
-  <text x="100" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Code Coverage</text>
-  <text x="100" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Test Reliability</text>
-  <text x="100" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Execution Speed</text>
-  <text x="100" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#ef6c00">Maintenance Cost</text>
-
-  <!-- Pyramid Structure Labels -->
-  <text x="50" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#424242" transform="rotate(-90 50 200)">High Confidence</text>
-  <text x="50" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#424242" transform="rotate(-90 50 400)">High Speed</text>
-
-  <!-- Visual arrows showing progression -->
-  <defs>
-    <marker id="arrowhead" markerWidth="8" markerHeight="6"
-      refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#757575" />
-    </marker>
-  </defs>
-
-  <path d="M 650 130 L 650 180" stroke="#757575" stroke-width="1" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="655" y="155" font-family="Arial, sans-serif" font-size="8" fill="#757575">Slower</text>
-
-  <path d="M 20 180 L 20 130" stroke="#757575" stroke-width="1" fill="none" marker-end="url(#arrowhead)"/>
-  <text x="25" y="155" font-family="Arial, sans-serif" font-size="8" fill="#757575">Higher</text>
-</svg>
+```mermaid
+graph TD
+    subgraph Pyramid["🔺 Testing Pyramid"]
+        E2E["🌐 E2E Tests<br/>(10-20%)<br/>User Journeys<br/>🔧 Playwright • Cypress"]
+        Integration["🔗 Integration Tests<br/>(20-30%)<br/>Component Interactions<br/>🔧 RTL • TestBed"]
+        Unit["⚡ Unit Tests<br/>(50-70%)<br/>Fast • Isolated • Many<br/>🔧 Jest • Vitest • Jasmine"]
+    end
+    
+    subgraph Details["📋 Test Details"]
+        subgraph E2EDetails["🌐 E2E Testing"]
+            E2E1[Critical User Journeys]
+            E2E2[Cross-browser Testing]  
+            E2E3[Performance Testing]
+        end
+        
+        subgraph IntDetails["🔗 Integration Testing"]
+            Int1[Component Integration]
+            Int2[API Integration]
+            Int3[State Management]
+            Int4[HTTP Mocking]
+        end
+        
+        subgraph UnitDetails["⚡ Unit Testing"]
+            Unit1[Pure Functions]
+            Unit2[Component Logic]
+            Unit3[Services/Utilities]
+            Unit4[Mocking • Stubbing]
+        end
+    end
+    
+    subgraph Metrics["📊 Quality Metrics"]
+        Coverage[📈 Code Coverage]
+        Reliability[🔒 Test Reliability]
+        Speed[⚡ Execution Speed]
+        Cost[💰 Maintenance Cost]
+    end
+    
+    subgraph Characteristics["📝 Characteristics"]
+        SpeedTrend[Speed: Fast → Slow]
+        CostTrend[Cost: Low → High]
+        ConfidenceTrend[Confidence: High → Higher]
+    end
+    
+    Unit --> Integration
+    Integration --> E2E
+    
+    Unit -.-> UnitDetails
+    Integration -.-> IntDetails
+    E2E -.-> E2EDetails
+    
+    style E2E fill:#ffebee,stroke:#f44336,stroke-width:3px
+    style Integration fill:#e3f2fd,stroke:#2196f3,stroke-width:3px
+    style Unit fill:#e8f5e8,stroke:#4caf50,stroke-width:3px
+    style Pyramid fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px
+    style Details fill:#fff8e1,stroke:#ffc107,stroke-width:1px
+    style Metrics fill:#fff8e1,stroke:#ffc107,stroke-width:1px
+    style Characteristics fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px
+```
 
 #### 1. Unit Testing Approach
 
@@ -5497,121 +5206,68 @@ describe('UserService', () => {
 #### Accessibility Implementation Strategy
 
 **Accessibility Architecture Overview**
-<svg viewBox="0 0 800 650" xmlns="http://www.w3.org/2000/svg">
-  <!-- Central Accessibility Strategy -->
-  <rect x="300" y="50" width="200" height="80" fill="#e8f5e8" stroke="#4caf50" stroke-width="3" rx="10"/>
-  <text x="400" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4caf50">Accessibility</text>
-  <text x="400" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#4caf50">Strategy</text>
-  <text x="400" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2e7d32">Universal Design</text>
 
-  <!-- Core Implementation Areas -->
-  <!-- Semantic HTML -->
-  <rect x="50" y="180" width="140" height="70" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="8"/>
-  <text x="120" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#2196f3">Semantic HTML</text>
-  <text x="120" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565c0">Proper Structure</text>
-  <text x="120" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#1565c0">Headings • Lists • Forms</text>
-
-  <!-- ARIA Implementation -->
-  <rect x="210" y="180" width="140" height="70" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2" rx="8"/>
-  <text x="280" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#9c27b0">ARIA</text>
-  <text x="280" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#9c27b0">Implementation</text>
-  <text x="280" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#6a1b9a">Labels • Roles • States</text>
-
-  <!-- Keyboard Navigation -->
-  <rect x="370" y="180" width="140" height="70" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="8"/>
-  <text x="440" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ff9800">Keyboard</text>
-  <text x="440" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#ff9800">Navigation</text>
-  <text x="440" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#e65100">Focus Management</text>
-
-  <!-- Color & Contrast -->
-  <rect x="530" y="180" width="140" height="70" fill="#ffebee" stroke="#f44336" stroke-width="2" rx="8"/>
-  <text x="600" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#f44336">Color &</text>
-  <text x="600" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#f44336">Contrast</text>
-  <text x="600" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#c62828">WCAG Guidelines</text>
-
-  <!-- Screen Reader Support -->
-  <rect x="690" y="180" width="140" height="70" fill="#f1f8e9" stroke="#689f38" stroke-width="2" rx="8"/>
-  <text x="760" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#689f38">Screen Reader</text>
-  <text x="760" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#689f38">Support</text>
-  <text x="760" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#33691e">NVDA • JAWS • VoiceOver</text>
-
-  <!-- WCAG 2.1 Compliance Section -->
-  <rect x="50" y="300" width="300" height="120" fill="#f8f9fa" stroke="#6c757d" stroke-width="2" rx="8"/>
-  <text x="200" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">WCAG 2.1 Compliance</text>
-
-  <rect x="70" y="340" width="80" height="60" fill="#d4edda" stroke="#28a745" stroke-width="1" rx="6"/>
-  <text x="110" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#155724">Level A</text>
-  <text x="110" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#155724">Basic</text>
-  <text x="110" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#155724">Minimum</text>
-
-  <rect x="160" y="340" width="80" height="60" fill="#cce5ff" stroke="#007bff" stroke-width="1" rx="6"/>
-  <text x="200" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#004085">Level AA</text>
-  <text x="200" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#004085">Standard</text>
-  <text x="200" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#004085">Target</text>
-
-  <rect x="250" y="340" width="80" height="60" fill="#fff3cd" stroke="#ffc107" stroke-width="1" rx="6"/>
-  <text x="290" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#856404">Level AAA</text>
-  <text x="290" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#856404">Enhanced</text>
-  <text x="290" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#856404">Gold Standard</text>
-
-  <!-- Testing Strategy Section -->
-  <rect x="380" y="300" width="250" height="120" fill="#f8f9fa" stroke="#6c757d" stroke-width="2" rx="8"/>
-  <text x="505" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">Testing Strategy</text>
-
-  <rect x="400" y="340" width="70" height="60" fill="#e1ecf4" stroke="#39739d" stroke-width="1" rx="6"/>
-  <text x="435" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#2c5282">Automated</text>
-  <text x="435" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#2c5282">Testing</text>
-  <text x="435" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c5282">Axe • Lighthouse</text>
-
-  <rect x="480" y="340" width="70" height="60" fill="#e8f4f8" stroke="#1f9bcf" stroke-width="1" rx="6"/>
-  <text x="515" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0c5460">Manual</text>
-  <text x="515" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0c5460">Testing</text>
-  <text x="515" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#0c5460">Keyboard • Screen Reader</text>
-
-  <rect x="560" y="340" width="70" height="60" fill="#e7f3ff" stroke="#0969da" stroke-width="1" rx="6"/>
-  <text x="595" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0550ae">User</text>
-  <text x="595" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0550ae">Testing</text>
-  <text x="595" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#0550ae">Real Users • Feedback</text>
-
-  <!-- Tools & Libraries Section -->
-  <rect x="50" y="460" width="580" height="120" fill="#f8f9fa" stroke="#6c757d" stroke-width="2" rx="8"/>
-  <text x="340" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#495057">Tools & Libraries</text>
-
-  <rect x="70" y="500" width="120" height="60" fill="#e6f3ff" stroke="#0066cc" stroke-width="1" rx="6"/>
-  <text x="130" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#003d7a">ESLint a11y</text>
-  <text x="130" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0066cc">Static Analysis</text>
-  <text x="130" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0066cc">Code Linting</text>
-
-  <rect x="200" y="500" width="120" height="60" fill="#e8f5e8" stroke="#28a745" stroke-width="1" rx="6"/>
-  <text x="260" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#155724">Axe DevTools</text>
-  <text x="260" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#28a745">Browser Extension</text>
-  <text x="260" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#28a745">Runtime Testing</text>
-
-  <rect x="330" y="500" width="120" height="60" fill="#fff3cd" stroke="#ffc107" stroke-width="1" rx="6"/>
-  <text x="390" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#856404">React A11y</text>
-  <text x="390" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#ffc107">Component Testing</text>
-  <text x="390" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#ffc107">React Specific</text>
-
-  <rect x="460" y="500" width="120" height="60" fill="#f0e6ff" stroke="#6f42c1" stroke-width="1" rx="6"/>
-  <text x="520" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#432874">NVDA/JAWS</text>
-  <text x="520" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6f42c1">Screen Readers</text>
-  <text x="520" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#6f42c1">User Experience</text>
-
-  <!-- Connection arrows -->
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7"
-      refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
-    </marker>
-  </defs>
-
-  <!-- Central strategy to implementation areas -->
-  <path d="M 350 130 L 120 180" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 380 130 L 280 180" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 400 130 L 440 180" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 420 130 L 600 180" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  <path d="M 450 130 L 760 180" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-</svg>`
+```mermaid
+graph TD
+    Strategy[🎯 Accessibility Strategy<br/>Universal Design] --> Implementation
+    
+    subgraph Implementation["🔧 Core Implementation Areas"]
+        Semantic[🏗️ Semantic HTML<br/>Proper Structure<br/>Headings • Lists • Forms]
+        ARIA[⚡ ARIA Implementation<br/>Labels • Roles • States]
+        Keyboard[⌨️ Keyboard Navigation<br/>Focus Management]
+        Color[🎨 Color & Contrast<br/>WCAG Guidelines]
+        ScreenReader[🔊 Screen Reader Support<br/>NVDA • JAWS • VoiceOver]
+    end
+    
+    subgraph WCAG["📋 WCAG 2.1 Compliance"]
+        LevelA[✅ Level A<br/>Basic<br/>Minimum]
+        LevelAA[🎯 Level AA<br/>Standard<br/>Target]
+        LevelAAA[🏆 Level AAA<br/>Enhanced<br/>Gold Standard]
+        
+        LevelA --> LevelAA
+        LevelAA --> LevelAAA
+    end
+    
+    subgraph Testing["🧪 Testing Strategy"]
+        Automated[🤖 Automated Testing<br/>Axe • Lighthouse]
+        Manual[👤 Manual Testing<br/>Keyboard • Screen Reader]
+        UserTesting[🙋 User Testing<br/>Real Users • Feedback]
+    end
+    
+    subgraph Tools["🛠️ Tools & Libraries"]
+        ESLint[🔍 ESLint a11y<br/>Static Analysis<br/>Code Linting]
+        AxeDevTools[🔧 Axe DevTools<br/>Browser Extension<br/>Runtime Testing]
+        ReactA11y[⚛️ React A11y<br/>Component Testing<br/>React Specific]
+        ScreenReaderTools[🔊 NVDA/JAWS<br/>Screen Readers<br/>User Experience]
+    end
+    
+    Strategy --> Semantic
+    Strategy --> ARIA
+    Strategy --> Keyboard
+    Strategy --> Color
+    Strategy --> ScreenReader
+    
+    Implementation --> WCAG
+    Implementation --> Testing
+    Testing --> Tools
+    
+    style Strategy fill:#e8f5e8,stroke:#4caf50,stroke-width:3px
+    style Semantic fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style ARIA fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style Keyboard fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style Color fill:#ffebee,stroke:#f44336,stroke-width:2px
+    style ScreenReader fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style LevelA fill:#d4edda,stroke:#28a745,stroke-width:1px
+    style LevelAA fill:#cce5ff,stroke:#007bff,stroke-width:1px
+    style LevelAAA fill:#fff3cd,stroke:#ffc107,stroke-width:1px
+    style Automated fill:#e1ecf4,stroke:#39739d,stroke-width:1px
+    style Manual fill:#e8f4f8,stroke:#1f9bcf,stroke-width:1px
+    style UserTesting fill:#e7f3ff,stroke:#0969da,stroke-width:1px
+    style ESLint fill:#e6f3ff,stroke:#0066cc,stroke-width:1px
+    style AxeDevTools fill:#e8f5e8,stroke:#28a745,stroke-width:1px
+    style ReactA11y fill:#fff3cd,stroke:#ffc107,stroke-width:1px
+    style ScreenReaderTools fill:#f0e6ff,stroke:#6f42c1,stroke-width:1px
+```
 
 #### 1. Semantic HTML and ARIA Implementation
 

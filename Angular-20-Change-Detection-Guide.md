@@ -135,7 +135,84 @@ export class DefaultDetectionComponent {
 
 ## Change Detection Strategies
 
-### OnPush Strategy
+### 🧠 OnPush Strategy - Deep Theory & Implementation
+
+#### **Theoretical Foundation**
+
+OnPush strategy fundamentally changes when Angular checks a component for updates. Instead of checking every component on every change detection cycle, OnPush components are only checked when:
+
+1. **📥 Input Properties Change** (Reference comparison)
+2. **🎯 DOM Events Occur** (Click, input, etc.)
+3. **📤 Output Events Fire** (From child components)
+4. **🔄 Manual Triggers** (markForCheck, detectChanges)
+
+#### **OnPush Change Detection Flow Diagram**
+
+```mermaid
+graph TD
+    A[Change Detection Cycle Starts] --> B{Is Component OnPush?}
+    B -->|No| C[Check Component Always]
+    B -->|Yes| D{Check OnPush Conditions}
+
+    D --> E{Input Reference Changed?}
+    D --> F{DOM Event Occurred?}
+    D --> G{Child Event Emitted?}
+    D --> H{Manual Trigger Called?}
+
+    E -->|Yes| I[✅ Check Component]
+    F -->|Yes| I
+    G -->|Yes| I
+    H -->|Yes| I
+
+    E -->|No| J[❌ Skip Component]
+    F -->|No| J
+    G -->|No| J
+    H -->|No| J
+
+    I --> K[Update DOM if needed]
+    J --> L[No DOM Updates]
+
+    C --> K
+    K --> M[Continue to Child Components]
+    L --> M
+    M --> N[End]
+```
+
+#### **OnPush vs Default Strategy Comparison**
+
+```mermaid
+graph LR
+    subgraph "Default Strategy"
+        A1[Component Tree] --> B1[Check Every Component]
+        B1 --> C1[On Every Cycle]
+        C1 --> D1[High CPU Usage]
+    end
+
+    subgraph "OnPush Strategy"
+        A2[Component Tree] --> B2[Check Only When Needed]
+        B2 --> C2[Input Changes Only]
+        C2 --> D2[Low CPU Usage]
+    end
+```
+
+#### **Memory Reference vs Value Comparison**
+
+OnPush uses **reference equality** (===) for input comparison, not deep value comparison:
+
+```mermaid
+graph TD
+    A[Input Property Change] --> B{Reference Comparison}
+    B -->|Same Reference| C[❌ No Change Detection]
+    B -->|New Reference| D[✅ Trigger Change Detection]
+
+    E[Object Mutation] --> F[Same Reference]
+    F --> G[❌ OnPush Won't Detect]
+
+    H[New Object Created] --> I[New Reference]
+    I --> J[✅ OnPush Will Detect]
+```
+
+### OnPush Implementation Example
 
 ```typescript
 @Component({
@@ -150,7 +227,11 @@ export class DefaultDetectionComponent {
       <button (click)="increment()">Increment</button>
       <!-- Line 4: Local event - will trigger change detection -->
 
-      <child-component [data]="childData" (dataChange)="onChildDataChange($event)"> </child-component>
+      <child-component
+        [data]="childData"
+        (dataChange)="onChildDataChange($event)"
+      >
+      </child-component>
       <!-- Line 5: Child component with input/output bindings -->
     </div>
   `,
@@ -182,6 +263,72 @@ export class OnPushExampleComponent {
     this.cdr.detectChanges(); // Line 19: Force immediate detection
   }
 }
+
+// 📊 Advanced OnPush Pattern with State Management
+@Component({
+  selector: "app-advanced-onpush",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="advanced-component">
+      <!-- ✅ These will update automatically -->
+      <h3>{{ user.name }}</h3>
+      <p>{{ user.email }}</p>
+
+      <!-- ❌ These won't update without manual triggers -->
+      <p>Internal Counter: {{ internalCounter }}</p>
+      <p>Async Data: {{ asyncData }}</p>
+
+      <!-- ✅ Event handlers work automatically -->
+      <button (click)="updateUser()">Update User</button>
+      <button (click)="updateInternal()">Update Internal</button>
+      <button (click)="loadAsyncData()">Load Async Data</button>
+    </div>
+  `,
+})
+export class AdvancedOnPushComponent implements OnInit {
+  @Input() user: User = { name: "", email: "" }; // Line 20: Input property
+
+  internalCounter = 0; // Line 21: Internal state (needs manual triggers)
+  asyncData = ""; // Line 22: Async data (needs manual triggers)
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private dataService: DataService
+  ) {}
+
+  ngOnInit() {
+    // Line 23: Async operations need manual change detection
+    this.dataService
+      .getData()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.asyncData = data; // Line 24: Update async data
+        this.cdr.markForCheck(); // Line 25: Manual trigger required
+      });
+  }
+
+  updateUser() {
+    // Line 26: Input property updates (parent will handle)
+    // This method would typically emit to parent
+    this.userUpdate.emit({
+      ...this.user,
+      name: "Updated Name",
+    }); // Line 27: Emit new user object
+  }
+
+  updateInternal() {
+    this.internalCounter++; // Line 28: Internal state change
+    this.cdr.markForCheck(); // Line 29: Manual trigger needed
+  }
+
+  loadAsyncData() {
+    // Line 30: Async operation example
+    setTimeout(() => {
+      this.asyncData = `Loaded at ${Date.now()}`; // Line 31: Async update
+      this.cdr.markForCheck(); // Line 32: Manual trigger required
+    }, 1000);
+  }
+}
 ```
 
 **Line-by-line explanation:**
@@ -204,6 +351,51 @@ export class OnPushExampleComponent {
 
 ### Comparison: Default vs OnPush
 
+#### **🔬 Performance Analysis Deep Dive**
+
+Understanding the performance implications between Default and OnPush strategies is crucial for building scalable Angular applications.
+
+#### **Change Detection Frequency Comparison**
+
+```mermaid
+graph TD
+    A[User Action] --> B{Strategy Type}
+
+    B -->|Default| C[Check ALL Components]
+    C --> D[Component Tree: 100 components]
+    D --> E[100 checks performed]
+    E --> F[High CPU Usage]
+
+    B -->|OnPush| G[Check ONLY affected components]
+    G --> H[Only components with input changes]
+    H --> I[~5-10 checks performed]
+    I --> J[Low CPU Usage]
+
+    K[Performance Impact] --> L[Default: O(n) complexity]
+    K --> M[OnPush: O(log n) complexity]
+```
+
+#### **Memory and CPU Usage Patterns**
+
+```mermaid
+graph TD
+    subgraph "Default Strategy Impact"
+        A1[Every Async Operation] --> B1[Full Tree Scan]
+        B1 --> C1[All Components Checked]
+        C1 --> D1[High CPU Cycles]
+        D1 --> E1[Potential Frame Drops]
+    end
+
+    subgraph "OnPush Strategy Impact"
+        A2[Only Relevant Changes] --> B2[Targeted Checks]
+        B2 --> C2[Minimal Component Checks]
+        C2 --> D2[Low CPU Cycles]
+        D2 --> E2[Smooth 60fps]
+    end
+```
+
+#### **Real-World Performance Metrics**
+
 ```typescript
 // Performance comparison demonstration
 @Component({
@@ -218,12 +410,40 @@ export class OnPushExampleComponent {
 
       <button (click)="updateUnrelatedData()">Update Unrelated Data</button>
       <!-- Line 1: Button that updates data not used by child components -->
+
+      <div class="metrics">
+        <h4>Performance Metrics</h4>
+        <p>Default Component Checks: {{ defaultChecks }}</p>
+        <p>OnPush Component Checks: {{ onPushChecks }}</p>
+        <p>Performance Ratio: {{ performanceRatio }}</p>
+      </div>
     </div>
   `,
 })
-export class PerformanceComparisonComponent {
+export class PerformanceComparisonComponent implements AfterViewInit {
   sharedData = { items: this.generateItems(1000) }; // Line 2: Shared data
   unrelatedData = "initial"; // Line 3: Data not used by children
+
+  defaultChecks = 0;
+  onPushChecks = 0;
+
+  @ViewChild(DefaultHeavyComponent) defaultComponent!: DefaultHeavyComponent;
+  @ViewChild(OnPushHeavyComponent) onPushComponent!: OnPushHeavyComponent;
+
+  ngAfterViewInit() {
+    // Monitor check counts
+    setInterval(() => {
+      this.defaultChecks = this.defaultComponent?.checkCount || 0;
+      this.onPushChecks = this.onPushComponent?.checkCount || 0;
+    }, 100);
+  }
+
+  get performanceRatio(): string {
+    if (this.onPushChecks === 0) return "N/A";
+    return `${Math.round(
+      this.defaultChecks / this.onPushChecks
+    )}x more efficient`;
+  }
 
   updateUnrelatedData() {
     this.unrelatedData = "updated-" + Date.now(); // Line 4: Update unrelated data
@@ -241,6 +461,52 @@ export class PerformanceComparisonComponent {
   }
 }
 
+// 📊 Advanced Performance Monitoring
+@Injectable({ providedIn: "root" })
+export class ChangeDetectionProfiler {
+  private performanceMap = new Map<
+    string,
+    {
+      checks: number;
+      totalTime: number;
+      averageTime: number;
+      lastCheckTime: number;
+    }
+  >();
+
+  recordCheck(componentName: string, duration: number) {
+    const existing = this.performanceMap.get(componentName) || {
+      checks: 0,
+      totalTime: 0,
+      averageTime: 0,
+      lastCheckTime: 0,
+    };
+
+    existing.checks++;
+    existing.totalTime += duration;
+    existing.averageTime = existing.totalTime / existing.checks;
+    existing.lastCheckTime = performance.now();
+
+    this.performanceMap.set(componentName, existing);
+  }
+
+  getPerformanceReport(): Array<{ component: string; metrics: any }> {
+    return Array.from(this.performanceMap.entries())
+      .map(([component, metrics]) => ({
+        component,
+        metrics,
+      }))
+      .sort((a, b) => b.metrics.totalTime - a.metrics.totalTime);
+  }
+
+  identifyBottlenecks(): string[] {
+    const report = this.getPerformanceReport();
+    return report
+      .filter((item) => item.metrics.averageTime > 5) // More than 5ms average
+      .map((item) => item.component);
+  }
+}
+
 // Default strategy - will check every cycle
 @Component({
   selector: "default-heavy-component",
@@ -250,19 +516,65 @@ export class PerformanceComparisonComponent {
       <h4>Default Strategy (Checks: {{ checkCount }})</h4>
       <!-- Line 9: Display check counter -->
       <ul>
-        <li *ngFor="let item of data.items; trackBy: trackByFn">{{ item.name }}: {{ expensiveCalculation(item.value) }}</li>
+        <li *ngFor="let item of data.items; trackBy: trackByFn">
+          {{ item.name }}: {{ expensiveCalculation(item.value) }}
+        </li>
         <!-- Line 10: Expensive calculation called every check -->
       </ul>
+      <div
+        class="performance-indicator"
+        [style.background-color]="getPerformanceColor()"
+      >
+        Performance: {{ checkFrequency }} checks/sec
+      </div>
     </div>
   `,
 })
-export class DefaultHeavyComponent implements DoCheck {
+export class DefaultHeavyComponent implements DoCheck, OnInit {
   @Input() data: any; // Line 11: Input data
   checkCount = 0; // Line 12: Counter for change detection cycles
+  private lastCheckTime = 0;
+  private checkTimes: number[] = [];
+
+  constructor(private profiler: ChangeDetectionProfiler) {}
+
+  ngOnInit() {
+    this.lastCheckTime = performance.now();
+  }
 
   ngDoCheck() {
+    const startTime = performance.now();
     this.checkCount++; // Line 13: Increment on every check
+
+    // Record timing for performance analysis
+    const timeSinceLastCheck = startTime - this.lastCheckTime;
+    this.checkTimes.push(timeSinceLastCheck);
+
+    // Keep only last 10 measurements for frequency calculation
+    if (this.checkTimes.length > 10) {
+      this.checkTimes = this.checkTimes.slice(-10);
+    }
+
+    this.lastCheckTime = startTime;
     console.log("Default component checked:", this.checkCount);
+
+    // Record performance
+    const endTime = performance.now();
+    this.profiler.recordCheck("DefaultHeavyComponent", endTime - startTime);
+  }
+
+  get checkFrequency(): number {
+    if (this.checkTimes.length < 2) return 0;
+    const avgInterval =
+      this.checkTimes.reduce((a, b) => a + b, 0) / this.checkTimes.length;
+    return Math.round(1000 / avgInterval);
+  }
+
+  getPerformanceColor(): string {
+    const freq = this.checkFrequency;
+    if (freq > 60) return "#ff4444"; // Red - too frequent
+    if (freq > 30) return "#ffaa44"; // Orange - moderate
+    return "#44ff44"; // Green - good
   }
 
   expensiveCalculation(value: number): number {
@@ -287,18 +599,42 @@ export class DefaultHeavyComponent implements DoCheck {
     <div>
       <h4>OnPush Strategy (Checks: {{ checkCount }})</h4>
       <ul>
-        <li *ngFor="let item of data.items; trackBy: trackByFn">{{ item.name }}: {{ expensiveCalculation(item.value) }}</li>
+        <li *ngFor="let item of data.items; trackBy: trackByFn">
+          {{ item.name }}: {{ expensiveCalculation(item.value) }}
+        </li>
       </ul>
+      <div
+        class="performance-indicator"
+        [style.background-color]="getPerformanceColor()"
+      >
+        Performance: Optimal (OnPush)
+      </div>
     </div>
   `,
 })
-export class OnPushHeavyComponent implements DoCheck {
+export class OnPushHeavyComponent implements DoCheck, OnInit {
   @Input() data: any;
   checkCount = 0;
+  private checkTimes: number[] = [];
+
+  constructor(private profiler: ChangeDetectionProfiler) {}
+
+  ngOnInit() {
+    console.log("OnPush component initialized");
+  }
 
   ngDoCheck() {
+    const startTime = performance.now();
     this.checkCount++; // Line 18: Only increments when inputs change
     console.log("OnPush component checked:", this.checkCount);
+
+    // Record timing
+    const endTime = performance.now();
+    this.profiler.recordCheck("OnPushHeavyComponent", endTime - startTime);
+  }
+
+  getPerformanceColor(): string {
+    return "#44ff44"; // Always green - OnPush is efficient
   }
 
   expensiveCalculation(value: number): number {
@@ -340,12 +676,259 @@ export class OnPushHeavyComponent implements DoCheck {
 
 ## ChangeDetectorRef Methods and Usage
 
+### 🧠 ChangeDetectorRef - Deep Theory & Architecture
+
+#### **Theoretical Foundation**
+
+ChangeDetectorRef is Angular's API for manually controlling change detection. It provides methods to detach components from the change detection tree, trigger detection manually, and check if detection is needed. Understanding its internal workings is crucial for optimizing Angular applications.
+
+#### **ChangeDetectorRef Architecture Diagram**
+
+```mermaid
+graph TD
+    A[ChangeDetectorRef] --> B[Component Instance]
+    B --> C[Change Detection Tree]
+
+    A --> D[markForCheck]
+    A --> E[detectChanges]
+    A --> F[detach]
+    A --> G[reattach]
+    A --> H[checkNoChanges]
+
+    D --> I[Schedule for Next Cycle]
+    E --> J[Immediate Detection]
+    F --> K[Remove from Tree]
+    G --> L[Add Back to Tree]
+    H --> M[Validation Check]
+
+    I --> N[Async Update]
+    J --> O[Sync Update]
+    K --> P[No Auto Updates]
+    L --> Q[Resume Auto Updates]
+    M --> R[Throw if Changes Found]
+```
+
+#### **Method Execution Flow Comparison**
+
+```mermaid
+sequenceDiagram
+    participant App as Application
+    participant Comp as Component
+    participant CDR as ChangeDetectorRef
+    participant DOM as DOM
+
+    Note over App,DOM: markForCheck() Flow
+    App->>Comp: State Change
+    Comp->>CDR: markForCheck()
+    CDR-->>CDR: Mark component dirty
+    Note right of CDR: Scheduled for next cycle
+    App->>CDR: Next Change Detection Cycle
+    CDR->>DOM: Update DOM
+
+    Note over App,DOM: detectChanges() Flow
+    App->>Comp: State Change
+    Comp->>CDR: detectChanges()
+    CDR->>CDR: Immediate Check
+    CDR->>DOM: Update DOM Immediately
+```
+
+#### **Component Tree State Management**
+
+```mermaid
+graph TD
+    A[Root Component] --> B[Child Component 1]
+    A --> C[Child Component 2]
+    B --> D[Grandchild 1]
+    B --> E[Grandchild 2]
+
+    subgraph "Attached State"
+        F[All components in tree]
+        F --> G[Receive change detection]
+    end
+
+    subgraph "Detached State"
+        H[Component removed from tree]
+        H --> I[No automatic updates]
+        H --> J[Manual triggers still work]
+    end
+
+    K[detach()] --> H
+    L[reattach()] --> F
+```
+
 ### Understanding ChangeDetectorRef
 
 ChangeDetectorRef is Angular's API for manually controlling change detection. It provides methods to detach components from the change detection tree, trigger detection manually, and check if detection is needed.
 
+#### **🔄 Core CDR Methods Deep Dive**
+
+##### **1. markForCheck() - Theoretical Understanding**
+
+```mermaid
+graph LR
+    A[markForCheck called] --> B[Mark component dirty]
+    B --> C[Mark all ancestors dirty]
+    C --> D[Schedule for next cycle]
+    D --> E[Wait for next tick]
+    E --> F[Run change detection]
+    F --> G[Update UI]
+```
+
+**How markForCheck() works internally:**
+
+- Marks the component and all its **ancestors** as dirty
+- **Schedules** (doesn't immediately run) change detection
+- Works **bottom-up** through the component tree
+- **Asynchronous** - runs on next change detection cycle
+
+##### **2. detectChanges() - Theoretical Understanding**
+
+```mermaid
+graph LR
+    A[detectChanges called] --> B[Immediate check start]
+    B --> C[Check this component]
+    C --> D[Check all children]
+    D --> E[Update DOM synchronously]
+    E --> F[Return immediately]
+```
+
+**How detectChanges() works internally:**
+
+- Runs change detection **immediately** and **synchronously**
+- Checks **only this component and its children** (top-down)
+- **Does not** check parent components
+- Updates DOM **immediately**
+
+#### **🎯 Advanced CDR Patterns & Use Cases**
+
+##### **Pattern 1: Async Operations with OnPush**
+
 ```typescript
-// Basic ChangeDetectorRef injection and usage
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="async-container">
+      <p>HTTP Data: {{ httpData }}</p>
+      <p>Timer Data: {{ timerData }}</p>
+      <p>Observable Data: {{ observableData }}</p>
+    </div>
+  `,
+})
+export class AsyncOnPushComponent implements OnInit {
+  httpData = "";
+  timerData = "";
+  observableData = "";
+
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient) {}
+
+  ngOnInit() {
+    // ❌ WRONG: Without markForCheck
+    this.http.get("/api/data").subscribe((data) => {
+      this.httpData = data;
+      // UI won't update with OnPush!
+    });
+
+    // ✅ CORRECT: With markForCheck
+    this.http.get("/api/data").subscribe((data) => {
+      this.httpData = data;
+      this.cdr.markForCheck(); // Schedule update for next cycle
+    });
+
+    // ✅ CORRECT: With detectChanges (immediate)
+    this.http.get("/api/data").subscribe((data) => {
+      this.httpData = data;
+      this.cdr.detectChanges(); // Update immediately
+    });
+
+    // ✅ BEST PRACTICE: Async pipe (automatic)
+    this.observableData$ = this.http.get("/api/data");
+    // Use {{ observableData$ | async }} in template
+  }
+}
+```
+
+##### **Pattern 2: Performance Optimization with detach/reattach**
+
+```typescript
+@Component({
+  template: `
+    <div class="performance-component">
+      <h3>High-Frequency Updates</h3>
+      <p>Status: {{ status }}</p>
+      <p>Counter: {{ counter }}</p>
+      <button (click)="startHighFrequencyUpdates()">Start Updates</button>
+      <button (click)="stopHighFrequencyUpdates()">Stop Updates</button>
+    </div>
+  `,
+})
+export class PerformanceOptimizedComponent {
+  status = "stopped";
+  counter = 0;
+  private intervalId: any;
+  private isDetached = false;
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  startHighFrequencyUpdates() {
+    // Detach from change detection for performance
+    this.cdr.detach();
+    this.isDetached = true;
+    this.status = "running (detached)";
+    this.cdr.detectChanges(); // Manual update to show status
+
+    // High-frequency updates without triggering change detection
+    this.intervalId = setInterval(() => {
+      this.counter++;
+      // No automatic UI updates while detached
+
+      // Manually update every 100 increments
+      if (this.counter % 100 === 0) {
+        this.cdr.detectChanges(); // Periodic manual updates
+      }
+    }, 10); // Very high frequency - 100 times per second
+  }
+
+  stopHighFrequencyUpdates() {
+    clearInterval(this.intervalId);
+
+    // Reattach to change detection
+    this.cdr.reattach();
+    this.isDetached = false;
+    this.status = "stopped (attached)";
+    // reattach() automatically triggers change detection
+  }
+}
+```
+
+#### **🛡️ Error Handling & Best Practices**
+
+##### **checkNoChanges() - Development Debugging**
+
+```typescript
+@Component({
+  template: `<div>Debug Component</div>`,
+})
+export class DebugComponent implements AfterViewChecked {
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  ngAfterViewChecked() {
+    if (isDevMode()) {
+      try {
+        // Verify no unexpected changes occurred
+        this.cdr.checkNoChanges();
+        console.log("✅ No unexpected changes detected");
+      } catch (error) {
+        console.error("❌ Unexpected changes detected:", error);
+        // This indicates a bug in your change detection logic
+      }
+    }
+  }
+}
+```
+
+### Basic ChangeDetectorRef injection and usage
+
+```typescript
 @Component({
   selector: "app-cdr-basic",
   changeDetection: ChangeDetectionStrategy.OnPush, // Line 1: OnPush strategy
@@ -360,11 +943,17 @@ ChangeDetectorRef is Angular's API for manually controlling change detection. It
       <!-- Line 4: Timestamp with pipe -->
 
       <div class="controls">
-        <button (click)="incrementWithMarkForCheck()">Increment + markForCheck()</button>
+        <button (click)="incrementWithMarkForCheck()">
+          Increment + markForCheck()
+        </button>
         <!-- Line 5: Button using markForCheck -->
-        <button (click)="incrementWithDetectChanges()">Increment + detectChanges()</button>
+        <button (click)="incrementWithDetectChanges()">
+          Increment + detectChanges()
+        </button>
         <!-- Line 6: Button using detectChanges -->
-        <button (click)="incrementWithoutDetection()">Increment (No Detection)</button>
+        <button (click)="incrementWithoutDetection()">
+          Increment (No Detection)
+        </button>
         <!-- Line 7: Button without detection -->
         <button (click)="checkNoChanges()">Check No Changes</button>
         <!-- Line 8: Button to test checkNoChanges -->
@@ -772,7 +1361,9 @@ export class DetectChangesDemoComponent implements AfterViewInit {
 
   performanceTest() {
     // Line 29: Performance comparison test
-    console.log("⚡ Performance test: detectChanges() vs multiple markForCheck()");
+    console.log(
+      "⚡ Performance test: detectChanges() vs multiple markForCheck()"
+    );
 
     const iterations = 100; // Line 30: Test iterations
 
@@ -793,9 +1384,13 @@ export class DetectChangesDemoComponent implements AfterViewInit {
     const markEnd = performance.now();
 
     // Line 37: Log performance results
-    console.log(`detectChanges() time: ${(detectEnd - detectStart).toFixed(2)}ms`);
+    console.log(
+      `detectChanges() time: ${(detectEnd - detectStart).toFixed(2)}ms`
+    );
     console.log(`markForCheck() time: ${(markEnd - markStart).toFixed(2)}ms`);
-    console.log("Note: detectChanges() is synchronous, markForCheck() is asynchronous");
+    console.log(
+      "Note: detectChanges() is synchronous, markForCheck() is asynchronous"
+    );
   }
 
   conditionalUpdate() {
@@ -940,13 +1535,19 @@ export class ChildComponent {
       </div>
 
       <div class="control-section">
-        <button (click)="detachComponent()" [disabled]="isDetached">Detach Component</button>
+        <button (click)="detachComponent()" [disabled]="isDetached">
+          Detach Component
+        </button>
         <!-- Line 5: Detach button -->
-        <button (click)="reattachComponent()" [disabled]="!isDetached">Reattach Component</button>
+        <button (click)="reattachComponent()" [disabled]="!isDetached">
+          Reattach Component
+        </button>
         <!-- Line 6: Reattach button -->
         <button (click)="manualUpdate()">Manual Update</button>
         <!-- Line 7: Manual update button -->
-        <button (click)="forceDetection()" [disabled]="!isDetached">Force Detection (while detached)</button>
+        <button (click)="forceDetection()" [disabled]="!isDetached">
+          Force Detection (while detached)
+        </button>
         <!-- Line 8: Force detection while detached -->
       </div>
 
@@ -1020,10 +1621,14 @@ export class DetachReattachDemoComponent implements OnInit, OnDestroy {
       this.lastUpdate = new Date(); // Line 21: Update timestamp
 
       if (this.isDetached) {
-        console.log(`Auto counter: ${this.autoCounter} (detached - UI won't update)`);
+        console.log(
+          `Auto counter: ${this.autoCounter} (detached - UI won't update)`
+        );
         // Line 22: Log when detached
       } else {
-        console.log(`Auto counter: ${this.autoCounter} (attached - UI will update)`);
+        console.log(
+          `Auto counter: ${this.autoCounter} (attached - UI will update)`
+        );
         // Line 23: Log when attached
       }
     }, 1000);
@@ -1051,7 +1656,9 @@ export class DetachReattachDemoComponent implements OnInit, OnDestroy {
     this.isDetached = false; // Line 32: Update status
     this.lastUpdate = new Date(); // Line 33: Update timestamp
 
-    console.log("✅ Component reattached - auto updates will now reflect in UI"); // Line 34: Log
+    console.log(
+      "✅ Component reattached - auto updates will now reflect in UI"
+    ); // Line 34: Log
     // Line 35: Note - reattach() automatically triggers change detection
   }
 
@@ -1063,7 +1670,9 @@ export class DetachReattachDemoComponent implements OnInit, OnDestroy {
     this.lastUpdate = new Date(); // Line 38: Update timestamp
 
     if (this.isDetached) {
-      console.log("Component is detached - using detectChanges() to force update");
+      console.log(
+        "Component is detached - using detectChanges() to force update"
+      );
       this.cdr.detectChanges(); // Line 39: Force update when detached
     } else {
       console.log("Component is attached - update will happen automatically");
@@ -1086,7 +1695,9 @@ export class DetachReattachDemoComponent implements OnInit, OnDestroy {
     // Line 45: detectChanges() works even on detached components
     this.cdr.detectChanges();
 
-    console.log("✅ Forced detection completed - UI updated despite detachment"); // Line 46: Log
+    console.log(
+      "✅ Forced detection completed - UI updated despite detachment"
+    ); // Line 46: Log
   }
 }
 ```
@@ -1156,7 +1767,12 @@ export class DetachReattachDemoComponent implements OnInit, OnDestroy {
 
       <div class="log-section">
         <h4>Check Results:</h4>
-        <div *ngFor="let log of checkLogs; trackBy: trackByLog" class="log-entry">{{ log.timestamp | date : "HH:mm:ss.SSS" }} - {{ log.message }}</div>
+        <div
+          *ngFor="let log of checkLogs; trackBy: trackByLog"
+          class="log-entry"
+        >
+          {{ log.timestamp | date : "HH:mm:ss.SSS" }} - {{ log.message }}
+        </div>
         <!-- Line 8: Display check results -->
       </div>
     </div>
@@ -1299,7 +1915,10 @@ export class CheckNoChangesDemoComponent {
 // Line 48: Service for demonstrating checkNoChanges in services
 @Injectable({ providedIn: "root" })
 export class ChangeDetectionValidationService {
-  validateComponentState(cdr: ChangeDetectorRef, componentName: string): boolean {
+  validateComponentState(
+    cdr: ChangeDetectorRef,
+    componentName: string
+  ): boolean {
     // Line 49: Service method to validate component state
     try {
       console.log(`🔍 Validating ${componentName} state`);
@@ -1313,7 +1932,9 @@ export class ChangeDetectionValidationService {
     }
   }
 
-  performStabilityCheck(components: Array<{ name: string; cdr: ChangeDetectorRef }>): void {
+  performStabilityCheck(
+    components: Array<{ name: string; cdr: ChangeDetectorRef }>
+  ): void {
     // Line 55: Check multiple components
     console.log("🔍 Running stability check on multiple components");
 
@@ -1389,7 +2010,11 @@ export class ChangeDetectionValidationService {
 @Injectable({ providedIn: "root" })
 export class ChangeDetectionBestPracticesService {
   // Line 1: Pattern 1 - Async operations with OnPush
-  handleAsyncOperation<T>(operation: Observable<T>, cdr: ChangeDetectorRef, updateCallback: (data: T) => void): Subscription {
+  handleAsyncOperation<T>(
+    operation: Observable<T>,
+    cdr: ChangeDetectorRef,
+    updateCallback: (data: T) => void
+  ): Subscription {
     // Line 2: Standard pattern for async operations with OnPush
     return operation.subscribe({
       next: (data) => {
@@ -1410,7 +2035,12 @@ export class ChangeDetectionBestPracticesService {
   }
 
   // Line 10: Pattern 3 - Conditional change detection
-  conditionalUpdate<T>(oldValue: T, newValue: T, cdr: ChangeDetectorRef, updateFn: () => void): void {
+  conditionalUpdate<T>(
+    oldValue: T,
+    newValue: T,
+    cdr: ChangeDetectorRef,
+    updateFn: () => void
+  ): void {
     if (oldValue !== newValue) {
       // Line 11: Only update if changed
       updateFn(); // Line 12: Execute update
@@ -1419,7 +2049,11 @@ export class ChangeDetectionBestPracticesService {
   }
 
   // Line 14: Pattern 4 - Performance monitoring
-  profileChangeDetection<T>(operation: () => T, cdr: ChangeDetectorRef, label: string): T {
+  profileChangeDetection<T>(
+    operation: () => T,
+    cdr: ChangeDetectorRef,
+    label: string
+  ): T {
     const startTime = performance.now(); // Line 15: Start timing
 
     const result = operation(); // Line 16: Execute operation
@@ -1520,81 +2154,201 @@ export class CustomStrategyComponent implements OnInit, OnDestroy {
 
 ## Zone.js vs Zoneless Architecture
 
+### 🧠 Zone.js - Deep Theory & Architecture
+
+#### **Theoretical Foundation**
+
+Zone.js is a library that provides execution context for asynchronous operations. It **"patches"** browser APIs to automatically trigger Angular's change detection when asynchronous operations complete. Understanding Zone.js is crucial for mastering Angular's change detection system.
+
+#### **How Zone.js Patches Browser APIs**
+
+```mermaid
+graph TD
+    A[Browser APIs] --> B[Native setTimeout]
+    A --> C[Native Promise.then]
+    A --> D[Native XMLHttpRequest]
+    A --> E[Native addEventListener]
+
+    F[Zone.js Patches] --> G[Wrapped setTimeout]
+    F --> H[Wrapped Promise.then]
+    F --> I[Wrapped XMLHttpRequest]
+    F --> J[Wrapped addEventListener]
+
+    G --> K[Execute Original + Trigger CD]
+    H --> K
+    I --> K
+    J --> K
+
+    K --> L[Angular Change Detection]
+    L --> M[Update DOM]
+```
+
+#### **Zone.js Execution Context Flow**
+
+```mermaid
+sequenceDiagram
+    participant App as Application Code
+    participant Zone as Zone.js
+    participant API as Browser API
+    participant Angular as Angular CD
+    participant DOM as DOM
+
+    App->>Zone: Call setTimeout()
+    Zone->>Zone: Create Zone context
+    Zone->>API: Call native setTimeout()
+    API-->>Zone: Timer expires
+    Zone->>Zone: Execute callback in Zone context
+    Zone->>Angular: Trigger change detection
+    Angular->>DOM: Update DOM if needed
+    Zone-->>App: Return result
+```
+
+#### **Zone.js vs Zoneless Comparison Architecture**
+
+```mermaid
+graph TB
+    subgraph "Zone.js Architecture"
+        A1[Application Code] --> B1[Zone.js Wrapper]
+        B1 --> C1[Browser APIs]
+        B1 --> D1[Auto Change Detection]
+        D1 --> E1[DOM Updates]
+    end
+
+    subgraph "Zoneless Architecture"
+        A2[Application Code] --> B2[Native Browser APIs]
+        A2 --> C2[Manual Change Detection]
+        A2 --> D2[Signals/Reactive Primitives]
+        C2 --> E2[DOM Updates]
+        D2 --> E2
+    end
+
+    F[Bundle Size] --> G[Zone.js: +45KB]
+    F --> H[Zoneless: 0KB]
+
+    I[Performance] --> J[Zone.js: Overhead for patching]
+    I --> K[Zoneless: Native performance]
+```
+
 ### Understanding Zone.js
 
 Zone.js is a library that patches asynchronous operations to automatically trigger Angular's change detection. It's been Angular's default change detection mechanism since Angular 2.
 
+#### **🔍 Zone.js Internal Mechanics**
+
+##### **API Patching Process**
+
+Zone.js replaces native browser APIs with Zone-aware versions that automatically trigger change detection:
+
 ```typescript
-// How Zone.js works under the hood
-export class ZoneJsExample {
-  constructor() {
-    // Line 1: Zone.js patches global async operations
-    // Original setTimeout is replaced with Zone-aware version
+// How Zone.js patches APIs internally (simplified)
+class ZoneJSPatching {
+  // 1. Patch setTimeout
+  static patchSetTimeout() {
+    const originalSetTimeout = window.setTimeout;
+
+    window.setTimeout = function (
+      callback: Function,
+      delay: number,
+      ...args: any[]
+    ) {
+      const wrappedCallback = Zone.current.wrap(callback, "setTimeout");
+      return originalSetTimeout.call(
+        this,
+        () => {
+          wrappedCallback.apply(this, args);
+          // Zone.js automatically triggers Angular change detection here
+          NgZone.checkStable();
+        },
+        delay
+      );
+    };
   }
 
-  demonstrateZonePatch() {
-    // Line 2: When you call setTimeout, Zone.js intercepts it
-    setTimeout(() => {
-      console.log("Timer executed");
-      // Line 3: Zone.js automatically triggers change detection after this
-    }, 1000);
+  // 2. Patch Promise
+  static patchPromise() {
+    const originalThen = Promise.prototype.then;
 
-    // Line 4: Same happens with Promise resolution
-    Promise.resolve("data").then((result) => {
-      console.log(result);
-      // Line 5: Change detection triggered automatically
-    });
+    Promise.prototype.then = function (
+      onFulfilled?: Function,
+      onRejected?: Function
+    ) {
+      const wrappedFulfilled = onFulfilled
+        ? Zone.current.wrap(onFulfilled, "Promise.then")
+        : undefined;
+      const wrappedRejected = onRejected
+        ? Zone.current.wrap(onRejected, "Promise.then")
+        : undefined;
 
-    // Line 6: HTTP requests also trigger change detection
-    fetch("/api/data")
-      .then((response) => {
-        // Line 7: Zone.js detects this async completion
-        return response.json();
-      })
-      .then((data) => {
-        // Line 8: Change detection runs after promise resolves
-        this.processData(data);
+      return originalThen.call(
+        this,
+        wrappedFulfilled
+          ? (...args) => {
+              const result = wrappedFulfilled.apply(this, args);
+              NgZone.checkStable(); // Trigger change detection
+              return result;
+            }
+          : undefined,
+        wrappedRejected
+      );
+    };
+  }
+
+  // 3. Patch XMLHttpRequest
+  static patchXHR() {
+    const originalSend = XMLHttpRequest.prototype.send;
+
+    XMLHttpRequest.prototype.send = function (...args) {
+      this.addEventListener("loadend", () => {
+        NgZone.checkStable(); // Trigger change detection on completion
       });
-  }
-
-  processData(data: any) {
-    // Line 9: Any state changes here will be reflected in UI
-    // Line 10: No manual change detection triggering needed
+      return originalSend.apply(this, args);
+    };
   }
 }
-
-// Zone.js configuration and customization
-import "zone.js/dist/zone"; // Line 11: Import Zone.js
-
-// Line 12: Configure Zone.js before Angular starts
-declare global {
-  interface Window {
-    __zone_symbol__ignoreConsoleErrorUncaughtError: boolean;
-  }
-}
-
-// Line 13: Disable certain Zone.js patches for performance
-(window as any).__Zone_disable_requestAnimationFrame = true; // Line 14: RAF patch
-(window as any).__Zone_disable_on_property = true; // Line 15: Property patches
-(window as any).__Zone_disable_geolocation = true; // Line 16: Geolocation patch
-(window as any).__Zone_disable_file = true; // Line 17: File API patch
-(window as any).__Zone_disable_canvas = true; // Line 18: Canvas patch
 ```
 
-**Line-by-line explanation:**
+##### **Zone Context and Task Tracking**
 
-- **Line 1**: Zone.js replaces browser APIs with Zone-aware versions
-- **Line 2**: setTimeout call is intercepted by Zone.js
-- **Line 3**: After callback executes, Zone.js triggers Angular change detection
-- **Line 4**: Promise handling is also patched by Zone.js
-- **Line 5**: Promise resolution automatically triggers change detection
-- **Line 6**: HTTP requests (fetch, XMLHttpRequest) are patched
-- **Line 7**: Zone.js monitors async operation completion
-- **Line 8**: Change detection runs when async operation completes
-- **Line 9-10**: State changes automatically update UI without manual intervention
-- **Line 11**: Zone.js must be imported before Angular
-- **Line 12**: Global configuration affects Zone.js behavior
-- **Line 14-18**: Disable specific patches to improve performance
+```typescript
+// Zone.js tracks all async operations as "tasks"
+interface ZoneTask {
+  type: "microTask" | "macroTask" | "eventTask";
+  source: string;
+  callback: Function;
+  data?: any;
+  scheduleFn?: Function;
+  cancelFn?: Function;
+}
+
+class ZoneTaskTracking {
+  private pendingTasks: Set<ZoneTask> = new Set();
+
+  onScheduleTask(task: ZoneTask) {
+    console.log(`📝 Task scheduled: ${task.source}`);
+    this.pendingTasks.add(task);
+  }
+
+  onInvokeTask(task: ZoneTask) {
+    console.log(`⚡ Task executing: ${task.source}`);
+  }
+
+  onHasTask(hasTaskState: {
+    microTask: boolean;
+    macroTask: boolean;
+    eventTask: boolean;
+  }) {
+    if (!hasTaskState.microTask && !hasTaskState.macroTask) {
+      console.log("🏁 Zone is stable - triggering change detection");
+      // This is when Angular runs change detection
+    }
+  }
+
+  onInvokeTaskDone(task: ZoneTask) {
+    console.log(`✅ Task completed: ${task.source}`);
+    this.pendingTasks.delete(task);
+  }
+}
+```
 
 ### Zone.js in Angular Components
 
@@ -1664,7 +2418,151 @@ export class ZoneAwareComponent implements OnInit {
       });
   }
 }
+
+// 🚀 Advanced Zone.js Optimization Patterns
+@Component({
+  selector: "app-zone-optimized",
+  template: `
+    <div>
+      <h3>Zone.js Optimizations</h3>
+      <p>High Frequency Counter: {{ highFreqCounter }}</p>
+      <p>Normal Counter: {{ normalCounter }}</p>
+      <button (click)="startOptimizedTimer()">Start Optimized Timer</button>
+      <button (click)="startNormalTimer()">Start Normal Timer</button>
+    </div>
+  `,
+})
+export class ZoneOptimizedComponent {
+  highFreqCounter = 0;
+  normalCounter = 0;
+
+  constructor(private ngZone: NgZone) {}
+
+  startOptimizedTimer() {
+    // Run outside Angular zone to avoid change detection overhead
+    this.ngZone.runOutsideAngular(() => {
+      setInterval(() => {
+        this.highFreqCounter++; // This won't trigger change detection
+
+        // Manually trigger change detection every 100 updates
+        if (this.highFreqCounter % 100 === 0) {
+          this.ngZone.run(() => {
+            // This will trigger change detection
+            console.log("Manual change detection trigger");
+          });
+        }
+      }, 10); // Very high frequency - 100 times per second
+    });
+  }
+
+  startNormalTimer() {
+    // Normal timer - will trigger change detection each time
+    setInterval(() => {
+      this.normalCounter++; // This triggers change detection every time
+    }, 1000);
+  }
+}
 ```
+
+### 🔋 Zoneless Change Detection (Angular 18+)
+
+#### **Zoneless Architecture Benefits**
+
+```mermaid
+graph TD
+    A[Zoneless Benefits] --> B[Smaller Bundle Size]
+    A --> C[Better Performance]
+    A --> D[More Control]
+    A --> E[Modern Async Patterns]
+
+    B --> F[No Zone.js overhead ~45KB]
+    C --> G[No API patching overhead]
+    C --> H[Native browser performance]
+    D --> I[Explicit change detection]
+    D --> J[Fine-grained control]
+    E --> K[Signals integration]
+    E --> L[Reactive programming]
+```
+
+#### **Migration Strategy: Zone.js → Zoneless**
+
+```typescript
+// BEFORE: Zone.js automatic detection
+@Component({
+  template: `
+    <div>
+      <p>Data: {{ data }}</p>
+      <button (click)="loadData()">Load</button>
+    </div>
+  `,
+})
+export class ZoneBased {
+  data = "";
+
+  constructor(private http: HttpClient) {}
+
+  loadData() {
+    // ✅ Works automatically with Zone.js
+    this.http.get("/api/data").subscribe((response) => {
+      this.data = response.data;
+      // Zone.js automatically triggers change detection
+    });
+  }
+
+  ngOnInit() {
+    // ✅ Works automatically with Zone.js
+    setTimeout(() => {
+      this.data = "Timer data";
+      // Zone.js automatically triggers change detection
+    }, 1000);
+  }
+}
+
+// AFTER: Zoneless with manual control
+@Component({
+  template: `
+    <div>
+      <p>Data: {{ data }}</p>
+      <p>Signal Data: {{ signalData() }}</p>
+      <button (click)="loadData()">Load</button>
+    </div>
+  `,
+})
+export class Zoneless {
+  data = "";
+  signalData = signal("");
+
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+
+  loadData() {
+    // ❌ Manual change detection required
+    this.http.get("/api/data").subscribe((response) => {
+      this.data = response.data;
+      this.cdr.markForCheck(); // Manual trigger needed
+    });
+
+    // ✅ Signals work automatically
+    this.http.get("/api/data").subscribe((response) => {
+      this.signalData.set(response.data); // Automatically triggers updates
+    });
+  }
+
+  ngOnInit() {
+    // ❌ Manual change detection required
+    setTimeout(() => {
+      this.data = "Timer data";
+      this.cdr.markForCheck(); // Manual trigger needed
+    }, 1000);
+
+    // ✅ Signals work automatically
+    setTimeout(() => {
+      this.signalData.set("Timer data"); // Automatically triggers updates
+    }, 1000);
+  }
+}
+```
+
+````
 
 **Line-by-line explanation:**
 
@@ -1779,7 +2677,7 @@ export class ZonelessExampleComponent implements OnInit {
     // Line 35: Effects run automatically when signals change
   });
 }
-```
+````
 
 **Line-by-line explanation:**
 
@@ -2050,6 +2948,90 @@ export class ZonelessDemoComponent {
 
 ## Lifecycle Hooks and Change Detection
 
+### 🧠 Change Detection Lifecycle - Deep Theory
+
+#### **Theoretical Foundation**
+
+Understanding how Angular's lifecycle hooks interact with change detection is essential for building efficient applications. Each lifecycle hook runs at specific points in the change detection cycle, and knowing when they execute helps optimize performance and avoid common pitfalls.
+
+#### **Complete Change Detection Cycle Flow**
+
+```mermaid
+sequenceDiagram
+    participant CD as Change Detection
+    participant Comp as Component
+    participant Child as Child Component
+    participant DOM as DOM
+
+    Note over CD,DOM: Change Detection Cycle Start
+
+    CD->>Comp: ngOnChanges (if @Input changed)
+    CD->>Comp: ngOnInit (first time only)
+    CD->>Comp: ngDoCheck (every cycle)
+
+    Note over CD,DOM: Process Content
+    CD->>Comp: ngAfterContentInit (first time only)
+    CD->>Comp: ngAfterContentChecked (every cycle)
+
+    Note over CD,DOM: Process Children
+    CD->>Child: Recursive change detection
+    Child-->>CD: Child processing complete
+
+    Note over CD,DOM: Process View
+    CD->>Comp: ngAfterViewInit (first time only)
+    CD->>Comp: ngAfterViewChecked (every cycle)
+
+    Note over CD,DOM: Update DOM
+    CD->>DOM: Apply changes if detected
+
+    Note over CD,DOM: Cycle Complete
+```
+
+#### **Lifecycle Hook Frequency and Performance Impact**
+
+```mermaid
+graph TD
+    A[Lifecycle Hooks] --> B[One-Time Hooks]
+    A --> C[Recurring Hooks]
+
+    B --> D[ngOnInit]
+    B --> E[ngAfterContentInit]
+    B --> F[ngAfterViewInit]
+    B --> G[Safe for heavy operations]
+
+    C --> H[ngOnChanges]
+    C --> I[ngDoCheck]
+    C --> J[ngAfterContentChecked]
+    C --> K[ngAfterViewChecked]
+    C --> L[⚠️ Performance sensitive]
+
+    M[Performance Rules] --> N[Minimize work in recurring hooks]
+    M --> O[Use OnPush with recurring hooks]
+    M --> P[Avoid side effects in recurring hooks]
+```
+
+#### **Hook Execution Timing Visualization**
+
+```mermaid
+gantt
+    title Change Detection Lifecycle Timeline
+    dateFormat X
+    axisFormat %s
+
+    section Initialization
+    Constructor           :0, 1
+    ngOnChanges          :1, 2
+    ngOnInit             :2, 3
+
+    section Every Cycle
+    ngDoCheck            :3, 4
+    Content Processing   :4, 5
+    ngAfterContentChecked:5, 6
+    Child Processing     :6, 8
+    ngAfterViewChecked   :8, 9
+    DOM Update          :9, 10
+```
+
 ### Understanding Hook Execution Order
 
 ```typescript
@@ -2068,51 +3050,81 @@ export class ZonelessDemoComponent {
     </div>
   `,
 })
-export class LifecycleDemoComponent implements OnInit, OnChanges, DoCheck, AfterContentInit, AfterContentChecked, AfterViewInit, AfterViewChecked, OnDestroy {
+export class LifecycleDemoComponent
+  implements
+    OnInit,
+    OnChanges,
+    DoCheck,
+    AfterContentInit,
+    AfterContentChecked,
+    AfterViewInit,
+    AfterViewChecked,
+    OnDestroy
+{
   @Input() parentData: string = ""; // Line 4: Input from parent
   value = "Initial Value"; // Line 5: Component state
   private checkCount = 0; // Line 6: Counter for DoCheck calls
+  private performanceMetrics = new Map<string, number>(); // Line 7: Performance tracking
 
   constructor() {
-    console.log("1. Constructor called"); // Line 7: Constructor execution
+    console.log("1. Constructor called"); // Line 8: Constructor execution
+    this.recordPerformance("constructor");
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // Line 8: Called when @Input properties change
+    // Line 9: Called when @Input properties change
+    this.recordPerformance("ngOnChanges");
     console.log("2. ngOnChanges called", changes);
-    console.log("  - Called before ngOnInit"); // Line 9: Execution order note
-    console.log("  - Called every time input changes"); // Line 10: Frequency note
+    console.log("  - Called before ngOnInit"); // Line 10: Execution order note
+    console.log("  - Called every time input changes"); // Line 11: Frequency note
 
-    // Line 11: Check which input properties changed
+    // Line 12: Check which input properties changed
     if (changes["parentData"]) {
       const change = changes["parentData"];
-      console.log(`  - parentData changed from ${change.previousValue} to ${change.currentValue}`);
+      console.log(
+        `  - parentData changed from ${change.previousValue} to ${change.currentValue}`
+      );
+
+      // ✅ BEST PRACTICE: Handle input validation here
+      this.validateInputs(change.currentValue);
     }
   }
 
   ngOnInit() {
-    // Line 12: Called once after first ngOnChanges
+    // Line 13: Called once after first ngOnChanges
+    this.recordPerformance("ngOnInit");
     console.log("3. ngOnInit called");
-    console.log("  - Called after constructor and first ngOnChanges"); // Line 13: Timing
-    console.log("  - Good place for initialization logic"); // Line 14: Best practice
+    console.log("  - Called after constructor and first ngOnChanges"); // Line 14: Timing
+    console.log("  - Good place for initialization logic"); // Line 15: Best practice
 
-    // Line 15: Example initialization
+    // Line 16: Example initialization
     this.initializeComponent();
   }
 
   ngDoCheck() {
-    // Line 16: Called every change detection cycle
+    // Line 17: Called every change detection cycle
+    const startTime = performance.now();
     this.checkCount++;
-    console.log(`4. ngDoCheck called (count: ${this.checkCount})`);
-    console.log("  - Called on every change detection cycle"); // Line 17: Frequency
-    console.log("  - Use for custom change detection logic"); // Line 18: Purpose
 
-    // Line 19: Custom change detection example
+    console.log(`4. ngDoCheck called (count: ${this.checkCount})`);
+    console.log("  - Called on every change detection cycle"); // Line 18: Frequency
+    console.log("  - Use for custom change detection logic"); // Line 19: Purpose
+
+    // ⚠️ WARNING: This runs VERY frequently - keep it light!
     this.performCustomChangeDetection();
+
+    const endTime = performance.now();
+    this.recordPerformance("ngDoCheck", endTime - startTime);
+
+    // 📊 Performance monitoring
+    if (this.checkCount % 100 === 0) {
+      this.reportPerformanceMetrics();
+    }
   }
 
   ngAfterContentInit() {
     // Line 20: Called once after content projection is initialized
+    this.recordPerformance("ngAfterContentInit");
     console.log("5. ngAfterContentInit called");
     console.log("  - Called after ngDoCheck"); // Line 21: Execution order
     console.log("  - Content projection is ready"); // Line 22: State information
@@ -2120,64 +3132,236 @@ export class LifecycleDemoComponent implements OnInit, OnChanges, DoCheck, After
 
   ngAfterContentChecked() {
     // Line 23: Called after every content check
+    const startTime = performance.now();
     console.log("6. ngAfterContentChecked called");
     console.log("  - Called after every ngDoCheck"); // Line 24: Frequency
     console.log("  - Projected content has been checked"); // Line 25: State info
+
+    // ⚠️ WARNING: This also runs frequently
+    this.validateContentState();
+
+    const endTime = performance.now();
+    this.recordPerformance("ngAfterContentChecked", endTime - startTime);
   }
 
   ngAfterViewInit() {
     // Line 26: Called once after view initialization
+    this.recordPerformance("ngAfterViewInit");
     console.log("7. ngAfterViewInit called");
     console.log("  - Called after ngAfterContentChecked"); // Line 27: Order
     console.log("  - View and child views are initialized"); // Line 28: State
 
-    // Line 29: Safe to access view children here
+    // ✅ SAFE: This is perfect for ViewChild access
     this.initializeViewReferences();
   }
 
   ngAfterViewChecked() {
-    // Line 30: Called after every view check
+    // Line 29: Called after every view check
+    const startTime = performance.now();
     console.log("8. ngAfterViewChecked called");
-    console.log("  - Called after every view update"); // Line 31: Frequency
-    console.log("  - View and child views have been checked"); // Line 32: State
+    console.log("  - Called after every view update"); // Line 30: Frequency
+    console.log("  - View and child views have been checked"); // Line 31: State
+
+    // ⚠️ CAUTION: Frequent execution - avoid heavy operations
+    this.validateViewState();
+
+    const endTime = performance.now();
+    this.recordPerformance("ngAfterViewChecked", endTime - startTime);
   }
 
   ngOnDestroy() {
-    // Line 33: Called when component is destroyed
+    // Line 32: Called when component is destroyed
     console.log("9. ngOnDestroy called");
-    console.log("  - Component is being destroyed"); // Line 34: State
-    console.log("  - Cleanup subscriptions and timers here"); // Line 35: Best practice
+    console.log("  - Component is being destroyed"); // Line 33: State
+    console.log("  - Cleanup subscriptions and timers here"); // Line 34: Best practice
 
-    // Line 36: Cleanup example
+    // 📊 Final performance report
+    this.reportFinalMetrics();
+
+    // Line 35: Cleanup example
     this.cleanup();
   }
 
   changeValue() {
-    this.value = "Changed Value - " + Date.now(); // Line 37: State change
-    console.log("State changed, change detection will run"); // Line 38: Info
+    this.value = "Changed Value - " + Date.now(); // Line 36: State change
+    console.log("State changed, change detection will run"); // Line 37: Info
+  }
+
+  // 🔧 Performance and validation methods
+  private recordPerformance(hookName: string, duration?: number) {
+    if (duration !== undefined) {
+      const existing = this.performanceMetrics.get(hookName) || 0;
+      this.performanceMetrics.set(hookName, existing + duration);
+    } else {
+      this.performanceMetrics.set(
+        hookName + "_calls",
+        (this.performanceMetrics.get(hookName + "_calls") || 0) + 1
+      );
+    }
+  }
+
+  private reportPerformanceMetrics() {
+    console.group("📊 Performance Metrics (every 100 cycles)");
+    this.performanceMetrics.forEach((value, key) => {
+      if (key.includes("_calls")) {
+        console.log(`${key.replace("_calls", "")}: ${value} calls`);
+      } else {
+        console.log(`${key}: ${value.toFixed(2)}ms total`);
+      }
+    });
+    console.groupEnd();
+  }
+
+  private reportFinalMetrics() {
+    console.group("📊 Final Performance Report");
+    console.log("Total ngDoCheck calls:", this.checkCount);
+    this.performanceMetrics.forEach((value, key) => {
+      console.log(
+        `${key}: ${typeof value === "number" ? value.toFixed(2) : value}`
+      );
+    });
+    console.groupEnd();
+  }
+
+  private validateInputs(newValue: any) {
+    // Input validation logic
+    if (typeof newValue === "string" && newValue.length > 100) {
+      console.warn("⚠️ Input value is very long, consider optimizing");
+    }
+  }
+
+  private validateContentState() {
+    // Lightweight content validation
+    // Keep this minimal as it runs every cycle
+  }
+
+  private validateViewState() {
+    // Lightweight view validation
+    // Keep this minimal as it runs every cycle
   }
 
   private initializeComponent() {
-    // Line 39: Initialization logic
+    // Line 38: Initialization logic
     console.log("  - Component initialization complete");
   }
 
   private performCustomChangeDetection() {
-    // Line 40: Custom change detection logic
-    // Line 41: Use DoCheck for complex object monitoring
+    // Line 39: Custom change detection logic
+    // Line 40: Use DoCheck for complex object monitoring
     if (this.checkCount % 10 === 0) {
       console.log("  - Custom check every 10 cycles");
     }
   }
 
   private initializeViewReferences() {
-    // Line 42: View initialization logic
+    // Line 41: View initialization logic
     console.log("  - View references can be safely accessed now");
   }
 
   private cleanup() {
-    // Line 43: Cleanup logic
+    // Line 42: Cleanup logic
     console.log("  - Performing cleanup");
+    this.performanceMetrics.clear();
+  }
+}
+
+// 🎯 Advanced Lifecycle Hook Patterns
+@Component({
+  selector: "app-advanced-lifecycle",
+  template: `
+    <div class="advanced-component">
+      <h3>Advanced Lifecycle Patterns</h3>
+      <p>Optimized for performance with OnPush</p>
+      <ng-content></ng-content>
+    </div>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AdvancedLifecycleComponent implements OnInit, DoCheck, OnDestroy {
+  private previousState: any = null;
+  private stateComparator = new StateComparator();
+  private destroy$ = new Subject<void>();
+  private performanceOptimizer = new PerformanceOptimizer();
+
+  @Input() complexData: any;
+
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  ngOnInit() {
+    // ✅ One-time heavy initialization is safe here
+    this.initializeHeavyResources()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        // Handle initialization result
+        this.cdr.markForCheck();
+      });
+  }
+
+  ngDoCheck() {
+    // 🚀 Optimized change detection with intelligent comparison
+    if (this.performanceOptimizer.shouldSkipCheck()) {
+      return; // Skip expensive checks when not needed
+    }
+
+    const hasChanges = this.stateComparator.hasChanges(
+      this.previousState,
+      this.complexData
+    );
+
+    if (hasChanges) {
+      this.previousState = this.stateComparator.deepClone(this.complexData);
+      this.handleStateChange();
+      this.cdr.markForCheck();
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.performanceOptimizer.cleanup();
+  }
+
+  private initializeHeavyResources(): Observable<any> {
+    // Heavy initialization logic
+    return of(null).pipe(delay(100));
+  }
+
+  private handleStateChange() {
+    // React to state changes
+    console.log("Optimized state change detected");
+  }
+}
+
+// 🛠️ Utility classes for advanced patterns
+class StateComparator {
+  hasChanges(previous: any, current: any): boolean {
+    // Intelligent comparison logic
+    return JSON.stringify(previous) !== JSON.stringify(current);
+  }
+
+  deepClone(obj: any): any {
+    return JSON.parse(JSON.stringify(obj));
+  }
+}
+
+class PerformanceOptimizer {
+  private lastCheckTime = 0;
+  private skipThreshold = 16; // Skip if less than one frame (60fps)
+
+  shouldSkipCheck(): boolean {
+    const now = performance.now();
+    const timeSinceLastCheck = now - this.lastCheckTime;
+
+    if (timeSinceLastCheck < this.skipThreshold) {
+      return true; // Skip this check for performance
+    }
+
+    this.lastCheckTime = now;
+    return false;
+  }
+
+  cleanup() {
+    // Cleanup performance monitoring
   }
 }
 ```
@@ -2341,7 +3525,9 @@ export class CustomChangeDetectionComponent implements DoCheck, OnInit {
 
   private calculateArrayHash(): string {
     // Line 29: Create hash of array content for deep comparison
-    return this.complexArray.map((item) => `${item.id}-${item.name}-${item.data.count}`).join("|"); // Line 30: Simple hash based on all properties
+    return this.complexArray
+      .map((item) => `${item.id}-${item.name}-${item.data.count}`)
+      .join("|"); // Line 30: Simple hash based on all properties
   }
 }
 ```
@@ -2392,7 +3578,8 @@ export class CustomChangeDetectionComponent implements DoCheck, OnInit {
       <button (click)="focusInput()">Focus Input</button>
       <!-- Line 2: Button to interact with ViewChild -->
 
-      <child-display-component #childComponent [data]="inputData"> </child-display-component>
+      <child-display-component #childComponent [data]="inputData">
+      </child-display-component>
       <!-- Line 3: Child component reference -->
 
       <p>Input value: {{ currentInputValue }}</p>
@@ -2422,7 +3609,10 @@ export class ViewChildDemoComponent implements AfterViewInit, OnDestroy {
       console.log("Input element:", this.inputElement.nativeElement); // Line 15: Log element
 
       // Line 16: Set up input event listener
-      this.inputSubscription = fromEvent(this.inputElement.nativeElement, "input")
+      this.inputSubscription = fromEvent(
+        this.inputElement.nativeElement,
+        "input"
+      )
         .pipe(
           debounceTime(300), // Line 17: Debounce input events
           map((event) => (event.target as HTMLInputElement).value) // Line 18: Extract value
@@ -2607,7 +3797,10 @@ export class ChildDisplayComponent implements OnInit {
       <div class="list-container">
         <h4>With TrackBy (Optimized)</h4>
         <ul>
-          <li *ngFor="let item of items; trackBy: trackByItemId" class="list-item">
+          <li
+            *ngFor="let item of items; trackBy: trackByItemId"
+            class="list-item"
+          >
             <!-- Line 8: ngFor with trackBy function -->
             <span>{{ item.name }} - {{ item.value }}</span>
             <button (click)="removeItem(item.id)">Remove</button>
@@ -2620,7 +3813,14 @@ export class ChildDisplayComponent implements OnInit {
       <div class="list-container">
         <h4>TrackBy with Index (Position Matters)</h4>
         <ul>
-          <li *ngFor="let item of items; trackBy: trackByItemIdAndIndex; index as i" class="list-item">
+          <li
+            *ngFor="
+              let item of items;
+              trackBy: trackByItemIdAndIndex;
+              index as i
+            "
+            class="list-item"
+          >
             <!-- Line 10: TrackBy that considers both item and position -->
             <span>[{{ i }}] {{ item.name }} - {{ item.value }}</span>
             <button (click)="removeItem(item.id)">Remove</button>
@@ -2736,7 +3936,10 @@ export class TrackByDemoComponent implements DoCheck {
     };
     this.items = updatedItems; // Line 49: Update array
     this.domOperations++; // Line 50: Increment counter
-    console.log(`Updated item at index ${randomIndex}:`, updatedItems[randomIndex]); // Line 51: Log update
+    console.log(
+      `Updated item at index ${randomIndex}:`,
+      updatedItems[randomIndex]
+    ); // Line 51: Log update
   }
 
   private initializeItems() {
@@ -2840,9 +4043,13 @@ interface Item {
     <div>
       <h3>Immutable Updates with OnPush</h3>
       <div class="controls">
-        <button (click)="addTodoMutable()">Add Todo (Mutable - Won't Update)</button>
+        <button (click)="addTodoMutable()">
+          Add Todo (Mutable - Won't Update)
+        </button>
         <!-- Line 2: Button that won't trigger updates due to mutation -->
-        <button (click)="addTodoImmutable()">Add Todo (Immutable - Will Update)</button>
+        <button (click)="addTodoImmutable()">
+          Add Todo (Immutable - Will Update)
+        </button>
         <!-- Line 3: Button that properly triggers updates -->
         <button (click)="updateUserMutable()">Update User (Mutable)</button>
         <!-- Line 4: User update that won't work -->
@@ -2862,9 +4069,16 @@ interface Item {
         <h4>Todos ({{ todos.length }}):</h4>
         <!-- Line 9: Todo count display -->
         <ul>
-          <li *ngFor="let todo of todos; trackBy: trackByTodoId" [class.completed]="todo.completed">
+          <li
+            *ngFor="let todo of todos; trackBy: trackByTodoId"
+            [class.completed]="todo.completed"
+          >
             <!-- Line 10: Todo list with trackBy -->
-            <input type="checkbox" [checked]="todo.completed" (change)="toggleTodoImmutable(todo.id)" />
+            <input
+              type="checkbox"
+              [checked]="todo.completed"
+              (change)="toggleTodoImmutable(todo.id)"
+            />
             <!-- Line 11: Checkbox with immutable toggle -->
             {{ todo.title }} - {{ todo.priority }}
             <button (click)="removeTodoImmutable(todo.id)">Remove</button>
@@ -2927,8 +4141,18 @@ export class ImmutableDemoComponent implements DoCheck {
   // Line 16: Array of todos
   todos: Todo[] = [
     { id: 1, title: "Learn Angular", completed: false, priority: "high" },
-    { id: 2, title: "Understand Change Detection", completed: true, priority: "medium" },
-    { id: 3, title: "Optimize Performance", completed: false, priority: "high" },
+    {
+      id: 2,
+      title: "Understand Change Detection",
+      completed: true,
+      priority: "medium",
+    },
+    {
+      id: 3,
+      title: "Optimize Performance",
+      completed: false,
+      priority: "high",
+    },
   ];
 
   lastUpdate = ""; // Line 17: Track last update time
@@ -3258,11 +4482,15 @@ export class DetachDemoComponent implements OnInit, OnDestroy {
     this.lastUpdate = new Date().toLocaleTimeString(); // Line 49: Update timestamp
 
     if (this.isDetached) {
-      console.log(`Counter updated to ${this.counter}, but UI won't update (detached)`); // Line 50: Log detached update
+      console.log(
+        `Counter updated to ${this.counter}, but UI won't update (detached)`
+      ); // Line 50: Log detached update
       this.detectionMethod = "Update (Detached)"; // Line 51: Update method
       // Line 52: UI won't update without manual detection
     } else {
-      console.log(`Counter updated to ${this.counter}, UI will update automatically`); // Line 53: Log normal update
+      console.log(
+        `Counter updated to ${this.counter}, UI will update automatically`
+      ); // Line 53: Log normal update
       this.detectionMethod = "Update (Automatic)"; // Line 54: Update method
       // Line 55: UI updates automatically when attached
     }
@@ -3338,9 +4566,13 @@ export class DetachDemoComponent implements OnInit, OnDestroy {
     <div>
       <h3>markForCheck() Strategy Demo</h3>
       <div class="scenario-buttons">
-        <button (click)="updateWithoutMarkForCheck()">Update Without markForCheck</button>
+        <button (click)="updateWithoutMarkForCheck()">
+          Update Without markForCheck
+        </button>
         <!-- Line 2: Update that won't trigger detection -->
-        <button (click)="updateWithMarkForCheck()">Update With markForCheck</button>
+        <button (click)="updateWithMarkForCheck()">
+          Update With markForCheck
+        </button>
         <!-- Line 3: Update that will trigger detection -->
         <button (click)="updateFromAsyncOperation()">Async Update</button>
         <!-- Line 4: Async operation example -->
@@ -3364,7 +4596,11 @@ export class DetachDemoComponent implements OnInit, OnDestroy {
         <!-- Line 11: Whether change detection was triggered -->
       </div>
 
-      <child-onpush-component [data]="childData" (dataUpdate)="onChildDataUpdate($event)"> </child-onpush-component>
+      <child-onpush-component
+        [data]="childData"
+        (dataUpdate)="onChildDataUpdate($event)"
+      >
+      </child-onpush-component>
       <!-- Line 12: Child component with OnPush strategy -->
     </div>
   `,
@@ -3711,7 +4947,12 @@ export class ChildOnPushComponent {
   template: `
     <div class="data-table-container">
       <div class="table-controls">
-        <input type="text" placeholder="Search..." [formControl]="searchControl" class="search-input" />
+        <input
+          type="text"
+          placeholder="Search..."
+          [formControl]="searchControl"
+          class="search-input"
+        />
         <!-- Line 2: Search input with reactive form control -->
 
         <select [formControl]="sortControl" class="sort-select">
@@ -3824,7 +5065,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
   loading = false; // Line 13: Loading state
 
   // Line 14: Current sort configuration
-  private currentSort: { field: string; direction: "asc" | "desc" } | null = null;
+  private currentSort: { field: string; direction: "asc" | "desc" } | null =
+    null;
   private destroy$ = new Subject<void>(); // Line 15: Destroy subject for cleanup
 
   constructor(
@@ -3906,7 +5148,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
     if (this.currentSort?.field === field) {
       // Line 53: Toggle sort direction if same field
-      this.currentSort.direction = this.currentSort.direction === "asc" ? "desc" : "asc";
+      this.currentSort.direction =
+        this.currentSort.direction === "asc" ? "desc" : "asc";
     } else {
       // Line 54: New field sort, default to ascending
       this.currentSort = { field, direction: "asc" };
@@ -3957,7 +5200,11 @@ export class DataTableComponent implements OnInit, OnDestroy {
     // Line 76: Apply search filter
     const searchTerm = this.searchControl.value?.toLowerCase() || "";
     if (searchTerm) {
-      result = result.filter((item) => item.name.toLowerCase().includes(searchTerm) || item.email.toLowerCase().includes(searchTerm)); // Line 77: Filter by search term
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.email.toLowerCase().includes(searchTerm)
+      ); // Line 77: Filter by search term
     }
 
     // Line 78: Apply sorting
@@ -4037,7 +5284,10 @@ export class DataService {
     // Line 102: Return HTTP request or mock data
     return this.http.get<TableItem[]>(`${this.baseUrl}/data`).pipe(
       catchError((error) => {
-        console.error("DataService: API call failed, returning mock data", error); // Line 103: Log error
+        console.error(
+          "DataService: API call failed, returning mock data",
+          error
+        ); // Line 103: Log error
         return this.getMockData(); // Line 104: Fallback to mock data
       })
     );
@@ -4049,7 +5299,9 @@ export class DataService {
       id: i + 1,
       name: `User ${i + 1}`,
       email: `user${i + 1}@example.com`,
-      date: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      date: new Date(
+        Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000
+      ).toISOString(),
     })); // Line 106: Create mock data array
 
     return of(mockData).pipe(delay(1000)); // Line 107: Return with artificial delay
@@ -4189,12 +5441,20 @@ export class DataService {
       <div class="dashboard-grid">
         <div class="metrics-card">
           <h3>Live Metrics</h3>
-          <div class="metric" *ngFor="let metric of liveMetrics; trackBy: trackByMetricId">
+          <div
+            class="metric"
+            *ngFor="let metric of liveMetrics; trackBy: trackByMetricId"
+          >
             <!-- Line 4: Live metrics with trackBy -->
             <span class="metric-label">{{ metric.label }}:</span>
-            <span class="metric-value" [style.color]="getMetricColor(metric.change)">
+            <span
+              class="metric-value"
+              [style.color]="getMetricColor(metric.change)"
+            >
               {{ metric.value }}
-              <small>({{ metric.change > 0 ? "+" : "" }}{{ metric.change }})</small>
+              <small
+                >({{ metric.change > 0 ? "+" : "" }}{{ metric.change }})</small
+              >
             </span>
           </div>
         </div>
@@ -4202,9 +5462,15 @@ export class DataService {
         <div class="messages-card">
           <h3>Live Messages ({{ messages.length }})</h3>
           <div class="messages-container" #messagesContainer>
-            <div class="message" *ngFor="let message of messages; trackBy: trackByMessageId" [class.new-message]="isNewMessage(message.id)">
+            <div
+              class="message"
+              *ngFor="let message of messages; trackBy: trackByMessageId"
+              [class.new-message]="isNewMessage(message.id)"
+            >
               <!-- Line 5: Messages with new message highlighting -->
-              <span class="message-time">{{ message.timestamp | date : "HH:mm:ss" }}</span>
+              <span class="message-time">{{
+                message.timestamp | date : "HH:mm:ss"
+              }}</span>
               <span class="message-content">{{ message.content }}</span>
             </div>
           </div>
@@ -4214,7 +5480,11 @@ export class DataService {
         <div class="users-card">
           <h3>Online Users ({{ onlineUsers.length }})</h3>
           <div class="users-list">
-            <div class="user" *ngFor="let user of onlineUsers; trackBy: trackByUserId" [class.just-joined]="isRecentUser(user.joinedAt)">
+            <div
+              class="user"
+              *ngFor="let user of onlineUsers; trackBy: trackByUserId"
+              [class.just-joined]="isRecentUser(user.joinedAt)"
+            >
               <!-- Line 6: Users list with recent join highlighting -->
               <span class="user-name">{{ user.name }}</span>
               <span class="user-status">{{ user.status }}</span>
@@ -4330,7 +5600,8 @@ export class DataService {
 })
 export class RealtimeDashboardComponent implements OnInit, OnDestroy {
   // Line 7: Connection state
-  connectionStatus: "connected" | "disconnected" | "connecting" = "disconnected";
+  connectionStatus: "connected" | "disconnected" | "connecting" =
+    "disconnected";
   isConnected = false; // Line 8: Connection flag
 
   // Line 9: Real-time data
@@ -4525,7 +5796,9 @@ export class RealtimeDashboardComponent implements OnInit, OnDestroy {
     // Line 99: Handle metric updates
     console.log("Updating metric:", payload.metricId); // Line 100: Log update
 
-    const metricIndex = this.liveMetrics.findIndex((m) => m.id === payload.metricId);
+    const metricIndex = this.liveMetrics.findIndex(
+      (m) => m.id === payload.metricId
+    );
     if (metricIndex >= 0) {
       // Line 101: Update existing metric
       const oldValue = this.liveMetrics[metricIndex].value;
@@ -4576,13 +5849,18 @@ export class RealtimeDashboardComponent implements OnInit, OnDestroy {
     }; // Line 117: Create user object
 
     // Line 118: Check if user already exists
-    const existingUserIndex = this.onlineUsers.findIndex((u) => u.id === user.id);
+    const existingUserIndex = this.onlineUsers.findIndex(
+      (u) => u.id === user.id
+    );
     if (existingUserIndex === -1) {
       this.onlineUsers = [...this.onlineUsers, user]; // Line 119: Add new user
       console.log("User joined:", user.name); // Line 120: Log join
     } else {
       // Line 121: Update existing user
-      this.onlineUsers[existingUserIndex] = { ...this.onlineUsers[existingUserIndex], ...user };
+      this.onlineUsers[existingUserIndex] = {
+        ...this.onlineUsers[existingUserIndex],
+        ...user,
+      };
       console.log("User updated:", user.name); // Line 122: Log update
     }
 
@@ -4599,10 +5877,34 @@ export class RealtimeDashboardComponent implements OnInit, OnDestroy {
   private initializeMetrics() {
     // Line 128: Initialize metrics with default values
     this.liveMetrics = [
-      { id: "cpu", label: "CPU Usage", value: 45, change: 0, lastUpdated: Date.now() },
-      { id: "memory", label: "Memory Usage", value: 67, change: 0, lastUpdated: Date.now() },
-      { id: "disk", label: "Disk Usage", value: 82, change: 0, lastUpdated: Date.now() },
-      { id: "network", label: "Network I/O", value: 23, change: 0, lastUpdated: Date.now() },
+      {
+        id: "cpu",
+        label: "CPU Usage",
+        value: 45,
+        change: 0,
+        lastUpdated: Date.now(),
+      },
+      {
+        id: "memory",
+        label: "Memory Usage",
+        value: 67,
+        change: 0,
+        lastUpdated: Date.now(),
+      },
+      {
+        id: "disk",
+        label: "Disk Usage",
+        value: 82,
+        change: 0,
+        lastUpdated: Date.now(),
+      },
+      {
+        id: "network",
+        label: "Network I/O",
+        value: 23,
+        change: 0,
+        lastUpdated: Date.now(),
+      },
     ]; // Line 129: Create initial metrics array
   }
 }
@@ -4656,7 +5958,9 @@ if (!isDevMode()) {
       <h3>Change Detection Debug Demo</h3>
 
       <div class="debug-controls">
-        <button (click)="triggerChangeDetection()">Trigger Change Detection</button>
+        <button (click)="triggerChangeDetection()">
+          Trigger Change Detection
+        </button>
         <!-- Line 3: Manual trigger button -->
         <button (click)="enableDebugMode()">Enable Debug Mode</button>
         <!-- Line 4: Debug mode toggle -->
@@ -4790,7 +6094,9 @@ export class DebugDemoComponent implements DoCheck, OnInit {
     const endTime = performance.now(); // Line 34: End performance timing
     this.lastPerformanceTime = Math.round((endTime - startTime) * 100) / 100; // Line 35: Calculate time
 
-    console.log(`✅ Change detection completed in ${this.lastPerformanceTime}ms`); // Line 36: Log completion
+    console.log(
+      `✅ Change detection completed in ${this.lastPerformanceTime}ms`
+    ); // Line 36: Log completion
   }
 
   enableDebugMode() {
@@ -4886,7 +6192,9 @@ export class DebugDemoComponent implements DoCheck, OnInit {
       originalDetectChanges(); // Line 79: Call original method
 
       const endTime = performance.now(); // Line 80: End timing
-      console.log(`⏱️  detectChanges() completed in ${(endTime - startTime).toFixed(2)}ms`); // Line 81: Log completion
+      console.log(
+        `⏱️  detectChanges() completed in ${(endTime - startTime).toFixed(2)}ms`
+      ); // Line 81: Log completion
     };
 
     // Line 82: Setup zone debugging
@@ -4929,7 +6237,8 @@ export class ChangeDetectionDebugService {
 
       // Line 97: Keep only last 100 measurements
       if (this.performanceData[componentName].length > 100) {
-        this.performanceData[componentName] = this.performanceData[componentName].slice(-100); // Line 98: Limit data
+        this.performanceData[componentName] =
+          this.performanceData[componentName].slice(-100); // Line 98: Limit data
       }
 
       console.log(`⏱️  ${componentName}: ${duration.toFixed(2)}ms`); // Line 99: Log performance
@@ -5043,7 +6352,9 @@ export class ChangeDetectionProfiler {
     }
 
     // Line 145: Get all measures
-    const measures = performance.getEntriesByType("measure").filter((entry) => entry.name.startsWith("cd-")); // Line 146: Filter CD measures
+    const measures = performance
+      .getEntriesByType("measure")
+      .filter((entry) => entry.name.startsWith("cd-")); // Line 146: Filter CD measures
 
     // Line 147: Group by operation
     const grouped = measures.reduce((acc, measure) => {
@@ -5079,14 +6390,19 @@ export class ChangeDetectionProfiler {
 
 // Line 159: Custom decorator for automatic profiling
 export function ProfileChangeDetection(label?: string) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor
+  ) {
     // Line 160: Decorator factory
     const method = descriptor.value; // Line 161: Get original method
     const profiler = ChangeDetectionProfiler.getInstance(); // Line 162: Get profiler instance
 
     descriptor.value = function (...args: any[]) {
       // Line 163: Wrapper function
-      const operationLabel = label || `${target.constructor.name}.${propertyName}`; // Line 164: Create label
+      const operationLabel =
+        label || `${target.constructor.name}.${propertyName}`; // Line 164: Create label
 
       profiler.markStart(operationLabel); // Line 165: Mark start
 
@@ -5193,14 +6509,18 @@ export class OnPushMigrationService {
   generateMigrationPlan(candidates: MigrationCandidate[]): MigrationStep[] {
     // Line 17: Generate step-by-step migration plan
     return candidates
-      .sort((a, b) => this.getMigrationPriority(a) - this.getMigrationPriority(b)) // Line 18: Sort by priority
+      .sort(
+        (a, b) => this.getMigrationPriority(a) - this.getMigrationPriority(b)
+      ) // Line 18: Sort by priority
       .map((candidate) => this.createMigrationStep(candidate)); // Line 19: Create steps
   }
 
   private getMigrationPriority(candidate: MigrationCandidate): number {
     // Line 20: Calculate migration priority (lower = higher priority)
     const complexityWeight = { low: 1, medium: 2, high: 3 }; // Line 21: Complexity weights
-    return complexityWeight[candidate.complexity] + candidate.dependencies.length; // Line 22: Calculate priority
+    return (
+      complexityWeight[candidate.complexity] + candidate.dependencies.length
+    ); // Line 22: Calculate priority
   }
 
   private createMigrationStep(candidate: MigrationCandidate): MigrationStep {
@@ -5355,9 +6675,11 @@ export class UserProfileComponentBefore implements OnInit {
 
   private loadPreferences() {
     // Line 70: Load preferences
-    this.userService.getUserPreferences(this.user.id).subscribe((preferences) => {
-      this.user.preferences = preferences; // Line 71: Direct assignment
-    });
+    this.userService
+      .getUserPreferences(this.user.id)
+      .subscribe((preferences) => {
+        this.user.preferences = preferences; // Line 71: Direct assignment
+      });
   }
 }
 
@@ -5711,7 +7033,9 @@ interface UserProfile {
   template: `
     <div>
       <h2>{{ user.name }}</h2>
-      <div *ngFor="let addr of user.addresses; trackBy: trackByAddressId">{{ addr.street }}, {{ addr.city }}</div>
+      <div *ngFor="let addr of user.addresses; trackBy: trackByAddressId">
+        {{ addr.street }}, {{ addr.city }}
+      </div>
     </div>
   `,
 })
@@ -5805,7 +7129,11 @@ export class DebugComponent implements DoCheck {
       // Line 3: Log if checks are too frequent
       if (timeSinceLastCheck < 16) {
         // Less than one frame (60fps)
-        console.warn(`Frequent change detection: ${timeSinceLastCheck.toFixed(2)}ms since last check`);
+        console.warn(
+          `Frequent change detection: ${timeSinceLastCheck.toFixed(
+            2
+          )}ms since last check`
+        );
       }
     }
 

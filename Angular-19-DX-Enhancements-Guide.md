@@ -18,37 +18,321 @@ Angular 19 introduces several new lifecycle hooks that provide better control ov
 This new hook allows you to run side effects after the component has been rendered to the DOM, similar to `useEffect` in React but specifically for post-render operations.
 
 ```typescript
-import { Component, afterRenderEffect, signal } from "@angular/core";
+import {
+  Component,
+  afterRenderEffect,
+  signal,
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
 
 @Component({
-  selector: "app-chart-component",
+  selector: "app-chart-component", // 🏷️ Component selector for template usage
   template: `
     <div #chartContainer class="chart-container">
-      <canvas #chartCanvas></canvas>
+      <!-- 📊 Chart container with template reference -->
+      <canvas
+        #chartCanvas
+        width="800"
+        height="400"
+        [attr.aria-label]="
+          'Chart displaying ' + chartData().length + ' data points'
+        "
+      >
+      </canvas>
+
+      <!-- 🎮 Chart controls -->
+      <div class="chart-controls">
+        <button
+          (click)="addDataPoint()"
+          [disabled]="isUpdating()"
+          class="btn-add"
+        >
+          {{ isUpdating() ? "Updating..." : "Add Data Point" }}
+        </button>
+        <button
+          (click)="removeDataPoint()"
+          [disabled]="chartData().length <= 1"
+          class="btn-remove"
+        >
+          Remove Last Point
+        </button>
+        <button (click)="resetChart()" class="btn-reset">Reset Chart</button>
+      </div>
+
+      <!-- 📊 Data display -->
+      <div class="data-summary">
+        <p>Data Points: {{ chartData().length }}</p>
+        <p>Max Value: {{ maxValue() }}</p>
+        <p>Average: {{ averageValue() | number : "1.2-2" }}</p>
+      </div>
     </div>
   `,
+  styles: [
+    `
+      .chart-container {
+        padding: 20px; /* 🎨 Container spacing */
+        border: 1px solid #ddd; /* 🖼️ Visual boundary */
+        border-radius: 8px; /* 🎨 Rounded corners */
+      }
+
+      canvas {
+        border: 1px solid #ccc; /* 📊 Canvas outline */
+        display: block; /* 🎨 Block display for proper sizing */
+        margin-bottom: 16px; /* 📏 Space below chart */
+      }
+
+      .chart-controls {
+        display: flex; /* 🔄 Horizontal layout */
+        gap: 12px; /* 📏 Space between buttons */
+        margin-bottom: 16px; /* 📏 Space below controls */
+      }
+
+      .data-summary {
+        background: #f5f5f5; /* 🎨 Light background */
+        padding: 12px; /* 📏 Internal spacing */
+        border-radius: 4px; /* 🎨 Slight rounding */
+      }
+    `,
+  ],
 })
 export class ChartComponent {
-  private chartData = signal([1, 2, 3, 4, 5]);
+  // 📊 SIGNAL-BASED STATE MANAGEMENT - Reactive data storage
+  private chartData = signal([1, 2, 3, 4, 5]); // 📈 Initial chart data points
+  private isUpdating = signal(false); // ⏳ Update state tracking
+  private chartInstance: any = null; // 📊 Chart.js instance reference
+
+  // 🔗 TEMPLATE REFERENCES - Direct DOM element access
+  @ViewChild("chartContainer") chartContainer!: ElementRef<HTMLDivElement>; // 📦 Container element
+  @ViewChild("chartCanvas") chartCanvas!: ElementRef<HTMLCanvasElement>; // 🎨 Canvas element
+
+  // 📊 COMPUTED SIGNALS - Derived values from chartData
+  readonly maxValue = computed(() => {
+    const data = this.chartData(); // 📈 Get current data
+    return data.length > 0 ? Math.max(...data) : 0; // 🔢 Find maximum value
+  });
+
+  readonly averageValue = computed(() => {
+    const data = this.chartData(); // 📈 Get current data
+    return data.length > 0
+      ? data.reduce((sum, val) => sum + val, 0) / data.length
+      : 0; // 📊 Calculate average
+  });
 
   constructor() {
-    // Runs after every render cycle
+    // 🔄 AFTER RENDER EFFECT - Executes after every render cycle
     afterRenderEffect(() => {
-      // Safe to access DOM elements here
-      this.updateChart();
+      console.log("🔄 afterRenderEffect triggered - DOM is fully updated"); // 📝 Log effect execution
+
+      // ✅ SAFE DOM ACCESS - Guaranteed DOM availability
+      this.updateChart(); // 📊 Update chart with latest data
+
+      // 🎯 PERFORMANCE LOGGING - Track render performance
+      console.log(
+        "📊 Chart updated with data points:",
+        this.chartData().length
+      );
+    });
+
+    // 🎯 EFFECT FOR DATA CHANGES - React to signal updates
+    effect(() => {
+      const currentData = this.chartData(); // 📈 Access reactive data
+      console.log("📈 Chart data changed:", currentData); // 📝 Log data changes
+
+      // 🔄 TRIGGER ACCESSIBILITY UPDATES
+      this.updateAccessibilityInfo(currentData);
+    });
+
+    // ⚡ EFFECT FOR UPDATE STATE - Track updating status
+    effect(() => {
+      const updating = this.isUpdating(); // ⏳ Get update status
+      if (updating) {
+        console.log("⏳ Chart update started..."); // 📝 Log update start
+      } else {
+        console.log("✅ Chart update completed"); // 📝 Log update completion
+      }
     });
   }
 
-  private updateChart() {
-    // DOM is guaranteed to be updated here
-    console.log("Chart rendered with data:", this.chartData());
-    // Initialize or update chart library
-    this.initializeChartJS();
+  // 📊 CHART UPDATE METHOD - Core chart rendering logic
+  private updateChart(): void {
+    // 🚫 GUARD CLAUSE - Ensure canvas availability
+    if (!this.chartCanvas?.nativeElement) {
+      console.warn("⚠️ Canvas element not available yet"); // ⚠️ Log warning
+      return; // 🚪 Exit early if canvas not ready
+    }
+
+    const canvas = this.chartCanvas.nativeElement; // 🎨 Get canvas element
+    const ctx = canvas.getContext("2d"); // 🖼️ Get 2D rendering context
+
+    if (!ctx) {
+      console.error("❌ Unable to get canvas 2D context"); // ❌ Log context error
+      return; // 🚪 Exit if context unavailable
+    }
+
+    // 🧹 CLEAR EXISTING CHART - Reset canvas for new drawing
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // 🗑️ Clear entire canvas
+
+    const data = this.chartData(); // 📈 Get current chart data
+    const maxValue = this.maxValue(); // 🔢 Get maximum value for scaling
+
+    // 📏 CHART DIMENSIONS - Calculate drawing area
+    const padding = 40; // 📏 Chart padding from edges
+    const chartWidth = canvas.width - 2 * padding; // 📐 Available chart width
+    const chartHeight = canvas.height - 2 * padding; // 📐 Available chart height
+    const barWidth = chartWidth / data.length; // 📊 Width of each bar
+
+    // 🎨 DRAWING CONFIGURATION - Set visual properties
+    ctx.fillStyle = "#4CAF50"; // 🎨 Bar fill color (green)
+    ctx.strokeStyle = "#2E7D32"; // 🖊️ Bar border color (dark green)
+    ctx.lineWidth = 2; // 📏 Border thickness
+
+    // 📊 DRAW CHART BARS - Render each data point
+    data.forEach((value, index) => {
+      const barHeight = maxValue > 0 ? (value / maxValue) * chartHeight : 0; // 📏 Scale bar height
+      const x = padding + index * barWidth; // 📐 X position of bar
+      const y = canvas.height - padding - barHeight; // 📐 Y position of bar (bottom-up)
+
+      // 🎨 DRAW BAR - Fill and stroke rectangle
+      ctx.fillRect(x + 2, y, barWidth - 4, barHeight); // 📊 Fill bar with slight padding
+      ctx.strokeRect(x + 2, y, barWidth - 4, barHeight); // 🖊️ Add border to bar
+
+      // 🔤 DRAW VALUE LABELS - Show data values
+      ctx.fillStyle = "#333"; // 🎨 Text color (dark gray)
+      ctx.font = "14px Arial"; // 🔤 Font configuration
+      ctx.textAlign = "center"; // 📐 Center-align text
+      ctx.fillText(
+        value.toString(), // 🔢 Convert number to string
+        x + barWidth / 2, // 📐 Center horizontally in bar
+        y - 5 // 📐 Position above bar
+      );
+
+      ctx.fillStyle = "#4CAF50"; // 🎨 Reset fill color for next bar
+    });
+
+    // 📐 DRAW AXES - Add coordinate system
+    ctx.strokeStyle = "#666"; // 🎨 Axis color (gray)
+    ctx.lineWidth = 1; // 📏 Axis thickness
+
+    // 📐 X-axis
+    ctx.beginPath(); // 🎨 Start new path
+    ctx.moveTo(padding, canvas.height - padding); // 📍 Move to start point
+    ctx.lineTo(canvas.width - padding, canvas.height - padding); // 📏 Draw horizontal line
+    ctx.stroke(); // 🖊️ Apply stroke
+
+    // 📐 Y-axis
+    ctx.beginPath(); // 🎨 Start new path
+    ctx.moveTo(padding, padding); // 📍 Move to start point
+    ctx.lineTo(padding, canvas.height - padding); // 📏 Draw vertical line
+    ctx.stroke(); // 🖊️ Apply stroke
+
+    console.log("🎨 Chart rendering completed successfully"); // ✅ Log completion
   }
 
-  updateData(newData: number[]) {
-    this.chartData.set(newData);
-    // afterRenderEffect will automatically trigger after this update
+  // 🎯 USER INTERACTION METHODS - Handle user actions
+
+  addDataPoint(): void {
+    this.isUpdating.set(true); // ⏳ Set updating state
+
+    // 🎲 GENERATE RANDOM DATA - Create new data point
+    const newValue = Math.floor(Math.random() * 10) + 1; // 🔢 Random number 1-10
+
+    // 📈 UPDATE SIGNAL - Add new data point
+    this.chartData.update((currentData) => {
+      const newData = [...currentData, newValue]; // 📊 Create new array with added value
+      console.log("➕ Added new data point:", newValue); // 📝 Log addition
+      return newData;
+    });
+
+    // ⏱️ SIMULATE ASYNC OPERATION - Mimic real data processing
+    setTimeout(() => {
+      this.isUpdating.set(false); // ✅ Clear updating state
+      console.log("✅ Data point addition completed"); // 📝 Log completion
+    }, 500);
+  }
+
+  removeDataPoint(): void {
+    // 🚫 GUARD CLAUSE - Prevent removing from empty array
+    if (this.chartData().length <= 1) {
+      console.warn("⚠️ Cannot remove data point - minimum one point required"); // ⚠️ Log warning
+      return; // 🚪 Exit early
+    }
+
+    this.isUpdating.set(true); // ⏳ Set updating state
+
+    // 📉 UPDATE SIGNAL - Remove last data point
+    this.chartData.update((currentData) => {
+      const newData = currentData.slice(0, -1); // ✂️ Remove last element
+      console.log("➖ Removed last data point, remaining:", newData.length); // 📝 Log removal
+      return newData;
+    });
+
+    // ⏱️ SIMULATE ASYNC OPERATION
+    setTimeout(() => {
+      this.isUpdating.set(false); // ✅ Clear updating state
+      console.log("✅ Data point removal completed"); // 📝 Log completion
+    }, 300);
+  }
+
+  resetChart(): void {
+    this.isUpdating.set(true); // ⏳ Set updating state
+
+    // 🔄 RESET TO INITIAL STATE
+    this.chartData.set([1, 2, 3, 4, 5]); // 📊 Reset to initial data
+    console.log("🔄 Chart reset to initial state"); // 📝 Log reset
+
+    // ⏱️ SIMULATE ASYNC OPERATION
+    setTimeout(() => {
+      this.isUpdating.set(false); // ✅ Clear updating state
+      console.log("✅ Chart reset completed"); // 📝 Log completion
+    }, 400);
+  }
+
+  // ♿ ACCESSIBILITY HELPER - Update screen reader information
+  private updateAccessibilityInfo(data: number[]): void {
+    const canvas = this.chartCanvas?.nativeElement; // 🎨 Get canvas reference
+    if (canvas) {
+      const description = `Chart displaying ${
+        data.length
+      } data points ranging from ${Math.min(...data)} to ${Math.max(...data)}`; // 📝 Create description
+      canvas.setAttribute("aria-label", description); // ♿ Set accessibility label
+      console.log("♿ Updated accessibility information:", description); // 📝 Log accessibility update
+    }
+  }
+
+  // 🔧 LIFECYCLE CLEANUP - Cleanup chart instance if needed
+  ngOnDestroy(): void {
+    if (this.chartInstance) {
+      this.chartInstance.destroy(); // 🧹 Cleanup chart instance
+      console.log("🧹 Chart instance destroyed"); // 📝 Log cleanup
+    }
+  }
+
+  // 🎯 UTILITY METHODS - Helper functions
+
+  updateData(newData: number[]): void {
+    // ✅ INPUT VALIDATION - Ensure valid data
+    if (!Array.isArray(newData) || newData.length === 0) {
+      console.error("❌ Invalid data provided to updateData"); // ❌ Log validation error
+      return; // 🚪 Exit early
+    }
+
+    console.log("🔄 Updating chart data externally:", newData); // 📝 Log external update
+    this.chartData.set(newData); // 📊 Update signal with new data
+
+    // 🔄 afterRenderEffect will automatically trigger after this update
+    console.log(
+      "✅ External data update completed - afterRenderEffect will handle rendering"
+    ); // 📝 Log completion
+  }
+
+  // 📊 PUBLIC GETTERS - Expose reactive state
+  getCurrentData(): readonly number[] {
+    return this.chartData(); // 📈 Return current data (readonly)
+  }
+
+  isChartUpdating(): boolean {
+    return this.isUpdating(); // ⏳ Return current updating state
   }
 }
 ```
@@ -63,34 +347,522 @@ import {
   afterNextRender,
   ViewChild,
   ElementRef,
+  signal,
+  computed,
+  effect,
+  OnInit,
+  OnDestroy,
 } from "@angular/core";
 
 @Component({
-  selector: "app-focus-input",
+  selector: "app-focus-input", // 🏷️ Component selector for template usage
   template: `
-    <input #inputElement type="text" placeholder="Auto-focus input" />
-    <button (click)="resetAndFocus()">Reset & Focus</button>
+    <div class="focus-demo-container">
+      <h3>🎯 Focus Management Demo</h3>
+
+      <!-- 🎮 Primary input with auto-focus -->
+      <div class="input-group">
+        <label for="mainInput" class="input-label">
+          Main Input (Auto-focused on load)
+        </label>
+        <input
+          #inputElement
+          id="mainInput"
+          type="text"
+          placeholder="Auto-focus input"
+          class="main-input"
+          [class.has-content]="hasContent()"
+          (input)="onInputChange($event)"
+          (blur)="onInputBlur()"
+          (focus)="onInputFocus()"
+        />
+        <small
+          class="character-count"
+          [class.warning]="isNearLimit()"
+          [class.error]="isOverLimit()"
+        >
+          {{ inputValue().length }}/{{ maxLength }} characters
+        </small>
+      </div>
+
+      <!-- 🎮 Control buttons with focus management -->
+      <div class="button-group">
+        <button
+          (click)="resetAndFocus()"
+          class="btn-primary"
+          [disabled]="isProcessing()"
+        >
+          {{ isProcessing() ? "Processing..." : "Reset & Focus" }}
+        </button>
+
+        <button (click)="clearAndFocusNext()" class="btn-secondary">
+          Clear & Focus Next
+        </button>
+
+        <button (click)="selectAllText()" [disabled]="!hasContent()">
+          Select All Text
+        </button>
+
+        <button (click)="focusWithDelay()" class="btn-info">
+          Focus with Delay
+        </button>
+      </div>
+
+      <!-- 🎯 Additional inputs for focus testing -->
+      <div class="input-group">
+        <label for="secondInput" class="input-label"> Second Input </label>
+        <input
+          #secondInput
+          id="secondInput"
+          type="text"
+          placeholder="Second input for focus testing"
+          class="secondary-input"
+          (focus)="onSecondInputFocus()"
+          (blur)="onSecondInputBlur()"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="emailInput" class="input-label"> Email Input </label>
+        <input
+          #emailInput
+          id="emailInput"
+          type="email"
+          placeholder="email@example.com"
+          class="email-input"
+          [class.invalid]="emailValue() && !isValidEmail()"
+          (input)="onEmailChange($event)"
+          (blur)="validateEmail()"
+        />
+        <small
+          class="validation-message"
+          *ngIf="emailValue() && !isValidEmail()"
+        >
+          Please enter a valid email address
+        </small>
+      </div>
+
+      <!-- 📊 Focus state indicators -->
+      <div class="state-indicators">
+        <div class="indicator" [class.active]="currentFocus() === 'main'">
+          🎯 Main Input
+          {{ currentFocus() === "main" ? "Focused" : "Unfocused" }}
+        </div>
+        <div class="indicator" [class.active]="currentFocus() === 'second'">
+          🎯 Second Input
+          {{ currentFocus() === "second" ? "Focused" : "Unfocused" }}
+        </div>
+        <div class="indicator" [class.active]="currentFocus() === 'email'">
+          📧 Email Input
+          {{ currentFocus() === "email" ? "Focused" : "Unfocused" }}
+        </div>
+      </div>
+
+      <!-- 📈 Statistics -->
+      <div class="statistics">
+        <p>Focus Events: {{ focusEventCount() }}</p>
+        <p>Render Cycles: {{ renderCycleCount() }}</p>
+        <p>Last Focus Time: {{ lastFocusTime() || "Never" }}</p>
+      </div>
+    </div>
   `,
+  styles: [
+    `
+      .focus-demo-container {
+        max-width: 600px; /* 📏 Container width limit */
+        margin: 20px auto; /* 📐 Center container */
+        padding: 24px; /* 📏 Internal spacing */
+        border: 1px solid #ddd; /* 🖼️ Container border */
+        border-radius: 8px; /* 🎨 Rounded corners */
+        background: #fafafa; /* 🎨 Light background */
+      }
+
+      .input-group {
+        margin-bottom: 20px; /* 📏 Space between groups */
+      }
+
+      .input-label {
+        display: block; /* 🔄 Block display for proper spacing */
+        margin-bottom: 6px; /* 📏 Space below label */
+        font-weight: 500; /* 🔤 Semi-bold text */
+        color: #333; /* 🎨 Dark text color */
+      }
+
+      input {
+        width: 100%; /* 📐 Full width */
+        padding: 12px; /* 📏 Internal spacing */
+        border: 2px solid #ddd; /* 🖼️ Input border */
+        border-radius: 4px; /* 🎨 Slight rounding */
+        font-size: 16px; /* 🔤 Font size */
+        transition: all 0.2s ease; /* 🎨 Smooth transitions */
+      }
+
+      input:focus {
+        border-color: #007bff; /* 🎨 Blue focus border */
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); /* ✨ Focus shadow */
+        outline: none; /* 🚫 Remove default outline */
+      }
+
+      input.has-content {
+        border-color: #28a745; /* 🎨 Green border with content */
+      }
+
+      input.invalid {
+        border-color: #dc3545; /* 🎨 Red border for invalid */
+      }
+
+      .character-count {
+        display: block; /* 🔄 Block display */
+        margin-top: 4px; /* 📏 Space above */
+        font-size: 12px; /* 🔤 Small font */
+        color: #666; /* 🎨 Gray text */
+      }
+
+      .character-count.warning {
+        color: #ffc107; /* 🎨 Warning yellow */
+      }
+
+      .character-count.error {
+        color: #dc3545; /* 🎨 Error red */
+      }
+
+      .button-group {
+        display: flex; /* 🔄 Flex layout */
+        gap: 8px; /* 📏 Space between buttons */
+        margin-bottom: 20px; /* 📏 Space below group */
+        flex-wrap: wrap; /* 🔄 Wrap on small screens */
+      }
+
+      button {
+        padding: 8px 16px; /* 📏 Button spacing */
+        border: none; /* 🚫 Remove default border */
+        border-radius: 4px; /* 🎨 Rounded corners */
+        font-size: 14px; /* 🔤 Font size */
+        cursor: pointer; /* 👆 Pointer cursor */
+        transition: all 0.2s ease; /* 🎨 Smooth transitions */
+      }
+
+      .btn-primary {
+        background: #007bff; /* 🎨 Blue background */
+        color: white; /* 🎨 White text */
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: #0056b3; /* 🎨 Darker blue on hover */
+      }
+
+      .btn-secondary {
+        background: #6c757d; /* 🎨 Gray background */
+        color: white; /* 🎨 White text */
+      }
+
+      .btn-info {
+        background: #17a2b8; /* 🎨 Teal background */
+        color: white; /* 🎨 White text */
+      }
+
+      button:disabled {
+        opacity: 0.5; /* 🎨 Reduced opacity */
+        cursor: not-allowed; /* 🚫 Not allowed cursor */
+      }
+
+      .state-indicators {
+        display: flex; /* 🔄 Flex layout */
+        flex-direction: column; /* 🔄 Vertical layout */
+        gap: 8px; /* 📏 Space between indicators */
+        margin-bottom: 16px; /* 📏 Space below */
+      }
+
+      .indicator {
+        padding: 8px; /* 📏 Internal spacing */
+        border-radius: 4px; /* 🎨 Rounded corners */
+        background: #f8f9fa; /* 🎨 Light background */
+        border: 1px solid #dee2e6; /* 🖼️ Light border */
+      }
+
+      .indicator.active {
+        background: #d4edda; /* 🎨 Green background for active */
+        border-color: #c3e6cb; /* 🖼️ Green border */
+        color: #155724; /* 🎨 Dark green text */
+      }
+
+      .statistics {
+        background: #e9ecef; /* 🎨 Light gray background */
+        padding: 16px; /* 📏 Internal spacing */
+        border-radius: 4px; /* 🎨 Rounded corners */
+      }
+
+      .statistics p {
+        margin: 4px 0; /* 📏 Small margin */
+        font-size: 14px; /* 🔤 Small font */
+      }
+    `,
+  ],
 })
-export class FocusInputComponent {
-  @ViewChild("inputElement") inputElement!: ElementRef<HTMLInputElement>;
+export class FocusInputComponent implements OnInit, OnDestroy {
+  // 🔗 TEMPLATE REFERENCES - Direct DOM element access
+  @ViewChild("inputElement") inputElement!: ElementRef<HTMLInputElement>; // 🎯 Main input element
+  @ViewChild("secondInput") secondInput!: ElementRef<HTMLInputElement>; // 🎯 Second input element
+  @ViewChild("emailInput") emailInput!: ElementRef<HTMLInputElement>; // 📧 Email input element
+
+  // 📊 REACTIVE STATE MANAGEMENT - Signal-based state
+  private inputValue = signal(""); // 📝 Main input value
+  private emailValue = signal(""); // 📧 Email input value
+  private currentFocus = signal<"main" | "second" | "email" | null>(null); // 🎯 Currently focused input
+  private focusEventCount = signal(0); // 📊 Count of focus events
+  private renderCycleCount = signal(0); // 📊 Count of render cycles
+  private lastFocusTime = signal<string>(""); // ⏰ Last focus timestamp
+  private isProcessing = signal(false); // ⏳ Processing state
+
+  // 🔢 CONFIGURATION CONSTANTS
+  private readonly maxLength = 100; // 📏 Maximum input length
+
+  // 📊 COMPUTED SIGNALS - Derived reactive values
+  readonly hasContent = computed(() => this.inputValue().trim().length > 0); // ✅ Has input content
+  readonly isNearLimit = computed(
+    () => this.inputValue().length > this.maxLength * 0.8
+  ); // ⚠️ Near character limit
+  readonly isOverLimit = computed(
+    () => this.inputValue().length > this.maxLength
+  ); // ❌ Over character limit
 
   constructor() {
-    // Runs only after the next render
+    console.log(
+      "🏗️ FocusInputComponent constructor - setting up lifecycle hooks"
+    ); // 📝 Log constructor
+
+    // 🔄 AFTER NEXT RENDER HOOK - Executes after the NEXT render cycle only
     afterNextRender(() => {
-      // Focus the input after initial render
-      this.inputElement.nativeElement.focus();
+      console.log(
+        "🎯 afterNextRender triggered - DOM is ready for initial focus"
+      ); // 📝 Log hook execution
+
+      // ✅ SAFE DOM ACCESS - Guaranteed element availability
+      if (this.inputElement?.nativeElement) {
+        this.inputElement.nativeElement.focus(); // 🎯 Set initial focus
+        console.log("✨ Initial focus set on main input"); // 📝 Log focus action
+
+        // 📊 UPDATE STATE
+        this.currentFocus.set("main"); // 🎯 Set focus state
+        this.updateFocusStats(); // 📊 Update statistics
+      } else {
+        console.warn("⚠️ Input element not available during afterNextRender"); // ⚠️ Log warning
+      }
+    });
+
+    // 🎯 EFFECT FOR FOCUS TRACKING - Monitor focus changes
+    effect(() => {
+      const focus = this.currentFocus(); // 🎯 Get current focus state
+      console.log("🔍 Focus changed to:", focus || "none"); // 📝 Log focus changes
+
+      // 📊 INCREMENT RENDER COUNTER
+      this.renderCycleCount.update((count) => count + 1);
+    });
+
+    // 📝 EFFECT FOR INPUT VALUE TRACKING
+    effect(() => {
+      const value = this.inputValue(); // 📝 Get input value
+      console.log("📝 Input value changed:", value.length, "characters"); // 📝 Log value changes
+
+      // ⚠️ VALIDATION LOGGING
+      if (this.isOverLimit()) {
+        console.warn("⚠️ Input value exceeds maximum length"); // ⚠️ Log limit warning
+      }
+    });
+
+    // 📧 EFFECT FOR EMAIL VALIDATION
+    effect(() => {
+      const email = this.emailValue(); // 📧 Get email value
+      if (email) {
+        const isValid = this.isValidEmail(); // ✅ Check validity
+        console.log(
+          "📧 Email validation:",
+          email,
+          "-",
+          isValid ? "Valid" : "Invalid"
+        ); // 📝 Log validation
+      }
     });
   }
 
-  resetAndFocus() {
-    this.inputElement.nativeElement.value = "";
+  ngOnInit(): void {
+    console.log("🚀 Component initialized - ready for user interaction"); // 📝 Log initialization
+  }
 
-    // Schedule focus for after next render
+  ngOnDestroy(): void {
+    console.log("🧹 Component destroyed - cleanup completed"); // 📝 Log destruction
+  }
+
+  // 🎯 USER INTERACTION METHODS - Handle user actions
+
+  resetAndFocus(): void {
+    console.log("🔄 Reset and focus requested"); // 📝 Log action start
+    this.isProcessing.set(true); // ⏳ Set processing state
+
+    // 🗑️ CLEAR INPUT VALUE
+    if (this.inputElement?.nativeElement) {
+      this.inputElement.nativeElement.value = ""; // 🗑️ Clear DOM value
+      this.inputValue.set(""); // 🗑️ Clear signal value
+      console.log("🗑️ Input cleared"); // 📝 Log clear action
+    }
+
+    // ⏱️ SIMULATE PROCESSING TIME
+    setTimeout(() => {
+      // 🔄 AFTER NEXT RENDER - Schedule focus for after DOM update
+      afterNextRender(() => {
+        if (this.inputElement?.nativeElement) {
+          this.inputElement.nativeElement.focus(); // 🎯 Set focus after clear
+          this.currentFocus.set("main"); // 🎯 Update focus state
+          this.updateFocusStats(); // 📊 Update statistics
+          console.log("✨ Focus restored after reset"); // 📝 Log focus restoration
+        }
+      });
+
+      this.isProcessing.set(false); // ✅ Clear processing state
+      console.log("✅ Reset and focus completed"); // 📝 Log completion
+    }, 800);
+  }
+
+  clearAndFocusNext(): void {
+    console.log("🔄 Clear and focus next requested"); // 📝 Log action
+
+    // 🗑️ CLEAR CURRENT INPUT
+    if (this.inputElement?.nativeElement) {
+      this.inputElement.nativeElement.value = ""; // 🗑️ Clear value
+      this.inputValue.set(""); // 📊 Update signal
+    }
+
+    // 🔄 AFTER NEXT RENDER - Focus second input after DOM update
     afterNextRender(() => {
-      this.inputElement.nativeElement.focus();
+      if (this.secondInput?.nativeElement) {
+        this.secondInput.nativeElement.focus(); // 🎯 Focus second input
+        this.currentFocus.set("second"); // 🎯 Update focus state
+        this.updateFocusStats(); // 📊 Update statistics
+        console.log("🎯 Focused moved to second input"); // 📝 Log focus change
+      }
     });
   }
+
+  selectAllText(): void {
+    // ✅ GUARD CLAUSE - Ensure element and content exist
+    if (!this.inputElement?.nativeElement || !this.hasContent()) {
+      console.warn("⚠️ Cannot select text - no element or content"); // ⚠️ Log warning
+      return; // 🚪 Exit early
+    }
+
+    const input = this.inputElement.nativeElement; // 🎯 Get input element
+
+    // 🔄 AFTER NEXT RENDER - Ensure DOM is stable before selection
+    afterNextRender(() => {
+      input.select(); // 🎯 Select all text
+      input.setSelectionRange(0, input.value.length); // 📏 Set selection range
+      console.log("✨ All text selected"); // 📝 Log selection
+
+      // 📊 UPDATE FOCUS STATE
+      this.currentFocus.set("main");
+      this.updateFocusStats();
+    });
+  }
+
+  focusWithDelay(): void {
+    console.log("⏱️ Focus with delay requested"); // 📝 Log delayed focus start
+
+    // ⏱️ DELAYED FOCUS - Focus after specific delay
+    setTimeout(() => {
+      // 🔄 AFTER NEXT RENDER - Ensure clean render cycle
+      afterNextRender(() => {
+        if (this.emailInput?.nativeElement) {
+          this.emailInput.nativeElement.focus(); // 🎯 Focus email input
+          this.currentFocus.set("email"); // 🎯 Update state
+          this.updateFocusStats(); // 📊 Update statistics
+          console.log("🎯 Delayed focus applied to email input"); // 📝 Log delayed focus
+        }
+      });
+    }, 1500);
+
+    console.log("⏰ Delayed focus scheduled for 1.5 seconds"); // 📝 Log schedule
+  }
+
+  // 📝 INPUT EVENT HANDLERS - Handle user input
+
+  onInputChange(event: Event): void {
+    const target = event.target as HTMLInputElement; // 🎯 Get input element
+    const value = target.value; // 📝 Extract value
+
+    // ✂️ ENFORCE LENGTH LIMIT
+    if (value.length > this.maxLength) {
+      const truncated = value.substring(0, this.maxLength); // ✂️ Truncate excess
+      target.value = truncated; // 🔄 Update DOM
+      this.inputValue.set(truncated); // 📊 Update signal
+      console.warn(`✂️ Input truncated to ${this.maxLength} characters`); // ⚠️ Log truncation
+    } else {
+      this.inputValue.set(value); // 📊 Update signal with full value
+    }
+
+    console.log("📝 Input changed:", this.inputValue().length, "characters"); // 📝 Log change
+  }
+
+  onEmailChange(event: Event): void {
+    const target = event.target as HTMLInputElement; // 📧 Get email input
+    this.emailValue.set(target.value); // 📊 Update email signal
+    console.log("📧 Email input changed:", target.value); // 📝 Log email change
+  }
+
+  // 🎯 FOCUS EVENT HANDLERS - Track focus state
+
+  onInputFocus(): void {
+    console.log("🎯 Main input focused"); // 📝 Log focus
+    this.currentFocus.set("main"); // 🎯 Update focus state
+    this.updateFocusStats(); // 📊 Update statistics
+  }
+
+  onInputBlur(): void {
+    console.log("🌫️ Main input blurred"); // 📝 Log blur
+    // Note: We don't set currentFocus to null immediately as another element might gain focus
+  }
+
+  onSecondInputFocus(): void {
+    console.log("🎯 Second input focused"); // 📝 Log focus
+    this.currentFocus.set("second"); // 🎯 Update focus state
+    this.updateFocusStats(); // 📊 Update statistics
+  }
+
+  onSecondInputBlur(): void {
+    console.log("🌫️ Second input blurred"); // 📝 Log blur
+  }
+
+  // 📧 EMAIL VALIDATION METHODS
+
+  validateEmail(): void {
+    const email = this.emailValue(); // 📧 Get email value
+    if (email && !this.isValidEmail()) {
+      console.warn("⚠️ Invalid email format entered"); // ⚠️ Log validation warning
+    }
+  }
+
+  isValidEmail(): boolean {
+    const email = this.emailValue(); // 📧 Get email value
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 📝 Email validation regex
+    return emailRegex.test(email); // ✅ Test against pattern
+  }
+
+  // 📊 UTILITY METHODS - Helper functions
+
+  private updateFocusStats(): void {
+    this.focusEventCount.update((count) => count + 1); // 📊 Increment focus count
+    this.lastFocusTime.set(new Date().toLocaleTimeString()); // ⏰ Update timestamp
+    console.log("📊 Focus statistics updated:", this.focusEventCount()); // 📝 Log stats update
+  }
+
+  // 📊 PUBLIC GETTERS - Expose reactive state (for template)
+
+  inputValue = this.inputValue.asReadonly(); // 📝 Readonly input value
+  emailValue = this.emailValue.asReadonly(); // 📧 Readonly email value
+  currentFocus = this.currentFocus.asReadonly(); // 🎯 Readonly focus state
+  focusEventCount = this.focusEventCount.asReadonly(); // 📊 Readonly event count
+  renderCycleCount = this.renderCycleCount.asReadonly(); // 📊 Readonly render count
+  lastFocusTime = this.lastFocusTime.asReadonly(); // ⏰ Readonly last focus time
+  isProcessing = this.isProcessing.asReadonly(); // ⏳ Readonly processing state
 }
 ```
 
@@ -105,83 +877,677 @@ import {
   computed,
   effect,
   afterRenderEffect,
+  afterNextRender,
+  ViewChild,
+  ElementRef,
+  OnInit,
+  OnDestroy,
 } from "@angular/core";
 
 @Component({
-  selector: "app-reactive-component",
+  selector: "app-reactive-component", // 🏷️ Component selector for template usage
   template: `
     <div class="metrics-dashboard">
-      <div class="counter">Count: {{ count() }}</div>
-      <div class="doubled">Doubled: {{ doubled() }}</div>
-      <div class="status" [class]="statusClass()">{{ status() }}</div>
+      <h2>🔄 Reactive Lifecycle Demo</h2>
 
-      <button (click)="increment()">Increment</button>
-      <button (click)="reset()">Reset</button>
+      <!-- 📊 Main metrics display -->
+      <div class="metrics-grid">
+        <div class="metric-card" [class.highlight]="count() > 0">
+          <h3>📊 Count</h3>
+          <span class="metric-value">{{ count() }}</span>
+        </div>
+
+        <div class="metric-card" [class.highlight]="doubled() > 10">
+          <h3>✖️ Doubled</h3>
+          <span class="metric-value">{{ doubled() }}</span>
+        </div>
+
+        <div class="metric-card" [class]="'status-' + status()">
+          <h3>🎯 Status</h3>
+          <span class="status-label">{{ status().toUpperCase() }}</span>
+        </div>
+
+        <div class="metric-card">
+          <h3>🔄 Effects</h3>
+          <span class="metric-value">{{ effectExecutions() }}</span>
+        </div>
+      </div>
+
+      <!-- 🎮 Interactive controls -->
+      <div class="control-panel">
+        <button
+          (click)="increment()"
+          class="btn-primary"
+          [disabled]="isProcessing()"
+        >
+          {{ isProcessing() ? "Processing..." : "➕ Increment" }}
+        </button>
+
+        <button
+          (click)="decrement()"
+          class="btn-secondary"
+          [disabled]="count() <= 0"
+        >
+          ➖ Decrement
+        </button>
+
+        <button (click)="reset()" class="btn-warning">🔄 Reset</button>
+
+        <button (click)="batchUpdate()" class="btn-info">
+          🚀 Batch Update
+        </button>
+
+        <button (click)="simulateAsync()" class="btn-success">
+          ⏱️ Async Update
+        </button>
+      </div>
+
+      <!-- 📈 Progress visualization -->
+      <div class="progress-section">
+        <h3>Progress Visualization</h3>
+        <div class="progress-container">
+          <div
+            class="progress-bar"
+            #progressBar
+            [style.width.%]="progressPercentage()"
+          ></div>
+          <span class="progress-text">{{ progressPercentage() }}%</span>
+        </div>
+      </div>
+
+      <!-- 🎯 Status visualization with dynamic classes -->
+      <div
+        class="status-visualization"
+        [ngClass]="statusClass()"
+        [attr.aria-label]="'Current status: ' + status()"
+      >
+        <div class="status-icon">{{ getStatusEmoji() }}</div>
+        <div class="status-description">{{ getStatusDescription() }}</div>
+      </div>
+
+      <!-- 📋 Activity log -->
+      <div class="activity-log">
+        <h3>📋 Activity Log</h3>
+        <div class="log-container" #logContainer>
+          <div
+            *ngFor="let entry of activityLog(); let i = index"
+            class="log-entry"
+            [class.latest]="i === activityLog().length - 1"
+          >
+            <span class="log-time">{{ entry.timestamp }}</span>
+            <span class="log-action">{{ entry.action }}</span>
+            <span class="log-value">{{ entry.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📊 Render cycle information -->
+      <div class="debug-info">
+        <h4>🔍 Debug Information</h4>
+        <p>Render Cycles: {{ renderCycles() }}</p>
+        <p>DOM Updates: {{ domUpdates() }}</p>
+        <p>Last Updated: {{ lastUpdateTime() }}</p>
+        <p>Performance Score: {{ performanceScore() }}</p>
+      </div>
     </div>
   `,
-})
-export class ReactiveComponent {
-  // Signals
-  count = signal(0);
-  status = signal("idle");
+  styles: [
+    `
+      .metrics-dashboard {
+        max-width: 1000px; /* 📏 Container width limit */
+        margin: 20px auto; /* 📐 Center container */
+        padding: 24px; /* 📏 Internal spacing */
+        font-family: "Segoe UI", sans-serif; /* 🔤 Modern font */
+      }
 
-  // Computed signals
-  doubled = computed(() => this.count() * 2);
+      .metrics-grid {
+        display: grid; /* 🎛️ Grid layout */
+        grid-template-columns: repeat(
+          auto-fit,
+          minmax(200px, 1fr)
+        ); /* 📐 Responsive columns */
+        gap: 16px; /* 📏 Space between cards */
+        margin-bottom: 24px; /* 📏 Space below grid */
+      }
+
+      .metric-card {
+        background: #f8f9fa; /* 🎨 Light background */
+        border: 2px solid #dee2e6; /* 🖼️ Border */
+        border-radius: 8px; /* 🎨 Rounded corners */
+        padding: 16px; /* 📏 Internal spacing */
+        text-align: center; /* 📐 Center text */
+        transition: all 0.3s ease; /* 🎨 Smooth transitions */
+      }
+
+      .metric-card.highlight {
+        border-color: #007bff; /* 🎨 Blue border for highlight */
+        background: #e3f2fd; /* 🎨 Light blue background */
+        transform: scale(1.02); /* 🎨 Slight scale effect */
+      }
+
+      .metric-card.status-idle {
+        background: #f1f3f4; /* 🎨 Gray for idle */
+        border-color: #9aa0a6; /* 🖼️ Gray border */
+      }
+
+      .metric-card.status-active {
+        background: #fff3cd; /* 🎨 Yellow for active */
+        border-color: #ffc107; /* 🖼️ Yellow border */
+      }
+
+      .metric-card.status-complete {
+        background: #d4edda; /* 🎨 Green for complete */
+        border-color: #28a745; /* 🖼️ Green border */
+      }
+
+      .metric-value {
+        font-size: 2rem; /* 🔤 Large metric display */
+        font-weight: bold; /* 🔤 Bold text */
+        color: #495057; /* 🎨 Dark gray */
+        display: block; /* 🔄 Block display */
+      }
+
+      .status-label {
+        font-size: 1.2rem; /* 🔤 Medium font size */
+        font-weight: 500; /* 🔤 Medium weight */
+      }
+
+      .control-panel {
+        display: flex; /* 🔄 Flex layout */
+        gap: 12px; /* 📏 Space between buttons */
+        margin-bottom: 24px; /* 📏 Space below panel */
+        flex-wrap: wrap; /* 🔄 Wrap on small screens */
+      }
+
+      button {
+        padding: 10px 16px; /* 📏 Button spacing */
+        border: none; /* 🚫 Remove default border */
+        border-radius: 6px; /* 🎨 Rounded corners */
+        font-size: 14px; /* 🔤 Font size */
+        font-weight: 500; /* 🔤 Medium weight */
+        cursor: pointer; /* 👆 Pointer cursor */
+        transition: all 0.2s ease; /* 🎨 Smooth transitions */
+      }
+
+      .btn-primary {
+        background: #007bff; /* 🎨 Blue background */
+        color: white; /* 🎨 White text */
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: #0056b3; /* 🎨 Darker blue on hover */
+      }
+
+      .btn-secondary {
+        background: #6c757d; /* 🎨 Gray background */
+        color: white; /* 🎨 White text */
+      }
+
+      .btn-warning {
+        background: #ffc107; /* 🎨 Yellow background */
+        color: #212529; /* 🎨 Dark text */
+      }
+
+      .btn-info {
+        background: #17a2b8; /* 🎨 Teal background */
+        color: white; /* 🎨 White text */
+      }
+
+      .btn-success {
+        background: #28a745; /* 🎨 Green background */
+        color: white; /* 🎨 White text */
+      }
+
+      button:disabled {
+        opacity: 0.5; /* 🎨 Reduced opacity */
+        cursor: not-allowed; /* 🚫 Not allowed cursor */
+      }
+
+      .progress-section {
+        margin-bottom: 24px; /* 📏 Space below section */
+      }
+
+      .progress-container {
+        position: relative; /* 📐 Relative positioning */
+        background: #e9ecef; /* 🎨 Light gray background */
+        border-radius: 20px; /* 🎨 Rounded progress bar */
+        height: 30px; /* 📏 Progress bar height */
+        overflow: hidden; /* 🚫 Hide overflow */
+      }
+
+      .progress-bar {
+        background: linear-gradient(
+          90deg,
+          #007bff,
+          #28a745
+        ); /* 🌈 Gradient background */
+        height: 100%; /* 📏 Full height */
+        border-radius: 20px; /* 🎨 Rounded corners */
+        transition: width 0.3s ease; /* 🎨 Smooth width transition */
+        min-width: 0; /* 📏 Minimum width */
+      }
+
+      .progress-text {
+        position: absolute; /* 📐 Absolute positioning */
+        top: 50%; /* 📐 Vertical center */
+        left: 50%; /* 📐 Horizontal center */
+        transform: translate(-50%, -50%); /* 📐 Perfect centering */
+        font-weight: bold; /* 🔤 Bold text */
+        color: #495057; /* 🎨 Dark gray */
+      }
+
+      .status-visualization {
+        background: #f8f9fa; /* 🎨 Light background */
+        border-radius: 8px; /* 🎨 Rounded corners */
+        padding: 20px; /* 📏 Internal spacing */
+        text-align: center; /* 📐 Center alignment */
+        margin-bottom: 24px; /* 📏 Space below */
+      }
+
+      .status-icon {
+        font-size: 3rem; /* 🔤 Large icon */
+        margin-bottom: 10px; /* 📏 Space below icon */
+      }
+
+      .status-description {
+        font-size: 1.1rem; /* 🔤 Medium font size */
+        color: #495057; /* 🎨 Dark gray */
+      }
+
+      .activity-log {
+        margin-bottom: 24px; /* 📏 Space below log */
+      }
+
+      .log-container {
+        background: #f8f9fa; /* 🎨 Light background */
+        border-radius: 6px; /* 🎨 Rounded corners */
+        padding: 16px; /* 📏 Internal spacing */
+        max-height: 200px; /* 📏 Maximum height */
+        overflow-y: auto; /* 📜 Vertical scroll */
+      }
+
+      .log-entry {
+        display: flex; /* 🔄 Flex layout */
+        justify-content: space-between; /* 📐 Space between items */
+        padding: 4px 0; /* 📏 Vertical padding */
+        border-bottom: 1px solid #dee2e6; /* 🖼️ Bottom border */
+        font-family: monospace; /* 🔤 Monospace font */
+        font-size: 12px; /* 🔤 Small font */
+      }
+
+      .log-entry.latest {
+        background: #e3f2fd; /* 🎨 Highlight latest entry */
+        border-radius: 4px; /* 🎨 Rounded corners */
+        padding: 6px 8px; /* 📏 Extra padding */
+      }
+
+      .log-time {
+        color: #6c757d; /* 🎨 Gray timestamp */
+      }
+
+      .log-action {
+        font-weight: bold; /* 🔤 Bold action */
+      }
+
+      .log-value {
+        color: #007bff; /* 🎨 Blue value */
+      }
+
+      .debug-info {
+        background: #343a40; /* 🎨 Dark background */
+        color: white; /* 🎨 White text */
+        padding: 16px; /* 📏 Internal spacing */
+        border-radius: 6px; /* 🎨 Rounded corners */
+        font-family: monospace; /* 🔤 Monospace font */
+        font-size: 12px; /* 🔤 Small font */
+      }
+
+      .debug-info h4 {
+        margin-top: 0; /* 📏 Remove top margin */
+        margin-bottom: 12px; /* 📏 Space below heading */
+      }
+
+      .debug-info p {
+        margin: 4px 0; /* 📏 Small margin */
+      }
+    `,
+  ],
+})
+export class ReactiveComponent implements OnInit, OnDestroy {
+  // 📊 REACTIVE STATE MANAGEMENT - Core application signals
+  count = signal(0); // 📊 Primary counter value
+  status = signal<"idle" | "active" | "complete">("idle"); // 🎯 Current component status
+  effectExecutions = signal(0); // 📊 Count of effect executions
+  renderCycles = signal(0); // 📊 Count of render cycles
+  domUpdates = signal(0); // 📊 Count of DOM updates
+  isProcessing = signal(false); // ⏳ Processing state
+  activityLog = signal<ActivityEntry[]>([]); // 📋 Activity history
+  lastUpdateTime = signal<string>("Never"); // ⏰ Last update timestamp
+
+  // 🔗 TEMPLATE REFERENCES - Direct DOM element access
+  @ViewChild("progressBar") progressBar!: ElementRef<HTMLDivElement>; // 📊 Progress bar element
+  @ViewChild("logContainer") logContainer!: ElementRef<HTMLDivElement>; // 📋 Log container element
+
+  // 📊 COMPUTED SIGNALS - Derived reactive values
+  doubled = computed(() => {
+    const currentCount = this.count(); // 📊 Get current count
+    console.log("🔄 Computing doubled value for count:", currentCount); // 📝 Log computation
+    return currentCount * 2; // ✖️ Return doubled value
+  });
+
   statusClass = computed(() => {
-    const currentStatus = this.status();
+    const currentStatus = this.status(); // 🎯 Get current status
+    console.log("🎨 Computing status classes for:", currentStatus); // 📝 Log class computation
+
     return {
-      "status-idle": currentStatus === "idle",
-      "status-active": currentStatus === "active",
-      "status-complete": currentStatus === "complete",
+      "status-idle": currentStatus === "idle", // 🎨 Idle state class
+      "status-active": currentStatus === "active", // 🎨 Active state class
+      "status-complete": currentStatus === "complete", // 🎨 Complete state class
     };
   });
 
+  progressPercentage = computed(() => {
+    const current = this.count(); // 📊 Get current count
+    const max = 20; // 🔢 Maximum value for 100%
+    const percentage = Math.min((current / max) * 100, 100); // 📊 Calculate percentage with cap
+    console.log("📊 Computing progress percentage:", percentage); // 📝 Log percentage calculation
+    return Math.round(percentage); // 🔢 Round to integer
+  });
+
+  performanceScore = computed(() => {
+    const renders = this.renderCycles(); // 📊 Get render count
+    const effects = this.effectExecutions(); // 📊 Get effect count
+    const updates = this.domUpdates(); // 📊 Get DOM update count
+
+    // 📊 CALCULATE PERFORMANCE SCORE - Higher is better
+    const baseScore = 100;
+    const renderPenalty = renders * 0.5; // 📉 Penalty for excessive renders
+    const effectPenalty = effects * 0.3; // 📉 Penalty for excessive effects
+    const updatePenalty = updates * 0.2; // 📉 Penalty for excessive DOM updates
+
+    const score = Math.max(
+      0,
+      baseScore - renderPenalty - effectPenalty - updatePenalty
+    ); // 📊 Calculate final score
+    return Math.round(score);
+  });
+
   constructor() {
-    // Effect runs when signals change
+    console.log(
+      "🏗️ ReactiveComponent constructor - initializing lifecycle hooks"
+    ); // 📝 Log constructor
+
+    // 🔄 EFFECT FOR COUNT CHANGES - Reactive state management
     effect(() => {
-      console.log("Count changed to:", this.count());
+      const currentCount = this.count(); // 📊 Access reactive count
+      console.log("📊 Count effect triggered - new value:", currentCount); // 📝 Log count change
 
-      // Update status based on count
-      if (this.count() === 0) {
-        this.status.set("idle");
-      } else if (this.count() < 10) {
-        this.status.set("active");
+      // 📊 INCREMENT EFFECT COUNTER
+      this.effectExecutions.update((count) => count + 1);
+
+      // 📋 LOG ACTIVITY
+      this.logActivity("COUNT_CHANGED", currentCount);
+
+      // 🎯 UPDATE STATUS BASED ON COUNT - Business logic in effects
+      if (currentCount === 0) {
+        this.status.set("idle"); // 🎯 Set idle status
+        console.log("🎯 Status updated to idle"); // 📝 Log status change
+      } else if (currentCount < 10) {
+        this.status.set("active"); // 🎯 Set active status
+        console.log("🎯 Status updated to active"); // 📝 Log status change
       } else {
-        this.status.set("complete");
+        this.status.set("complete"); // 🎯 Set complete status
+        console.log("🎯 Status updated to complete"); // 📝 Log status change
       }
+
+      // ⏰ UPDATE TIMESTAMP
+      this.lastUpdateTime.set(new Date().toLocaleTimeString());
     });
 
-    // Runs after each render when DOM is updated
+    // 🔄 EFFECT FOR STATUS CHANGES - Monitor status transitions
+    effect(() => {
+      const currentStatus = this.status(); // 🎯 Access reactive status
+      console.log("🎯 Status effect triggered - new status:", currentStatus); // 📝 Log status change
+
+      // 📋 LOG STATUS ACTIVITY
+      this.logActivity("STATUS_CHANGED", currentStatus);
+    });
+
+    // 🔄 AFTER RENDER EFFECT - Execute after every render cycle
     afterRenderEffect(() => {
-      // DOM operations after signals update the view
+      console.log("🔄 afterRenderEffect triggered - DOM fully updated"); // 📝 Log render effect
+
+      // 📊 INCREMENT RENDER COUNTER
+      this.renderCycles.update((count) => count + 1);
+
+      // 🎨 UPDATE PROGRESS BAR - Safe DOM manipulation after render
       this.updateProgressBar();
+
+      // 📋 UPDATE DOM STATE LOGGING
       this.logDOMState();
+
+      // 📜 SCROLL LOG CONTAINER - Keep latest entries visible
+      this.scrollLogToBottom();
+
+      // 📊 INCREMENT DOM UPDATE COUNTER
+      this.domUpdates.update((count) => count + 1);
+    });
+
+    // 🔄 AFTER NEXT RENDER - One-time initialization after first render
+    afterNextRender(() => {
+      console.log("🚀 afterNextRender triggered - initial DOM setup"); // 📝 Log initial render
+
+      // 🎯 INITIAL FOCUS SETUP
+      this.setupInitialState();
+
+      // 📋 LOG INITIAL ACTIVITY
+      this.logActivity("COMPONENT_INITIALIZED", "Ready");
     });
   }
 
-  increment() {
-    this.count.update((current) => current + 1);
+  ngOnInit(): void {
+    console.log("🚀 Component initialized - ready for user interaction"); // 📝 Log initialization
   }
 
-  reset() {
-    this.count.set(0);
+  ngOnDestroy(): void {
+    console.log("🧹 Component destroyed - cleanup completed"); // 📝 Log destruction
   }
 
-  private updateProgressBar() {
-    // Safe DOM manipulation after render
-    const progressBar = document.querySelector(".progress-bar");
-    if (progressBar) {
-      const percentage = Math.min(this.count() * 10, 100);
-      progressBar.setAttribute("style", `width: ${percentage}%`);
+  // 🎯 USER INTERACTION METHODS - Handle user actions
+
+  increment(): void {
+    console.log("➕ Increment requested"); // 📝 Log increment request
+    this.isProcessing.set(true); // ⏳ Set processing state
+
+    // ⏱️ SIMULATE ASYNC PROCESSING
+    setTimeout(() => {
+      this.count.update((current) => {
+        const newValue = current + 1; // ➕ Increment count
+        console.log("📈 Count incremented to:", newValue); // 📝 Log new value
+        return newValue;
+      });
+
+      this.isProcessing.set(false); // ✅ Clear processing state
+      console.log("✅ Increment completed"); // 📝 Log completion
+    }, 300);
+  }
+
+  decrement(): void {
+    // 🚫 GUARD CLAUSE - Prevent negative values
+    if (this.count() <= 0) {
+      console.warn("⚠️ Cannot decrement below zero"); // ⚠️ Log warning
+      return; // 🚪 Exit early
+    }
+
+    console.log("➖ Decrement requested"); // 📝 Log decrement request
+
+    this.count.update((current) => {
+      const newValue = current - 1; // ➖ Decrement count
+      console.log("📉 Count decremented to:", newValue); // 📝 Log new value
+      return newValue;
+    });
+  }
+
+  reset(): void {
+    console.log("🔄 Reset requested"); // 📝 Log reset request
+
+    // 🔄 RESET ALL STATE
+    this.count.set(0); // 📊 Reset count
+    this.effectExecutions.set(0); // 📊 Reset effect counter
+    this.renderCycles.set(0); // 📊 Reset render counter
+    this.domUpdates.set(0); // 📊 Reset DOM update counter
+    this.activityLog.set([]); // 📋 Clear activity log
+    this.lastUpdateTime.set("Reset"); // ⏰ Update timestamp
+
+    console.log("✅ Component state reset to initial values"); // 📝 Log reset completion
+  }
+
+  batchUpdate(): void {
+    console.log("🚀 Batch update requested"); // 📝 Log batch update start
+    this.isProcessing.set(true); // ⏳ Set processing state
+
+    // 🚀 BATCH MULTIPLE UPDATES - Demonstrate efficient signal updates
+    setTimeout(() => {
+      const updates = [2, 4, 6, 8, 10]; // 📊 Predefined update values
+
+      updates.forEach((value, index) => {
+        setTimeout(() => {
+          this.count.set(value); // 📊 Set specific value
+          console.log(`🔄 Batch update ${index + 1}/5: ${value}`); // 📝 Log batch progress
+
+          // ✅ COMPLETE PROCESSING ON LAST UPDATE
+          if (index === updates.length - 1) {
+            this.isProcessing.set(false); // ✅ Clear processing state
+            console.log("✅ Batch update completed"); // 📝 Log batch completion
+          }
+        }, index * 200); // ⏱️ Staggered updates
+      });
+    }, 100);
+  }
+
+  simulateAsync(): void {
+    console.log("⏱️ Async simulation requested"); // 📝 Log async start
+    this.isProcessing.set(true); // ⏳ Set processing state
+
+    // 🎲 SIMULATE ASYNC OPERATION - Mock API call or heavy computation
+    const simulateApiCall = () => {
+      return new Promise<number>((resolve) => {
+        const delay = Math.random() * 2000 + 1000; // 🎲 Random delay 1-3 seconds
+        const newValue = Math.floor(Math.random() * 20) + 1; // 🎲 Random value 1-20
+
+        setTimeout(() => {
+          console.log(
+            `⏱️ Async operation completed after ${Math.round(delay)}ms`
+          ); // 📝 Log completion
+          resolve(newValue);
+        }, delay);
+      });
+    };
+
+    simulateApiCall().then((newValue) => {
+      this.count.set(newValue); // 📊 Set new value from async operation
+      this.isProcessing.set(false); // ✅ Clear processing state
+      console.log("✅ Async simulation completed with value:", newValue); // 📝 Log async completion
+    });
+  }
+
+  // 🔧 UTILITY METHODS - Helper functions
+
+  private updateProgressBar(): void {
+    // ✅ SAFE DOM ACCESS - afterRenderEffect guarantees availability
+    if (this.progressBar?.nativeElement) {
+      const percentage = this.progressPercentage(); // 📊 Get progress percentage
+      const element = this.progressBar.nativeElement; // 🎯 Get DOM element
+
+      // 🎨 APPLY VISUAL UPDATES
+      element.style.width = `${percentage}%`; // 📏 Set width
+      element.setAttribute("aria-valuenow", percentage.toString()); // ♿ Accessibility
+      element.setAttribute("aria-valuemin", "0"); // ♿ Minimum value
+      element.setAttribute("aria-valuemax", "100"); // ♿ Maximum value
+
+      console.log("🎨 Progress bar updated to:", percentage + "%"); // 📝 Log progress update
     }
   }
 
-  private logDOMState() {
-    console.log(
-      "DOM updated - Count in DOM:",
-      document.querySelector(".counter")?.textContent
-    );
+  private logDOMState(): void {
+    // 📊 LOG DOM STATE - Verify DOM synchronization with signals
+    const countElements = document.querySelectorAll(".metric-value"); // 🔍 Find metric displays
+    if (countElements.length > 0) {
+      const domCount = countElements[0].textContent; // 📊 Get displayed count
+      const signalCount = this.count(); // 📊 Get signal count
+      console.log(
+        "📊 DOM-Signal sync check - DOM:",
+        domCount,
+        "Signal:",
+        signalCount
+      ); // 📝 Log sync check
+    }
   }
+
+  private scrollLogToBottom(): void {
+    // 📜 AUTO-SCROLL LOG - Keep latest entries visible
+    if (this.logContainer?.nativeElement) {
+      const container = this.logContainer.nativeElement; // 📋 Get log container
+      container.scrollTop = container.scrollHeight; // 📜 Scroll to bottom
+    }
+  }
+
+  private setupInitialState(): void {
+    console.log("🎯 Setting up initial component state"); // 📝 Log initial setup
+
+    // 🎯 INITIAL ACCESSIBILITY SETUP
+    if (this.progressBar?.nativeElement) {
+      this.progressBar.nativeElement.setAttribute("role", "progressbar"); // ♿ Set ARIA role
+      this.progressBar.nativeElement.setAttribute(
+        "aria-label",
+        "Count Progress"
+      ); // ♿ Set label
+    }
+  }
+
+  private logActivity(action: string, value: any): void {
+    const entry: ActivityEntry = {
+      timestamp: new Date().toLocaleTimeString(), // ⏰ Current time
+      action: action, // 📝 Action description
+      value: value.toString(), // 📊 Action value
+    };
+
+    // 📋 ADD TO LOG - Maintain activity history
+    this.activityLog.update((log) => {
+      const newLog = [...log, entry]; // 📋 Create new log array
+      // 🗑️ LIMIT LOG SIZE - Keep only last 20 entries
+      return newLog.length > 20 ? newLog.slice(-20) : newLog;
+    });
+  }
+
+  // 🎨 UI HELPER METHODS - Template utility functions
+
+  getStatusEmoji(): string {
+    const status = this.status(); // 🎯 Get current status
+    const emojis = {
+      idle: "😴", // 😴 Idle state
+      active: "⚡", // ⚡ Active state
+      complete: "🎉", // 🎉 Complete state
+    };
+    return emojis[status] || "❓"; // ❓ Unknown status fallback
+  }
+
+  getStatusDescription(): string {
+    const status = this.status(); // 🎯 Get current status
+    const descriptions = {
+      idle: "Component is in idle state", // 😴 Idle description
+      active: "Component is actively processing", // ⚡ Active description
+      complete: "Component has completed its task", // 🎉 Complete description
+    };
+    return descriptions[status] || "Unknown status"; // ❓ Unknown status fallback
+  }
+}
+
+// 📋 TYPE DEFINITIONS - Strong typing for activity logging
+interface ActivityEntry {
+  timestamp: string; // ⏰ When the activity occurred
+  action: string; // 📝 What action was performed
+  value: string; // 📊 The value associated with the action
 }
 ```
 
@@ -195,37 +1561,347 @@ Angular Material Design V18 introduces Material Design 3 (Material You) with enh
 
 The new theming system provides more flexible color schemes and typography:
 
-```typescript
+```scss
 // theme.scss - Material Design 3 Theme Configuration
-@use '@angular/material' as mat;
+@use "@angular/material" as mat;
 
-// Define your color palette based on Material Design 3
-$primary-palette: mat.define-palette(mat.$azure-palette, 500);
-$accent-palette: mat.define-palette(mat.$rose-palette, 200);
-$warn-palette: mat.define-palette(mat.$red-palette);
+// 🎨 MATERIAL DESIGN 3 CORE - Import the new M3 core styles
+@include mat.core();
 
-// Create Material Design 3 theme
-$theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: $primary-palette,
-    tertiary: $accent-palette,
-  ),
-  typography: (
-    brand-family: 'Inter, sans-serif',
-    plain-family: 'Roboto, sans-serif',
-  ),
-  density: (
-    scale: 0,
+// 🎨 COLOR PALETTE DEFINITIONS - Define brand-specific color schemes
+$primary-palette: mat.define-palette(
+  mat.$azure-palette,
+  500
+); // 🔵 Primary brand color (Azure blue)
+$accent-palette: mat.define-palette(
+  mat.$rose-palette,
+  200
+); // 🌸 Accent color (Rose pink)
+$warn-palette: mat.define-palette(
+  mat.$red-palette
+); // 🔴 Warning/error color (Red)
+
+// 🌈 CUSTOM BRAND COLORS - Additional brand colors for Material You
+$custom-colors: (
+  // 🎨 SURFACE COLORS - Background and surface variations
+  "surface-dim": #f1f3f4,
+  // 🌫️ Dimmed surface color
+  "surface-bright": #ffffff,
+  // ✨ Bright surface color
+  "surface-container": #f8f9fa,
+  // 📦 Container surface color
+  "surface-container-low": #f1f3f4,
+  // 📦 Low container surface
+  "surface-container-high": #e8eaed,
+
+  // 📦 High container surface
+  // 🎯 ACCENT COLORS - Secondary brand colors
+  "secondary": #5f6368,
+  // 🔘 Secondary text/elements
+  "tertiary": #1a73e8,
+  // 🔹 Tertiary accent
+  "quaternary": #34a853,
+
+  // 🟢 Success/positive actions
+  // 🎭 STATE COLORS - Interactive states
+  "hover-overlay": rgba(0, 0, 0, 0.04),
+  // 👆 Hover state overlay
+  "pressed-overlay": rgba(0, 0, 0, 0.1),
+  // 👇 Pressed state overlay
+  "focus-overlay": rgba(26, 115, 232, 0.12),
+  // 🎯 Focus state overlay
+  "disabled-overlay": rgba(0, 0, 0, 0.38),
+  // 🚫 Disabled state overlay
+);
+
+// 🌓 LIGHT THEME CONFIGURATION - Primary theme definition
+$theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      // 🌞 Light theme variant
+      primary: $primary-palette,
+      // 🔵 Primary color scheme
+      tertiary: $accent-palette,
+      // 🌸 Tertiary color scheme
+      use-system-variables: true,
+      // 🔧 Enable CSS custom properties
+    ),
+    typography: (
+      brand-family: "Inter, system-ui, sans-serif",
+      // 🔤 Modern brand font
+      plain-family: "Roboto, Arial, sans-serif",
+      // 🔤 Readable body font
+      use-system-variables: true,
+      // 🔧 Enable CSS font variables
+    ),
+    density: (
+      scale: 0,
+      // 📏 Standard density (0 = default)
+    ),
   )
-));
+);
 
-// Apply the theme
+// 🌃 DARK THEME CONFIGURATION - Alternative dark mode theme
+$dark-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: dark,
+      // 🌙 Dark theme variant
+      primary: $primary-palette,
+      // 🔵 Same primary colors
+      tertiary: $accent-palette,
+      // 🌸 Same tertiary colors
+      use-system-variables: true,
+      // 🔧 Enable CSS custom properties
+    ),
+    typography: (
+      brand-family: "Inter, system-ui, sans-serif",
+      // 🔤 Consistent fonts
+      plain-family: "Roboto, Arial, sans-serif",
+      // 🔤 Consistent fonts
+      use-system-variables: true,
+      // 🔧 Enable CSS font variables
+    ),
+    density: (
+      scale: 0,
+      // 📏 Consistent density
+    ),
+  )
+);
+
+// 🎯 APPLY BASE THEME - Set default theme for all components
 @include mat.all-component-themes($theme);
 
-// Material Design 3 specific mixins
-@include mat.system-level-colors($theme);
-@include mat.system-level-typography($theme);
+// 🎨 MATERIAL DESIGN 3 ENHANCEMENTS - Apply M3 specific features
+@include mat.system-level-colors($theme); // 🌈 System color tokens
+@include mat.system-level-typography($theme); // 🔤 System typography tokens
+
+// 🌃 DARK THEME SELECTOR - Auto dark mode support
+@media (prefers-color-scheme: dark) {
+  .mat-app-background {
+    @include mat.all-component-colors(
+      $dark-theme
+    ); // 🌙 Apply dark theme colors
+  }
+}
+
+// 🎯 MANUAL DARK MODE CLASS - User-controlled dark mode
+.dark-theme {
+  @include mat.all-component-colors($dark-theme); // 🌙 Dark theme override
+
+  // 🔧 CUSTOM DARK MODE VARIABLES - Additional dark mode customizations
+  --mat-sys-surface: #121212; // 🌑 Dark surface
+  --mat-sys-on-surface: #e8eaed; // 🌕 Light text on dark
+  --mat-sys-surface-container: #1e1e1e; // 📦 Dark container
+}
+
+// 🎨 HIGH CONTRAST MODE - Accessibility enhancement
+@media (prefers-contrast: high) {
+  .mat-mdc-button {
+    --mat-mdc-button-persistent-ripple-color: currentColor; // 🌊 High contrast ripples
+    border: 2px solid currentColor !important; // 🖼️ Strong borders
+  }
+
+  .mat-mdc-form-field {
+    --mat-form-field-container-text-color: #000000; // 🔤 High contrast text
+    --mat-form-field-disabled-input-text-color: #666666; // 🔤 Disabled text
+  }
+}
+
+// 🎯 REDUCED MOTION - Respect user motion preferences
+@media (prefers-reduced-motion: reduce) {
+  .mat-mdc-tab-group {
+    --mat-tab-animation-duration: 0ms !important; // 🚫 Disable tab animations
+  }
+
+  .mat-mdc-button {
+    --mat-mdc-button-state-layer-color: transparent; // 🚫 Disable ripple animations
+  }
+}
+
+// 🎨 CUSTOM COMPONENT THEMING - Brand-specific customizations
+
+// 📊 Enhanced Card Styling
+.mat-mdc-card {
+  --mat-card-container-color: var(
+    --mat-sys-surface-container
+  ); // 📦 Container background
+  --mat-card-container-shape: 16px; // 🔘 Rounded corners
+
+  // ✨ ELEVATION ENHANCEMENT - Better shadow system
+  &.elevated {
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), // 📏 Small shadow
+      0px 1px 2px rgba(0, 0, 0, 0.24); // 📏 Medium shadow
+  }
+
+  // 🎯 HOVER STATE - Interactive feedback
+  &:hover {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.12), // 📏 Larger shadow on hover
+      0px 2px 4px rgba(0, 0, 0, 0.08); // 📏 Subtle depth
+    transform: translateY(-2px); // ⬆️ Slight lift effect
+    transition: all 0.2s ease; // 🎨 Smooth transition
+  }
+}
+
+// 🎮 Enhanced Button Styling
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button {
+  --mat-mdc-button-container-shape: 20px; // 🔘 More rounded buttons
+  --mat-mdc-button-horizontal-padding: 24px; // 📏 Generous padding
+
+  // 🎯 FOCUS ENHANCEMENT - Better focus indicators
+  &:focus-visible {
+    outline: 3px solid var(--mat-sys-primary); // 🎯 Strong focus outline
+    outline-offset: 2px; // 📏 Offset from button
+  }
+}
+
+// 📝 Enhanced Form Field Styling
+.mat-mdc-form-field {
+  --mat-form-field-container-shape: 12px; // 🔘 Rounded form fields
+
+  // 🎯 FOCUS STATE - Enhanced focus styling
+  &.mat-focused {
+    .mat-mdc-form-field-outline-thick {
+      --mat-form-field-outline-color: var(
+        --mat-sys-primary
+      ); // 🔵 Primary color focus
+      --mat-form-field-outline-width: 3px; // 📏 Thicker focus outline
+    }
+  }
+
+  // ❌ ERROR STATE - Clear error indication
+  &.mat-form-field-invalid {
+    .mat-mdc-form-field-outline-thick {
+      --mat-form-field-outline-color: var(
+        --mat-sys-error
+      ); // 🔴 Error color outline
+    }
+  }
+}
+
+// 📊 Enhanced Chip Styling
+.mat-mdc-chip-set {
+  gap: 8px; // 📏 Space between chips
+
+  .mat-mdc-chip {
+    --mat-chip-container-shape: 16px; // 🔘 Rounded chips
+    --mat-chip-with-avatar-leading-space: 4px; // 📏 Avatar spacing
+
+    // ✅ SELECTED STATE - Clear selection indication
+    &.mat-mdc-chip-selected {
+      --mat-chip-selected-container-color: var(
+        --mat-sys-primary-container
+      ); // 🎨 Selection background
+      --mat-chip-selected-label-text-color: var(
+        --mat-sys-on-primary-container
+      ); // 🔤 Selection text
+    }
+  }
+}
+
+// 📑 Enhanced Tab Styling
+.mat-mdc-tab-group {
+  --mat-tab-header-label-text-color: var(
+    --mat-sys-on-surface
+  ); // 🔤 Tab text color
+  --mat-tab-header-active-label-text-color: var(
+    --mat-sys-primary
+  ); // 🔤 Active tab color
+  --mat-tab-header-active-ripple-color: var(
+    --mat-sys-primary
+  ); // 🌊 Active ripple color
+
+  // 🎯 FOCUS ENHANCEMENT - Better keyboard navigation
+  .mat-mdc-tab:focus-visible {
+    outline: 2px solid var(--mat-sys-primary); // 🎯 Focus outline
+    outline-offset: -2px; // 📏 Inset outline
+    border-radius: 4px; // 🔘 Rounded focus
+  }
+}
+
+// 📊 DATA TABLE ENHANCEMENTS - Better table theming
+.mat-mdc-table {
+  --mat-table-row-item-container-color: var(
+    --mat-sys-surface
+  ); // 📋 Row background
+  --mat-table-header-container-color: var(
+    --mat-sys-surface-variant
+  ); // 📋 Header background
+
+  // 🎯 HOVER STATE - Row highlighting
+  .mat-mdc-row:hover {
+    background-color: var(--mat-sys-surface-container); // 🎨 Hover background
+  }
+
+  // ✅ SELECTED STATE - Clear selection
+  .mat-mdc-row.selected {
+    background-color: var(
+      --mat-sys-primary-container
+    ); // 🎨 Selection background
+    color: var(--mat-sys-on-primary-container); // 🔤 Selection text
+  }
+}
+
+// 🔧 UTILITY CLASSES - Helper classes for consistent theming
+
+.surface-container {
+  background-color: var(--mat-sys-surface-container); // 📦 Standard container
+  color: var(--mat-sys-on-surface); // 🔤 Container text
+  border-radius: 12px; // 🔘 Container shape
+}
+
+.primary-container {
+  background-color: var(--mat-sys-primary-container); // 🎨 Primary container
+  color: var(--mat-sys-on-primary-container); // 🔤 Primary container text
+  border-radius: 16px; // 🔘 Primary shape
+}
+
+.surface-variant {
+  background-color: var(--mat-sys-surface-variant); // 🎨 Variant surface
+  color: var(--mat-sys-on-surface-variant); // 🔤 Variant text
+}
+
+// 📱 RESPONSIVE BREAKPOINTS - Mobile-first theming
+@media (max-width: 768px) {
+  .mat-mdc-button {
+    --mat-mdc-button-horizontal-padding: 16px; // 📏 Smaller mobile padding
+    font-size: 14px; // 🔤 Smaller mobile text
+  }
+
+  .mat-mdc-form-field {
+    width: 100%; // 📐 Full width on mobile
+  }
+}
+
+/* 📋 MATERIAL DESIGN 3 BENEFITS:
+
+✅ ENHANCED ACCESSIBILITY:
+- Better contrast ratios for WCAG compliance
+- Improved focus indicators for keyboard navigation
+- High contrast mode support
+- Reduced motion preferences
+
+✅ BRAND CONSISTENCY:
+- System-level color tokens for consistent theming
+- CSS custom properties for easy customization
+- Dark mode support with automatic detection
+- Responsive design considerations
+
+✅ PERFORMANCE OPTIMIZATIONS:
+- CSS custom properties reduce bundle size
+- Reduced redundancy in style definitions
+- Better tree-shaking of unused styles
+- Improved runtime performance
+
+✅ DEVELOPER EXPERIENCE:
+- Type-safe theme configuration
+- Better IDE support with IntelliSense
+- Clearer documentation and examples
+- Easier migration path from M2 to M3
+*/
 ```
 
 ### **New Material Components**

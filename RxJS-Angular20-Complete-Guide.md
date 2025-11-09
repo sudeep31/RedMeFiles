@@ -123,56 +123,62 @@ function getUserData(userId: string): Observable<UserData> {
 An Observable is like a **lazy Promise** that can emit multiple values over time. Think of it as a **Netflix stream** - it only starts playing when you press play (subscribe).
 
 ```typescript
-import { Observable, Observer } from "rxjs";
+import { Observable, Observer } from "rxjs"; // 📦 Import RxJS core types
 
-// Creating an Observable from scratch
+// 🏗️ CREATING AN OBSERVABLE FROM SCRATCH - Manual observable construction
 const customObservable = new Observable<string>(
-  (observer: Observer<string>) => {
-    console.log("🚀 Observable started!"); // Only executes when subscribed
+  (observer: Observer<string>) => { // 👁️ Observer parameter receives subscription callbacks
+    console.log("🚀 Observable started!"); // 🎬 Only executes when someone subscribes
 
-    // Emit values over time
-    observer.next("First value"); // Emit first value
-    observer.next("Second value"); // Emit second value
+    // 📡 EMIT VALUES OVER TIME - Immediate data emission
+    observer.next("First value");  // 📨 Send first data point to subscribers
+    observer.next("Second value"); // 📨 Send second data point immediately after
 
-    // Simulate async operation
+    // ⏱️ SIMULATE ASYNC OPERATION - Demonstrate time-based data flow
     setTimeout(() => {
-      observer.next("Delayed value"); // Emit after delay
-      observer.complete(); // Signal completion
-    }, 2000);
+      observer.next("Delayed value"); // 📨 Emit value after 2-second delay
+      observer.complete(); // ✅ Signal that observable has finished emitting
+    }, 2000); // ⏱️ 2-second delay to simulate network request or processing
 
-    // Cleanup function (called on unsubscribe)
+    // 🧹 CLEANUP FUNCTION - Return teardown logic for resource management
     return () => {
-      console.log("🧹 Cleanup: Observable unsubscribed");
+      console.log("🧹 Cleanup: Observable unsubscribed"); // 🗑️ Cleanup logs
+      // 💡 Production usage: Clear intervals, cancel HTTP requests, remove event listeners
     };
   }
 );
 
-// Subscribe to receive values
+// 🎯 SUBSCRIBE TO RECEIVE VALUES - Start the observable stream
 const subscription = customObservable.subscribe({
+  // 📨 NEXT HANDLER - Called for each emitted value
   next: (value) => {
-    console.log("📨 Received:", value);
+    console.log("📨 Received:", value); // 📝 Process each incoming data point
   },
+  // ❌ ERROR HANDLER - Called when an error occurs in the stream
   error: (error) => {
-    console.error("❌ Error:", error);
+    console.error("❌ Error:", error); // 🚨 Handle any stream errors gracefully
   },
+  // ✅ COMPLETE HANDLER - Called when observable finishes successfully
   complete: () => {
-    console.log("✅ Observable completed");
+    console.log("✅ Observable completed"); // 🎉 Stream ended without errors
   },
 });
 
-// Unsubscribe after 3 seconds
+// 🛑 UNSUBSCRIBE AFTER DELAY - Demonstrate manual subscription cleanup
 setTimeout(() => {
-  subscription.unsubscribe();
-  console.log("🛑 Unsubscribed");
-}, 3000);
+  subscription.unsubscribe(); // 🧹 Stop receiving values and trigger cleanup
+  console.log("🛑 Unsubscribed"); // 📝 Log unsubscription event
+}, 3000); // ⏱️ Wait 3 seconds before unsubscribing
 
-/* Output:
-🚀 Observable started!
-📨 Received: First value
-📨 Received: Second value
-📨 Received: Delayed value
-✅ Observable completed
-🛑 Unsubscribed
+/* 📋 EXECUTION TIMELINE AND OUTPUT:
+0ms:   🚀 Observable started!     // Observer function starts
+0ms:   📨 Received: First value    // First next() emitted
+0ms:   📨 Received: Second value   // Second next() emitted
+2000ms: 📨 Received: Delayed value // setTimeout next() after 2s
+2000ms: ✅ Observable completed    // complete() called after 2s
+3000ms: 🛑 Unsubscribed           // Manual unsubscribe after 3s
+3000ms: 🧹 Cleanup: Observable unsubscribed // Cleanup function runs
+*/
 */
 ```
 
@@ -211,44 +217,71 @@ graph TB
 import { Observable, Subject, interval } from "rxjs";
 import { share } from "rxjs/operators";
 
-// 🧊 COLD Observable - Each subscription gets its own execution
+// 🧊 COLD OBSERVABLE - Each subscription creates a new independent execution
 const coldObservable = new Observable((observer) => {
-  console.log("🧊 Cold Observable started");
-  const intervalId = setInterval(() => {
-    observer.next(Date.now()); // Each subscriber gets different timestamps
-  }, 1000);
+  console.log("🧊 Cold Observable started"); // 🎬 Runs for EACH subscriber
 
+  // 🕐 CREATE INTERVAL - Each subscriber gets their own timer
+  const intervalId = setInterval(() => {
+    observer.next(Date.now()); // 📅 Each subscriber gets different timestamps
+  }, 1000); // ⏱️ Emit timestamp every second
+
+  // 🧹 CLEANUP FUNCTION - Clear interval when subscription ends
   return () => clearInterval(intervalId);
 });
 
-console.log("=== Cold Observable Example ===");
-// First subscriber
+console.log("=== 🧊 Cold Observable Example ===");
+
+// 👤 FIRST SUBSCRIBER - Starts its own execution timeline
 coldObservable.subscribe((value) =>
   console.log("👤 Subscriber 1:", new Date(value).toLocaleTimeString())
 );
 
-// Second subscriber (starts 2 seconds later)
+// 👤 SECOND SUBSCRIBER - Starts 2 seconds later with its own execution
 setTimeout(() => {
   coldObservable.subscribe((value) =>
     console.log("👤 Subscriber 2:", new Date(value).toLocaleTimeString())
   );
-}, 2000);
+}, 2000); // ⏱️ Delayed subscription to demonstrate independence
 
-// 🔥 HOT Observable - All subscribers share same execution
-const hotObservable = coldObservable.pipe(share()); // Make it hot
+// 🔥 HOT OBSERVABLE - All subscribers share the same execution
+const hotObservable = coldObservable.pipe(share()); // 🔄 Convert cold to hot using share operator
 
-console.log("=== Hot Observable Example ===");
-// First subscriber
+console.log("=== 🔥 Hot Observable Example ===");
+
+// 🔥 FIRST HOT SUBSCRIBER - Starts the shared execution
 hotObservable.subscribe((value) =>
   console.log("🔥 Subscriber A:", new Date(value).toLocaleTimeString())
 );
 
-// Second subscriber (joins existing stream)
+// 🔥 SECOND HOT SUBSCRIBER - Joins existing execution (same timestamps)
 setTimeout(() => {
   hotObservable.subscribe((value) =>
     console.log("🔥 Subscriber B:", new Date(value).toLocaleTimeString())
   );
-}, 2000);
+}, 2000); // ⏱️ Joins 2 seconds later but receives same stream
+
+/* 📋 COLD vs HOT COMPARISON:
+
+🧊 COLD OBSERVABLE OUTPUT:
+=== Cold Observable Example ===
+🧊 Cold Observable started        // First subscriber triggers execution
+👤 Subscriber 1: 10:00:01        // Subscriber 1 gets its own timestamps
+🧊 Cold Observable started        // Second subscriber triggers NEW execution  
+👤 Subscriber 1: 10:00:02        // Subscriber 1 continues its timeline
+👤 Subscriber 2: 10:00:03        // Subscriber 2 starts its own timeline
+👤 Subscriber 1: 10:00:03        // Different timestamps for each subscriber
+👤 Subscriber 2: 10:00:04
+
+🔥 HOT OBSERVABLE OUTPUT:
+=== Hot Observable Example ===
+🔥 Subscriber A: 10:00:01        // First subscriber starts shared execution
+🔥 Subscriber A: 10:00:02        // Shared timeline continues
+🔥 Subscriber A: 10:00:03        // Second subscriber joins existing stream
+🔥 Subscriber B: 10:00:03        // Same timestamp! Shared execution
+🔥 Subscriber A: 10:00:04        // Both get same values
+🔥 Subscriber B: 10:00:04
+*/
 ```
 
 ### **Observable vs Promise Comparison**
@@ -355,65 +388,87 @@ setTimeout(() => {
 
 ### **2. BehaviorSubject - Stores Latest Value**
 
-```typescript
+````typescript
 import { BehaviorSubject } from "rxjs";
 
-// BehaviorSubject requires an initial value
-const behaviorSubject = new BehaviorSubject<string>("Initial Value");
+// 💾 BEHAVIORSUBJECT CREATION - Requires an initial value to store
+const behaviorSubject = new BehaviorSubject<string>("Initial Value"); // 🏁 Always starts with a value
 
-console.log("=== BehaviorSubject Example ===");
+console.log("=== 💾 BehaviorSubject Example ===");
 
-// First subscriber gets initial value immediately
+// 👤 FIRST SUBSCRIBER - Gets initial value immediately upon subscription
 behaviorSubject.subscribe({
-  next: (value) => console.log("👤 Early subscriber:", value),
+  next: (value) => console.log("👤 Early subscriber:", value), // 📨 Receives "Initial Value" instantly
 });
 
-// Emit new values
-behaviorSubject.next("First update");
-behaviorSubject.next("Second update");
+// 📡 EMIT NEW VALUES - Update the stored value and notify all subscribers
+behaviorSubject.next("First update");  // 🔄 Store "First update" and broadcast
+behaviorSubject.next("Second update"); // 🔄 Store "Second update" and broadcast
 
-// Late subscriber gets the latest value immediately
+// 👤 LATE SUBSCRIBER - Gets the latest stored value immediately
 setTimeout(() => {
   console.log("👤 Late subscriber joining...");
   behaviorSubject.subscribe({
-    next: (value) => console.log("👤 Late subscriber:", value),
+    next: (value) => console.log("👤 Late subscriber:", value), // 📨 Receives "Second update" instantly
   });
 
-  // Access current value directly
-  console.log("📋 Current value:", behaviorSubject.value);
-}, 1000);
+  // 🔍 ACCESS CURRENT VALUE DIRECTLY - Synchronous value access
+  console.log("📋 Current value:", behaviorSubject.value); // 💾 Direct access to stored value
+}, 1000); // ⏱️ 1-second delay to demonstrate late subscription
 
-/* Output:
-👤 Early subscriber: Initial Value
-👤 Early subscriber: First update
-👤 Early subscriber: Second update
-👤 Late subscriber joining...
-👤 Late subscriber: Second update
-📋 Current value: Second update
+/* 📋 EXECUTION TIMELINE AND OUTPUT:
+0ms:   👤 Early subscriber: Initial Value   // Immediate emission of initial value
+0ms:   👤 Early subscriber: First update    // First next() emission
+0ms:   👤 Early subscriber: Second update   // Second next() emission
+1000ms: 👤 Late subscriber joining...        // Late subscriber message
+1000ms: 👤 Late subscriber: Second update   // Late subscriber gets LATEST value
+1000ms: 📋 Current value: Second update     // Direct synchronous access
 */
-```
 
-**Real-world use case:**
+**🔧 Real-world use case:**
 
 ```typescript
-// User authentication state management
+// 🔐 USER AUTHENTICATION STATE MANAGEMENT - Practical BehaviorSubject usage
 class AuthService {
+  // 💾 PRIVATE SUBJECT - Internal state management with initial false state
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+
+  // 📡 PUBLIC OBSERVABLE - Expose read-only stream to consumers
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
+  /**
+   * 🔑 LOGIN METHOD - Handle user authentication with state updates
+   * @param {LoginCredentials} credentials - User login data
+   * @returns {Observable<User>} User data stream
+   */
   login(credentials: LoginCredentials): Observable<User> {
     return this.http.post<User>("/api/login", credentials).pipe(
+      // ✅ SUCCESS HANDLER - Update authentication state on successful login
       tap((user) => {
-        // Store user and update authentication state
-        this.currentUser = user;
-        this.isAuthenticatedSubject.next(true); // All subscribers notified
+        this.currentUser = user; // 💾 Store user data locally
+        this.isAuthenticatedSubject.next(true); // 📡 Notify all subscribers: user is authenticated
       }),
+      // ❌ ERROR HANDLER - Update authentication state on login failure
       catchError((error) => {
-        this.isAuthenticatedSubject.next(false);
-        return throwError(error);
+        this.isAuthenticatedSubject.next(false); // 📡 Notify all subscribers: authentication failed
+        return throwError(error); // 🔄 Re-throw error for component handling
       })
     );
   }
+
+  /**
+   * 🚪 LOGOUT METHOD - Clear authentication state
+   */
+  logout(): void {
+    this.currentUser = null; // 🧹 Clear stored user data
+    this.isAuthenticatedSubject.next(false); // 📡 Notify all subscribers: user logged out
+  }
+
+  // 🔍 SYNCHRONOUS AUTH CHECK - Components can check current state immediately
+  get isCurrentlyAuthenticated(): boolean {
+    return this.isAuthenticatedSubject.value; // 💾 Direct access to current authentication state
+  }
+}
 
   logout(): void {
     this.currentUser = null;
@@ -425,46 +480,130 @@ class AuthService {
     return this.isAuthenticatedSubject.value;
   }
 }
-```
+````
 
 ### **3. ReplaySubject - Stores Multiple Past Values**
 
-```typescript
+````typescript
 import { ReplaySubject } from "rxjs";
 
-// ReplaySubject(bufferSize, windowTime)
-const replaySubject = new ReplaySubject<string>(3); // Store last 3 values
+// 🎬 REPLAYSUBJECT CREATION - Stores multiple past values for late subscribers
+const replaySubject = new ReplaySubject<string>(3); // 💾 Buffer size: store last 3 values
+// Alternative: new ReplaySubject<string>(3, 5000); // 💾 Store 3 values for 5 seconds
 
-console.log("=== ReplaySubject Example ===");
+console.log("=== 🎬 ReplaySubject Example ===");
 
-// Emit values before any subscription
-replaySubject.next("Value 1");
-replaySubject.next("Value 2");
-replaySubject.next("Value 3");
-replaySubject.next("Value 4"); // Only last 3 will be replayed
+// 📡 EMIT VALUES BEFORE ANY SUBSCRIPTION - Values are stored in buffer
+replaySubject.next("Value 1"); // 💾 Stored in buffer (position 1)
+replaySubject.next("Value 2"); // 💾 Stored in buffer (position 2)
+replaySubject.next("Value 3"); // 💾 Stored in buffer (position 3)
+replaySubject.next("Value 4"); // 💾 Overwrites oldest value (Value 1 is lost)
 
-// Late subscriber gets last 3 values
+// 👤 LATE SUBSCRIBER - Gets replayed values from buffer
 console.log("👤 Late subscriber joining...");
 replaySubject.subscribe({
-  next: (value) => console.log("👤 Late subscriber receives:", value),
+  next: (value) => console.log("👤 Late subscriber receives:", value), // 🎬 Replays last 3 values
 });
 
-// Emit more values
-replaySubject.next("Value 5");
+// 📡 EMIT MORE VALUES - New emissions go to all current subscribers
+replaySubject.next("Value 5"); // 📨 Sent to current subscribers + stored in buffer
 
-/* Output:
+/* 📋 BUFFER MANAGEMENT AND OUTPUT:
+Buffer state before subscription: ["Value 2", "Value 3", "Value 4"] (last 3)
 👤 Late subscriber joining...
-👤 Late subscriber receives: Value 2
-👤 Late subscriber receives: Value 3
-👤 Late subscriber receives: Value 4
-👤 Late subscriber receives: Value 5
+👤 Late subscriber receives: Value 2    // Replayed from buffer
+👤 Late subscriber receives: Value 3    // Replayed from buffer
+👤 Late subscriber receives: Value 4    // Replayed from buffer
+👤 Late subscriber receives: Value 5    // New emission
 */
-```
 
-**Real-world use case:**
+**🔧 Real-world use case:**
 
 ```typescript
-// Chat message history service
+// 💬 CHAT MESSAGE HISTORY SERVICE - Practical ReplaySubject usage
+class ChatService {
+  // 🎬 STORE LAST 50 MESSAGES - New users see recent conversation history
+  private messagesSubject = new ReplaySubject<ChatMessage>(50);
+  public messages$ = this.messagesSubject.asObservable();
+
+  /**
+   * 📨 SEND MESSAGE METHOD - Add message to chat and update history
+   * @param {ChatMessage} message - Message to send
+   */
+  sendMessage(message: ChatMessage): void {
+    // 🔒 Add timestamp and user info
+    const enrichedMessage = {
+      ...message,
+      timestamp: new Date(),
+      id: this.generateMessageId()
+    };
+
+    // 📡 Broadcast to all current subscribers + store in history buffer
+    this.messagesSubject.next(enrichedMessage);
+
+    // 🌐 Send to server (optional)
+    this.http.post('/api/messages', enrichedMessage).subscribe();
+  }
+
+  /**
+   * 👤 USER JOINS CHAT - Late subscribers get message history
+   * When a user opens chat, they automatically see last 50 messages
+   */
+  joinChat(): Observable<ChatMessage> {
+    return this.messages$; // 🎬 Immediately replays last 50 messages
+  }
+
+  /**
+   * 🧹 CLEAR CHAT HISTORY - Reset message buffer
+   */
+  clearHistory(): void {
+    // 🔄 Create new ReplaySubject to clear buffer
+    this.messagesSubject = new ReplaySubject<ChatMessage>(50);
+    this.messages$ = this.messagesSubject.asObservable();
+  }
+
+  private generateMessageId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+}
+
+// 🎮 USAGE EXAMPLE - Multiple users joining chat at different times
+const chatService = new ChatService();
+
+// 📨 Send some messages before anyone joins
+chatService.sendMessage({ text: "Hello everyone!", userId: "user1" });
+chatService.sendMessage({ text: "How's everyone doing?", userId: "user2" });
+chatService.sendMessage({ text: "Great to be here!", userId: "user3" });
+
+// 👤 USER A JOINS - Gets message history immediately
+console.log("👤 User A joining chat...");
+chatService.joinChat().subscribe(message => {
+  console.log("👤 User A sees:", message.text, `(${message.userId})`);
+});
+
+// ⏱️ More messages sent while User A is in chat
+setTimeout(() => {
+  chatService.sendMessage({ text: "Welcome User A!", userId: "user2" });
+
+  // 👤 USER B JOINS LATER - Gets full history including new messages
+  console.log("👤 User B joining chat...");
+  chatService.joinChat().subscribe(message => {
+    console.log("👤 User B sees:", message.text, `(${message.userId})`);
+  });
+}, 2000);
+
+/* 📋 CHAT TIMELINE OUTPUT:
+👤 User A joining chat...
+👤 User A sees: Hello everyone! (user1)        // From history buffer
+👤 User A sees: How's everyone doing? (user2)  // From history buffer
+👤 User A sees: Great to be here! (user3)      // From history buffer
+👤 User A sees: Welcome User A! (user2)        // Live message
+👤 User B joining chat...
+👤 User B sees: Hello everyone! (user1)        // Full history replay
+👤 User B sees: How's everyone doing? (user2)  // Full history replay
+👤 User B sees: Great to be here! (user3)      // Full history replay
+👤 User B sees: Welcome User A! (user2)        // Full history replay
+*/
 class ChatService {
   private messagesSubject = new ReplaySubject<ChatMessage>(50); // Last 50 messages
   public messages$ = this.messagesSubject.asObservable();
@@ -492,7 +631,7 @@ class ChatService {
     });
   }
 }
-```
+````
 
 ### **4. AsyncSubject - Only Last Value on Complete**
 
@@ -603,101 +742,320 @@ Creation operators are **factory functions** that create Observables from variou
 
 ### **1. of - Create from Known Values**
 
-```typescript
+````typescript
 import { of } from "rxjs";
 import { delay, map } from "rxjs/operators";
 
-// Create Observable from known values (synchronous)
-const numbersObservable = of(1, 2, 3, 4, 5);
+// 🏗️ CREATE OBSERVABLE FROM KNOWN VALUES - Synchronous emission of predefined data
+const numbersObservable = of(1, 2, 3, 4, 5); // 📊 Creates observable that emits each number sequentially
 
-console.log("=== of() Operator ===");
+console.log("=== 🔢 of() Operator ===");
 numbersObservable.subscribe({
-  next: (value) => console.log("📨 Received number:", value),
-  complete: () => console.log("✅ Numbers completed"),
+  next: (value) => console.log("📨 Received number:", value), // 📊 Each number emitted individually
+  complete: () => console.log("✅ Numbers completed"), // 🎉 Completes after all values emitted
 });
 
-// Create Observable from objects
+// 🏗️ CREATE OBSERVABLE FROM OBJECTS - Complex data structures
 const usersObservable = of(
-  { id: 1, name: "John", email: "john@email.com" },
-  { id: 2, name: "Jane", email: "jane@email.com" },
-  { id: 3, name: "Bob", email: "bob@email.com" }
+  { id: 1, name: "John", email: "john@email.com" },   // 👤 First user object
+  { id: 2, name: "Jane", email: "jane@email.com" },   // 👤 Second user object
+  { id: 3, name: "Bob", email: "bob@email.com" }      // 👤 Third user object
 );
 
-console.log("=== of() with Objects ===");
+console.log("=== 👥 of() with Objects ===");
 usersObservable
   .pipe(
-    // Transform each user object
-    map((user) => `👤 ${user.name} (${user.email})`),
-    // Add delay to simulate async
-    delay(500)
+    // 🔄 TRANSFORM EACH USER OBJECT - Map operator modifies emitted data
+    map((user) => `👤 ${user.name} (${user.email})`), // 📝 Format user info as string
+    // ⏱️ ADD DELAY TO SIMULATE ASYNC - Make synchronous data appear asynchronous
+    delay(500) // 📡 500ms delay between each user emission (simulates API call)
   )
   .subscribe({
-    next: (userInfo) => console.log(userInfo),
-    complete: () => console.log("✅ Users completed"),
+    next: (userInfo) => console.log(userInfo), // 📝 Display formatted user info
+    complete: () => console.log("✅ Users completed"), // 🎉 All users processed
   });
 
-/* Output:
+/* 📋 EXECUTION TIMELINE AND OUTPUT:
 === of() Operator ===
-📨 Received number: 1
-📨 Received number: 2
-📨 Received number: 3
-📨 Received number: 4
-📨 Received number: 5
-✅ Numbers completed
+0ms:   📨 Received number: 1      // Immediate synchronous emission
+0ms:   📨 Received number: 2      // All values emitted at once
+0ms:   📨 Received number: 3
+0ms:   📨 Received number: 4
+0ms:   📨 Received number: 5
+0ms:   ✅ Numbers completed       // Completes immediately
 
 === of() with Objects ===
-👤 John (john@email.com)
-👤 Jane (jane@email.com)
-👤 Bob (bob@email.com)
-✅ Users completed
+500ms:  👤 John (john@email.com)   // First user after delay
+1000ms: 👤 Jane (jane@email.com)   // Second user after additional delay
+1500ms: 👤 Bob (bob@email.com)     // Third user after additional delay
+1500ms: ✅ Users completed         // Completes after all emissions
 */
-```
 
-**Real-world Angular use case:**
+**🔧 Real-world Angular use case:**
 
 ```typescript
-// Mock data service for development
+// 📚 MOCK DATA SERVICE FOR DEVELOPMENT - Practical of() operator usage
 @Injectable()
 export class UserService {
+  // 💾 MOCK USER DATA - Development/testing data
   private mockUsers = [
-    { id: 1, name: "John Doe", role: "admin" },
-    { id: 2, name: "Jane Smith", role: "user" },
-    { id: 3, name: "Bob Johnson", role: "moderator" },
+    { id: 1, name: "John Doe", role: "admin" },      // 👑 Admin user
+    { id: 2, name: "Jane Smith", role: "user" },     // 👤 Regular user
+    { id: 3, name: "Bob Johnson", role: "moderator" }, // 🛡️ Moderator user
   ];
 
+  /**
+   * 👥 GET USERS METHOD - Environment-aware data source
+   * Returns real API data in production, mock data in development
+   * @returns {Observable<User[]>} Stream of user data
+   */
   getUsers(): Observable<User[]> {
-    // In development, return mock data immediately
+    // 🌐 PRODUCTION MODE - Use real API endpoint
     if (environment.production) {
-      return this.http.get<User[]>("/api/users");
+      return this.http.get<User[]>("/api/users"); // 📡 HTTP request to server
     } else {
-      // Return mock data with simulated delay
+      // 🛠️ DEVELOPMENT MODE - Use mock data with of() operator
       return of(this.mockUsers).pipe(
-        delay(1000) // Simulate network delay
+        delay(1000) // ⏱️ Simulate network latency for realistic testing
       );
     }
   }
 
+  /**
+   * 🔍 GET USER BY ID METHOD - Find specific user
+   * @param {number} id - User identifier
+   * @returns {Observable<User | null>} Single user or null if not found
+   */
   getUserById(id: number): Observable<User | null> {
+    // 🔍 FIND USER IN MOCK DATA - Synchronous search
     const user = this.mockUsers.find((u) => u.id === id);
-    return of(user || null);
+
+    // 🏗️ CREATE OBSERVABLE - Return found user or null using of()
+    return of(user || null); // 📦 Wraps result in Observable for consistent API
+  }
+
+  /**
+   * ✅ VALIDATE USER PERMISSIONS - Quick permission check
+   * @param {number} userId - User to check
+   * @param {string} permission - Required permission
+   * @returns {Observable<boolean>} Permission validation result
+   */
+  hasPermission(userId: number, permission: string): Observable<boolean> {
+    const user = this.mockUsers.find(u => u.id === userId);
+
+    // 🔒 PERMISSION LOGIC - Admin has all permissions
+    const hasPermission = user?.role === 'admin' ||
+                         (user?.role === 'moderator' && permission !== 'admin');
+
+    // 🏗️ RETURN OBSERVABLE BOOLEAN - Consistent async API
+    return of(hasPermission).pipe(
+      delay(100) // ⏱️ Small delay to simulate permission check
+    );
   }
 }
-```
+````
 
 ### **2. from - Create from Iterables/Promises**
 
-```typescript
+````typescript
 import { from, fromEvent } from "rxjs";
 import { map, take } from "rxjs/operators";
 
-// Convert array to Observable
-const arrayObservable = from([10, 20, 30, 40, 50]);
+// 🔄 CONVERT ARRAY TO OBSERVABLE - Transform iterable into reactive stream
+const arrayObservable = from([10, 20, 30, 40, 50]); // 📊 Each array element becomes separate emission
 
-console.log("=== from() with Array ===");
+console.log("=== 📊 from() with Array ===");
 arrayObservable.subscribe({
-  next: (value) => console.log("📨 Array value:", value),
-  complete: () => console.log("✅ Array completed"),
+  next: (value) => console.log("📨 Array value:", value), // 📊 Each element emitted individually
+  complete: () => console.log("✅ Array completed"), // 🎉 Completes after all elements processed
 });
+
+// 🔄 CONVERT PROMISE TO OBSERVABLE - Handle async operations reactively
+const promiseObservable = from(
+  fetch('https://jsonplaceholder.typicode.com/users/1') // 🌐 HTTP request returning Promise
+    .then(response => response.json()) // 🔄 Parse JSON response
+);
+
+console.log("=== 🌐 from() with Promise ===");
+promiseObservable.subscribe({
+  next: (user) => console.log("👤 User from Promise:", user.name), // 👤 Handle resolved Promise value
+  error: (error) => console.error("❌ Promise error:", error), // 🚨 Handle Promise rejection
+  complete: () => console.log("✅ Promise completed") // 🎉 Promise resolved successfully
+});
+
+// 🔄 CONVERT STRING TO OBSERVABLE - Each character as separate emission
+const stringObservable = from("Hello"); // 📝 Each character becomes an emission
+
+console.log("=== 📝 from() with String ===");
+stringObservable
+  .pipe(
+    map(char => char.toUpperCase()), // 🔄 Transform each character to uppercase
+    map(char => `📝 Letter: ${char}`) // 📝 Format each character for display
+  )
+  .subscribe({
+    next: (letter) => console.log(letter), // 📝 Display each formatted character
+    complete: () => console.log("✅ String completed") // 🎉 All characters processed
+  });
+
+// 🖱️ CONVERT DOM EVENTS TO OBSERVABLE - Reactive event handling
+const buttonClickObservable = fromEvent(document.getElementById('myButton'), 'click');
+
+console.log("=== 🖱️ fromEvent() with DOM Events ===");
+buttonClickObservable
+  .pipe(
+    take(5), // 🔢 Only take first 5 clicks
+    map((event: Event) => ({
+      timestamp: Date.now(), // ⏱️ When click occurred
+      target: (event.target as HTMLElement)?.tagName, // 🎯 What was clicked
+      coordinates: { // 📍 Where click occurred
+        x: (event as MouseEvent).clientX,
+        y: (event as MouseEvent).clientY
+      }
+    }))
+  )
+  .subscribe({
+    next: (clickData) => console.log("🖱️ Click:", clickData), // 🖱️ Handle each click
+    complete: () => console.log("✅ 5 clicks completed") // 🎉 After 5 clicks
+  });
+
+/* 📋 EXECUTION TIMELINE AND OUTPUT:
+=== from() with Array ===
+0ms: 📨 Array value: 10           // Immediate synchronous emissions
+0ms: 📨 Array value: 20
+0ms: 📨 Array value: 30
+0ms: 📨 Array value: 40
+0ms: 📨 Array value: 50
+0ms: ✅ Array completed
+
+=== from() with String ===
+0ms: 📝 Letter: H                 // Each character emitted separately
+0ms: 📝 Letter: E
+0ms: 📝 Letter: L
+0ms: 📝 Letter: L
+0ms: 📝 Letter: O
+0ms: ✅ String completed
+
+=== from() with Promise ===
+~200ms: 👤 User from Promise: Leanne Graham  // When Promise resolves
+~200ms: ✅ Promise completed
+
+=== fromEvent() with DOM Events ===
+// Output depends on user clicks:
+Click 1: 🖱️ Click: {timestamp: 1699123456789, target: 'BUTTON', coordinates: {x: 150, y: 200}}
+Click 2: 🖱️ Click: {timestamp: 1699123457123, target: 'BUTTON', coordinates: {x: 152, y: 198}}
+... (up to 5 clicks)
+✅ 5 clicks completed
+*/
+
+**🔧 Real-world Angular use cases:**
+
+```typescript
+// 📱 FILE UPLOAD SERVICE - Practical from() operator usage
+@Injectable()
+export class FileUploadService {
+
+  /**
+   * 📁 UPLOAD MULTIPLE FILES - Convert FileList to Observable stream
+   * @param {FileList} files - Files selected by user
+   * @returns {Observable<UploadResult>} Stream of upload results
+   */
+  uploadFiles(files: FileList): Observable<UploadResult> {
+    // 🔄 CONVERT FILELIST TO ARRAY - FileList is iterable but not array
+    const fileArray = Array.from(files); // 📊 Convert to proper array
+
+    // 🔄 CREATE OBSERVABLE FROM ARRAY - Each file becomes separate emission
+    return from(fileArray).pipe(
+      // 🔄 TRANSFORM EACH FILE - Process individual file uploads
+      mergeMap(file => this.uploadSingleFile(file)), // 📤 Upload each file individually
+      // 📊 TRACK PROGRESS - Add upload progress information
+      scan((acc, result) => ({
+        completed: acc.completed + 1,
+        total: fileArray.length,
+        results: [...acc.results, result]
+      }), { completed: 0, total: fileArray.length, results: [] })
+    );
+  }
+
+  /**
+   * 📤 SINGLE FILE UPLOAD - Handle individual file upload
+   * @param {File} file - File to upload
+   * @returns {Observable<UploadResult>} Upload result
+   */
+  private uploadSingleFile(file: File): Observable<UploadResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<UploadResult>('/api/upload', formData, {
+      reportProgress: true, // 📊 Enable progress tracking
+      observe: 'events' // 🎯 Observe HTTP events
+    }).pipe(
+      // 🔄 FILTER FOR COMPLETION - Only emit when upload completes
+      filter(event => event.type === HttpEventType.Response),
+      // 📊 EXTRACT RESPONSE BODY - Get actual upload result
+      map(event => (event as HttpResponse<UploadResult>).body)
+    );
+  }
+}
+
+// 🎮 FORM VALIDATION SERVICE - Reactive form handling
+@Injectable()
+export class ValidationService {
+
+  /**
+   * 🔍 VALIDATE MULTIPLE FIELDS - Process array of validation rules
+   * @param {ValidationRule[]} rules - Validation rules to check
+   * @returns {Observable<ValidationResult>} Validation results stream
+   */
+  validateFields(rules: ValidationRule[]): Observable<ValidationResult> {
+    // 🔄 CONVERT RULES ARRAY TO OBSERVABLE - Each rule becomes emission
+    return from(rules).pipe(
+      // 🔄 PROCESS EACH RULE - Transform to validation result
+      mergeMap(rule => this.validateSingleRule(rule)),
+      // 📊 COLLECT ALL RESULTS - Gather validation outcomes
+      toArray(), // 📋 Wait for all validations to complete
+      // 🔄 TRANSFORM TO FINAL RESULT - Combine individual results
+      map(results => ({
+        isValid: results.every(r => r.isValid), // ✅ All rules must pass
+        errors: results.filter(r => !r.isValid).map(r => r.error) // ❌ Collect errors
+      }))
+    );
+  }
+
+  private validateSingleRule(rule: ValidationRule): Observable<{isValid: boolean, error?: string}> {
+    // 🔍 Validation logic implementation
+    return of({ isValid: true }); // Simplified for example
+  }
+}
+
+// 🎬 ANIMATION SERVICE - Sequential animations using from()
+@Injectable()
+export class AnimationService {
+
+  /**
+   * 🎭 PLAY ANIMATION SEQUENCE - Execute animations in order
+   * @param {AnimationStep[]} steps - Animation steps to execute
+   * @returns {Observable<AnimationResult>} Animation completion stream
+   */
+  playSequence(steps: AnimationStep[]): Observable<AnimationResult> {
+    // 🔄 CONVERT STEPS TO OBSERVABLE - Each step becomes emission
+    return from(steps).pipe(
+      // 🎬 EXECUTE STEPS SEQUENTIALLY - Wait for each animation to complete
+      concatMap(step => this.executeAnimationStep(step)),
+      // 📊 TRACK PROGRESS - Monitor animation progress
+      scan((progress, result) => ({
+        completed: progress.completed + 1,
+        total: steps.length,
+        currentStep: result.step,
+        duration: progress.duration + result.duration
+      }), { completed: 0, total: steps.length, currentStep: '', duration: 0 })
+    );
+  }
+
+  private executeAnimationStep(step: AnimationStep): Observable<AnimationResult> {
+    // 🎬 Animation execution implementation
+    return of({ step: step.name, duration: step.duration });
+  }
+}
 
 // Convert Promise to Observable
 const promiseObservable = from(
@@ -754,7 +1112,7 @@ setObservable.subscribe({
 🔢 Set value: 3
 ✅ Set completed
 */
-```
+````
 
 **Real-world Angular use case:**
 
@@ -1121,105 +1479,207 @@ Transformation operators **transform values** emitted by Observables. Think of t
 
 ### **1. map - Transform Each Value**
 
-```typescript
+````typescript
 import { of, interval } from "rxjs";
 import { map, take } from "rxjs/operators";
 
-// Basic map transformation
-const numbers = of(1, 2, 3, 4, 5);
+// 🔢 BASIC MAP TRANSFORMATION - Transform each emitted value
+const numbers = of(1, 2, 3, 4, 5); // 📊 Source observable with numbers
 
-console.log("=== map() Basic Example ===");
+console.log("=== 🔢 map() Basic Example ===");
 numbers
   .pipe(
-    map((value) => value * 2) // Transform each number
+    // 🔄 TRANSFORM EACH VALUE - Apply function to every emission
+    map((value) => value * 2) // 📈 Multiply each number by 2
   )
   .subscribe({
-    next: (value) => console.log("🔢 Doubled:", value),
-    complete: () => console.log("✅ Doubling completed"),
+    next: (value) => console.log("🔢 Doubled:", value), // 📊 Display transformed value
+    complete: () => console.log("✅ Doubling completed"), // 🎉 All values processed
   });
 
-// Transform objects
+// 👤 TRANSFORM OBJECTS - Complex data structure transformation
 const users = of(
-  { id: 1, firstName: "John", lastName: "Doe", age: 30 },
-  { id: 2, firstName: "Jane", lastName: "Smith", age: 25 },
-  { id: 3, firstName: "Bob", lastName: "Johnson", age: 35 }
+  { id: 1, firstName: "John", lastName: "Doe", age: 30 },      // 👤 User 1 data
+  { id: 2, firstName: "Jane", lastName: "Smith", age: 25 },    // 👤 User 2 data
+  { id: 3, firstName: "Bob", lastName: "Johnson", age: 35 }    // 👤 User 3 data
 );
 
-console.log("=== map() Object Transformation ===");
+console.log("=== 👤 map() Object Transformation ===");
 users
   .pipe(
+    // 🔄 COMPLEX OBJECT TRANSFORMATION - Reshape and enhance data structure
     map((user) => ({
-      id: user.id,
-      fullName: `${user.firstName} ${user.lastName}`, // Combine names
-      isAdult: user.age >= 18, // Add computed property
-      initials: `${user.firstName[0]}${user.lastName[0]}`.toUpperCase(), // Extract initials
+      id: user.id, // 🆔 Keep original ID
+      fullName: `${user.firstName} ${user.lastName}`, // 📝 Combine first and last name
+      isAdult: user.age >= 18, // ✅ Add computed boolean property
+      initials: `${user.firstName[0]}${user.lastName[0]}`.toUpperCase(), // 🔤 Extract and format initials
+      ageCategory: user.age < 30 ? 'Young' : user.age < 50 ? 'Middle-aged' : 'Senior' // 📊 Categorize by age
     }))
   )
   .subscribe({
     next: (transformedUser) =>
-      console.log("👤 Transformed user:", transformedUser),
-    complete: () => console.log("✅ User transformation completed"),
+      console.log("👤 Transformed user:", transformedUser), // 📊 Display enhanced user object
+    complete: () => console.log("✅ User transformation completed"), // 🎉 All users processed
   });
 
-// Chain multiple maps
-const timestamps = interval(1000);
+// 🔗 CHAIN MULTIPLE MAPS - Sequential transformations in pipeline
+const timestamps = interval(1000); // ⏱️ Emit incrementing numbers every second
 
-console.log("=== map() Chaining Example ===");
+console.log("=== ⏰ map() Chaining Example ===");
 timestamps
   .pipe(
-    take(5),
-    map((value) => new Date()), // Convert to Date object
+    take(5), // 🔢 Only take first 5 emissions
+    // 🔄 FIRST TRANSFORMATION - Convert counter to Date object
+    map((value) => new Date()), // 📅 Create Date from current timestamp
+    // 🔄 SECOND TRANSFORMATION - Extract time information
     map((date) => ({
-      // Transform to time info
-      timestamp: date.getTime(),
-      readable: date.toLocaleTimeString(),
-      hour: date.getHours(),
-      isWorkingHours: date.getHours() >= 9 && date.getHours() <= 17,
+      timestamp: date.getTime(), // 📊 Unix timestamp
+      readable: date.toLocaleTimeString(), // 📝 Human-readable time
+      hour: date.getHours(), // 🕐 Extract hour
+      minute: date.getMinutes(), // 🕐 Extract minute
+      isWorkingHours: date.getHours() >= 9 && date.getHours() <= 17, // 💼 Business hours check
+      dayPeriod: date.getHours() < 12 ? 'Morning' : date.getHours() < 18 ? 'Afternoon' : 'Evening' // 🌅 Time period
     }))
   )
   .subscribe({
-    next: (timeInfo) => console.log("⏰ Time info:", timeInfo),
-    complete: () => console.log("✅ Time tracking completed"),
+    next: (timeInfo) => console.log("⏰ Time info:", timeInfo), // 📊 Display time analysis
+    complete: () => console.log("✅ Time tracking completed"), // 🎉 Completed after 5 emissions
   });
 
-/* Output:
+/* 📋 EXECUTION TIMELINE AND OUTPUT:
 === map() Basic Example ===
-🔢 Doubled: 2
-🔢 Doubled: 4
-🔢 Doubled: 6
-🔢 Doubled: 8
-🔢 Doubled: 10
-✅ Doubling completed
+0ms: 🔢 Doubled: 2               // 1 * 2 = 2
+0ms: 🔢 Doubled: 4               // 2 * 2 = 4
+0ms: 🔢 Doubled: 6               // 3 * 2 = 6
+0ms: 🔢 Doubled: 8               // 4 * 2 = 8
+0ms: 🔢 Doubled: 10              // 5 * 2 = 10
+0ms: ✅ Doubling completed
 
 === map() Object Transformation ===
-👤 Transformed user: { id: 1, fullName: 'John Doe', isAdult: true, initials: 'JD' }
-👤 Transformed user: { id: 2, fullName: 'Jane Smith', isAdult: true, initials: 'JS' }
-👤 Transformed user: { id: 3, fullName: 'Bob Johnson', isAdult: true, initials: 'BJ' }
-✅ User transformation completed
-*/
-```
+0ms: 👤 Transformed user: {id: 1, fullName: 'John Doe', isAdult: true, initials: 'JD', ageCategory: 'Young'}
+0ms: 👤 Transformed user: {id: 2, fullName: 'Jane Smith', isAdult: true, initials: 'JS', ageCategory: 'Young'}
+0ms: 👤 Transformed user: {id: 3, fullName: 'Bob Johnson', isAdult: true, initials: 'BJ', ageCategory: 'Middle-aged'}
+0ms: ✅ User transformation completed
 
-**Real-world Angular use case:**
+=== map() Chaining Example ===
+1000ms: ⏰ Time info: {timestamp: 1699..., readable: '2:30:15 PM', hour: 14, minute: 30, isWorkingHours: true, dayPeriod: 'Afternoon'}
+2000ms: ⏰ Time info: {timestamp: 1699..., readable: '2:30:16 PM', hour: 14, minute: 30, isWorkingHours: true, dayPeriod: 'Afternoon'}
+... (continues for 5 emissions)
+*/
+
+**🔧 Real-world Angular use case:**
 
 ```typescript
-// Product service with data transformation
+// 📦 PRODUCT SERVICE WITH DATA TRANSFORMATION - Practical map() usage
 @Injectable()
 export class ProductService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {} // 🌐 HTTP client for API calls
 
+  /**
+   * 📊 GET PRODUCTS WITH TRANSFORMATION - Fetch and enhance product data
+   * @returns {Observable<Product[]>} Stream of enhanced product objects
+   */
   getProducts(): Observable<Product[]> {
     return this.http.get<ProductDTO[]>("/api/products").pipe(
-      // Transform API response to domain model
+      // 🔄 FIRST MAP - Transform API response to domain model
       map((productDTOs) =>
-        productDTOs.map((dto) => this.transformProductDTO(dto))
+        productDTOs.map((dto) => this.transformProductDTO(dto)) // 🔄 Convert each DTO to domain object
       ),
-      // Add computed properties
+      // 🔄 SECOND MAP - Add computed properties for UI
       map((products) =>
         products.map((product) => ({
-          ...product,
-          // Calculate display price with discount
-          displayPrice:
-            product.discount > 0
+          ...product, // 📋 Spread existing properties
+          // 💰 CALCULATE DISPLAY PRICE - Handle discounts
+          displayPrice: product.discount > 0
+            ? product.price * (1 - product.discount / 100) // 📊 Apply discount
+            : product.price, // 💰 Original price if no discount
+          // 🏷️ PRICE DISPLAY FORMAT - User-friendly price strings
+          formattedPrice: this.formatPrice(product.price), // 💲 Format as currency
+          discountText: product.discount > 0
+            ? `${product.discount}% OFF` // 🏷️ Discount label
+            : null, // 🚫 No discount text
+          // 📊 STOCK STATUS - Inventory level categorization
+          stockStatus: this.getStockStatus(product.quantity), // 📦 Calculate stock level
+          // 🎯 UI DISPLAY FLAGS - Frontend rendering helpers
+          isOnSale: product.discount > 0, // 🔥 Sale indicator
+          isLowStock: product.quantity < 10, // ⚠️ Low stock warning
+          isNewProduct: this.isProductNew(product.createdDate), // ✨ New product badge
+          // 🔍 SEARCH OPTIMIZATION - Enhanced searchable text
+          searchText: `${product.name} ${product.category} ${product.brand}`.toLowerCase() // 📝 Searchable string
+        }))
+      ),
+      // 🔄 THIRD MAP - Sort and categorize for display
+      map((products) =>
+        products.sort((a, b) => {
+          // 🎯 CUSTOM SORTING LOGIC - Featured products first
+          if (a.featured !== b.featured) return a.featured ? -1 : 1;
+          if (a.isOnSale !== b.isOnSale) return a.isOnSale ? -1 : 1;
+          return a.name.localeCompare(b.name); // 📝 Alphabetical fallback
+        })
+      )
+    );
+  }
+
+  /**
+   * 🔄 TRANSFORM PRODUCT DTO - Convert API response to domain model
+   * @param {ProductDTO} dto - Raw API response object
+   * @returns {Product} Domain model object
+   */
+  private transformProductDTO(dto: ProductDTO): Product {
+    return {
+      id: dto.product_id, // 🆔 Map API field to domain field
+      name: dto.product_name, // 📝 Product title
+      price: dto.price_cents / 100, // 💰 Convert cents to dollars
+      quantity: dto.stock_count, // 📦 Available inventory
+      category: dto.category_name, // 🏷️ Product category
+      brand: dto.brand_name, // 🏢 Product brand
+      description: dto.product_description, // 📝 Product details
+      imageUrl: dto.image_urls?.[0] || '/assets/no-image.png', // 🖼️ Primary image with fallback
+      rating: dto.average_rating || 0, // ⭐ Customer rating
+      reviewCount: dto.review_count || 0, // 📊 Number of reviews
+      discount: dto.discount_percentage || 0, // 💸 Discount amount
+      featured: dto.is_featured || false, // 🌟 Featured product flag
+      createdDate: new Date(dto.created_at), // 📅 Parse creation date
+      tags: dto.tags ? dto.tags.split(',') : [] // 🏷️ Convert tag string to array
+    };
+  }
+
+  /**
+   * 💲 FORMAT PRICE - Convert number to currency string
+   * @param {number} price - Price value
+   * @returns {string} Formatted price string
+   */
+  private formatPrice(price: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  }
+
+  /**
+   * 📦 GET STOCK STATUS - Categorize inventory levels
+   * @param {number} quantity - Available quantity
+   * @returns {string} Stock status category
+   */
+  private getStockStatus(quantity: number): string {
+    if (quantity === 0) return 'out-of-stock';
+    if (quantity < 5) return 'very-low';
+    if (quantity < 10) return 'low';
+    if (quantity < 50) return 'medium';
+    return 'high';
+  }
+
+  /**
+   * ✨ CHECK IF PRODUCT IS NEW - Determine if product is recently added
+   * @param {Date} createdDate - Product creation date
+   * @returns {boolean} True if product is new (within 30 days)
+   */
+  private isProductNew(createdDate: Date): boolean {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return createdDate > thirtyDaysAgo;
+  }
+}
               ? product.price * (1 - product.discount / 100)
               : product.price,
           // Determine availability status
@@ -1259,68 +1719,93 @@ export class ProductService {
     return "In Stock";
   }
 }
-```
+````
 
 ### **2. switchMap - Switch to New Observable**
 
 ```typescript
 import { of, interval, fromEvent } from "rxjs";
-import { switchMap, map, take } from "rxjs/operators";
+import { switchMap, map, take, delay } from "rxjs/operators";
 
-// switchMap cancels previous inner observable when new value arrives
-console.log("=== switchMap() Basic Example ===");
+// 🔄 SWITCHMAP CANCELLATION BEHAVIOR - Switches to new inner observable, cancelling previous
+console.log("=== 🔄 switchMap() Basic Example ===");
 
-const sourceObservable = of("A", "B", "C");
+const sourceObservable = of("A", "B", "C"); // 📊 Source emits three letters
 
 sourceObservable
   .pipe(
+    // 🔄 SWITCH TO NEW OBSERVABLE - For each source emission, create new inner observable
     switchMap((letter) => {
-      console.log(`🔄 Starting inner observable for: ${letter}`);
+      console.log(`🔄 Starting inner observable for: ${letter}`); // 🚀 Log new inner observable start
       return interval(1000).pipe(
-        take(3),
-        map((value) => `${letter}${value + 1}`) // A1, A2, A3, B1, B2, B3, etc.
+        // ⏱️ Create timer that emits every second
+        take(3), // 🔢 Only take 3 values from interval
+        map((value) => `${letter}${value + 1}`) // 📝 Combine letter with counter (A1, A2, A3)
       );
     })
   )
   .subscribe({
-    next: (value) => console.log("📨 Received:", value),
-    complete: () => console.log("✅ switchMap completed"),
+    next: (value) => console.log("📨 Received:", value), // 📊 Display final combined values
+    complete: () => console.log("✅ switchMap completed"), // 🎉 All processing complete
   });
 
-// Real-world example: Search with automatic cancellation
-const searchInput = document.createElement("input");
-searchInput.placeholder = "Search users...";
-document.body.appendChild(searchInput);
+/* 📋 SWITCHMAP BEHAVIOR ANALYSIS:
+Since of() emits synchronously and immediately:
+- "A" triggers inner observable, but is immediately cancelled by "B"
+- "B" triggers inner observable, but is immediately cancelled by "C" 
+- Only "C" inner observable completes, emitting C1, C2, C3
+This demonstrates switchMap's CANCELLATION behavior!
+*/
 
-console.log("=== switchMap() Search Example ===");
+// 🔍 REAL-WORLD EXAMPLE - Search with automatic cancellation to prevent race conditions
+const searchInput = document.createElement("input"); // 🎮 Create search input element
+searchInput.placeholder = "Search users..."; // 📝 Add placeholder text
+searchInput.style.padding = "10px"; // 🎨 Basic styling
+searchInput.style.margin = "10px"; // 🎨 Add margin
+document.body.appendChild(searchInput); // 📋 Add to DOM
 
-// Simulate user search behavior
-fromEvent(searchInput, "input")
+console.log("=== 🔍 switchMap() Search Example ===");
+
+// 🎮 REACTIVE SEARCH IMPLEMENTATION - Cancel previous searches when user types
+fromEvent(searchInput, "input") // 👂 Listen to input events
   .pipe(
-    map((event: any) => event.target.value), // Get search term
+    // 🔄 EXTRACT SEARCH TERM - Get current input value
+    map((event: any) => event.target.value), // 📝 Extract typed text
+
+    // 🔄 SWITCH TO SEARCH OBSERVABLE - Cancel previous search when new input arrives
     switchMap((searchTerm) => {
+      // 🚫 EMPTY SEARCH HANDLING - Return empty results for empty input
       if (!searchTerm.trim()) {
-        return of([]); // Return empty results for empty search
+        return of([]); // 📋 Empty array for empty search
       }
 
-      console.log(`🔍 Searching for: ${searchTerm}`);
+      console.log(`🔍 Searching for: ${searchTerm}`); // 📝 Log search initiation
 
-      // Simulate API call
+      // 🌐 SIMULATE API CALL - Mock HTTP request with realistic delay
       return of([
         {
-          id: 1,
-          name: `${searchTerm} User 1`,
-          email: `${searchTerm.toLowerCase()}1@example.com`,
+          id: 1, // 🆔 User identifier
+          name: `${searchTerm} User 1`, // 👤 Dynamic name based on search
+          email: `${searchTerm.toLowerCase()}1@example.com`, // 📧 Generated email
+          avatar: `https://ui-avatars.com/api/?name=${searchTerm}+User+1`, // 🖼️ Avatar URL
         },
         {
           id: 2,
           name: `${searchTerm} User 2`,
           email: `${searchTerm.toLowerCase()}2@example.com`,
+          avatar: `https://ui-avatars.com/api/?name=${searchTerm}+User+2`,
+        },
+        {
+          id: 3,
+          name: `${searchTerm} User 3`,
+          email: `${searchTerm.toLowerCase()}3@example.com`,
+          avatar: `https://ui-avatars.com/api/?name=${searchTerm}+User+3`,
         },
       ]).pipe(
-        delay(500), // Simulate network delay
+        delay(500), // ⏱️ 500ms delay to simulate network latency
+        // 📊 LOG COMPLETION - Track when search finishes
         map((users) => {
-          console.log(`✅ Search completed for: ${searchTerm}`);
+          console.log(`✅ Search completed for: ${searchTerm}`); // 🎉 Search finished
           return users;
         })
       );
@@ -1328,85 +1813,459 @@ fromEvent(searchInput, "input")
   )
   .subscribe({
     next: (results) => {
-      console.log("📋 Search results:", results);
+      console.log("📋 Search results:", results); // 📊 Display search results
+      // 🎨 In real app: update UI with results
+    },
+    error: (error) => {
+      console.error("❌ Search error:", error); // 🚨 Handle search errors
     },
   });
 
-/* Output when typing "john" then quickly "jane":
-🔍 Searching for: j
-🔍 Searching for: jo
-🔍 Searching for: joh
-🔍 Searching for: john
-🔍 Searching for: jane
-✅ Search completed for: jane (previous searches cancelled)
-📋 Search results: [{ id: 1, name: 'jane User 1', email: 'jane1@example.com' }, ...]
+/* 📋 SEARCH BEHAVIOR DEMONSTRATION:
+If user types "john" quickly then "jane":
+🔍 Searching for: j           // First search starts
+🔍 Searching for: jo          // Previous search CANCELLED, new search starts  
+🔍 Searching for: joh         // Previous search CANCELLED, new search starts
+🔍 Searching for: john        // Previous search CANCELLED, new search starts
+🔍 Searching for: jane        // Previous search CANCELLED, new search starts
+✅ Search completed for: jane // Only the final search completes
+📋 Search results: [...jane results...] // Only latest results displayed
+
+This prevents:
+- Race conditions (older search completing after newer one)
+- Unnecessary API calls (cancelled searches stop network requests)
+- UI flicker (results from wrong search overwriting correct ones)
+*/
+
+// 🎯 ADVANCED EXAMPLE - Dependent API calls with cancellation
+console.log("=== 🎯 switchMap() Dependent Calls Example ===");
+
+const userIds = of(1, 2, 3); // � User IDs to fetch
+
+userIds
+  .pipe(
+    // 🔄 FETCH USER PROFILE - First API call
+    switchMap((userId) => {
+      console.log(`👤 Fetching user ${userId} profile...`);
+
+      // 🌐 SIMULATE USER API CALL
+      return of({
+        id: userId,
+        name: `User ${userId}`,
+        email: `user${userId}@example.com`,
+        departmentId: userId * 10, // 🏢 Department reference
+      }).pipe(
+        delay(300), // ⏱️ Simulate API delay
+        // 🔄 CHAIN SECOND API CALL - Fetch department info
+        switchMap((user) => {
+          console.log(
+            `🏢 Fetching department ${user.departmentId} for user ${user.id}...`
+          );
+
+          // 🌐 SIMULATE DEPARTMENT API CALL
+          return of({
+            id: user.departmentId,
+            name: `Department ${user.departmentId}`,
+            manager: `Manager ${user.departmentId}`,
+            location: `Building ${user.departmentId}`,
+          }).pipe(
+            delay(200), // ⏱️ Simulate second API delay
+            // 🔗 COMBINE USER AND DEPARTMENT DATA
+            map((department) => ({
+              user: user, // 👤 User information
+              department: department, // 🏢 Department information
+              fullProfile: `${user.name} works in ${department.name} managed by ${department.manager}`, // 📝 Combined info
+            }))
+          );
+        })
+      );
+    })
+  )
+  .subscribe({
+    next: (profile) => {
+      console.log("👥 Complete profile:", profile); // 📊 Display combined data
+    },
+    complete: () => console.log("✅ All profiles loaded"), // 🎉 All processing done
+  });
+
+/* 📋 DEPENDENT CALLS OUTPUT:
+Since of() emits synchronously, only the last user (3) completes:
+👤 Fetching user 1 profile...  // Started and cancelled
+👤 Fetching user 2 profile...  // Started and cancelled  
+👤 Fetching user 3 profile...  // Completed
+🏢 Fetching department 30 for user 3...
+👥 Complete profile: {user: {id: 3, name: 'User 3'...}, department: {id: 30, name: 'Department 30'...}, fullProfile: 'User 3 works in Department 30 managed by Manager 30'}
+✅ All profiles loaded
+
+This demonstrates how switchMap prevents cascading API calls when source emits rapidly!
 */
 ```
 
-**Real-world Angular use case:**
+// 🎯 ANGULAR SERVICE IMPLEMENTATION - Real-world switchMap usage patterns
 
-```typescript
-// User search component with automatic cancellation
+// 🔍 USER SEARCH SERVICE - Demonstrates search with automatic cancellation
+@Injectable({
+providedIn: 'root' // 🌐 Available application-wide
+})
+export class UserSearchService {
+private readonly API_BASE_URL = 'https://api.example.com'; // 🌐 API endpoint base
+
+constructor(private http: HttpClient) {} // 🌐 Inject HTTP client
+
+// 🔍 SEARCH USERS METHOD - Returns observable with cancellation capability
+searchUsers(query: string): Observable<User[]> {
+// 🚫 VALIDATION - Handle empty search gracefully
+if (!query || query.trim().length < 2) {
+return of([]); // 📋 Return empty results for invalid queries
+}
+
+    console.log(`🔍 API call: Searching for users with query: "${query}"`); // 📝 Log API call
+
+    // 🌐 HTTP REQUEST - Real API call with query parameters
+    return this.http.get<User[]>(`${this.API_BASE_URL}/users/search`, {
+      params: {
+        q: query.trim(), // 📝 Clean query parameter
+        limit: '10', // 🔢 Limit results for performance
+        fields: 'id,name,email,avatar,department' // 📊 Specify required fields
+      }
+    }).pipe(
+      // 📊 TRANSFORM RESPONSE - Add computed properties
+      map((users: User[]) => {
+        console.log(`✅ API response: Found ${users.length} users for "${query}"`); // 📈 Log results
+        return users.map(user => ({
+          ...user,
+          searchQuery: query, // 🏷️ Track which query found this user
+          timestamp: new Date() // ⏰ When this result was obtained
+        }));
+      }),
+      // ❌ ERROR HANDLING - Graceful error recovery
+      catchError((error) => {
+        console.error(`❌ Search error for query "${query}":`, error); // 🚨 Log error details
+        // 🔄 Return empty results instead of breaking the stream
+        return of([]);
+      })
+    );
+
+}
+
+// 🎯 ADVANCED SEARCH - Multi-criteria with dependent calls
+searchUsersWithDetails(query: string): Observable<UserWithDetails[]> {
+return this.searchUsers(query).pipe(
+// 🔄 CHAIN DEPENDENT CALLS - Get additional details for each user
+switchMap((users: User[]) => {
+// 🚫 EMPTY RESULTS HANDLING
+if (users.length === 0) {
+return of([]); // 📋 No users to enhance
+}
+
+        console.log(`🔄 Fetching details for ${users.length} users...`); // 📝 Log enhancement start
+
+        // 🎯 PARALLEL DETAIL FETCHING - Get department info for all users
+        const userDetailsRequests = users.map(user =>
+          this.http.get<Department>(`${this.API_BASE_URL}/departments/${user.departmentId}`).pipe(
+            // 🔗 COMBINE USER AND DEPARTMENT
+            map((department: Department) => ({
+              ...user, // 👤 Original user data
+              department: department, // 🏢 Department details
+              fullTitle: `${user.name} - ${user.role} at ${department.name}` // 📝 Computed display title
+            })),
+            // ❌ INDIVIDUAL ERROR HANDLING - Don't fail entire search for one bad department
+            catchError((error) => {
+              console.warn(`⚠️ Failed to fetch department for user ${user.id}:`, error);
+              return of({
+                ...user,
+                department: { id: user.departmentId, name: 'Unknown Department' }, // 🏢 Fallback department
+                fullTitle: `${user.name} - ${user.role}` // 📝 Fallback title without department
+              });
+            })
+          )
+        );
+
+        // 🎯 COMBINE ALL REQUESTS - Wait for all department details
+        return forkJoin(userDetailsRequests);
+      })
+    );
+
+}
+}
+
+// 🎮 COMPONENT IMPLEMENTATION - Uses search service with switchMap for reactive search
 @Component({
-  selector: "app-user-search",
-  template: `
-    <div class="search-container">
-      <input
-        #searchInput
-        type="text"
-        placeholder="Search users..."
-        class="search-input"
-      />
+selector: 'app-user-search', // 🏷️ Component selector
+template: `
+<div class="search-container">
+<!-- 🔍 SEARCH INPUT - Reactive input field -->
+<input
+#searchInput
+type="text"
+placeholder="Search users... (minimum 2 characters)"
+class="search-input"
+[class.searching]="isLoading$ | async"
+/>
 
+      <!-- 🎨 SEARCH RESULTS DISPLAY -->
       <div class="search-results">
-        <div *ngIf="isLoading" class="loading">🔄 Searching...</div>
+        <!-- ⏳ LOADING INDICATOR -->
+        <div *ngIf="isLoading$ | async" class="loading">
+          🔄 Searching... <span class="query-display">{{ currentQuery$ | async }}</span>
+        </div>
 
-        <div *ngFor="let user of searchResults" class="user-item">
-          <img [src]="user.avatar" [alt]="user.name" class="avatar" />
+        <!-- 📋 RESULTS LIST -->
+        <div *ngFor="let user of searchResults$ | async; trackBy: trackByUserId"
+             class="user-item"
+             [class.highlighted]="user.id === selectedUserId">
+          <img [src]="user.avatar || defaultAvatar"
+               [alt]="user.name"
+               class="avatar"
+               (error)="onImageError($event)" /> <!-- 🖼️ Avatar with error handling -->
+
           <div class="user-info">
-            <h4>{{ user.name }}</h4>
-            <p>{{ user.email }}</p>
-            <span class="department">{{ user.department }}</span>
+            <h4 [innerHTML]="highlightMatch(user.name, currentQuery$ | async)"></h4> <!-- 🎨 Highlight search term -->
+            <p class="email">{{ user.email }}</p>
+            <span class="department" *ngIf="user.department">
+              🏢 {{ user.department.name }}
+            </span>
+            <small class="search-meta">
+              Found via: "{{ user.searchQuery }}" at {{ user.timestamp | date:'short' }}
+            </small> <!-- 📊 Search metadata -->
+          </div>
+
+          <!-- 🎯 ACTION BUTTONS -->
+          <div class="user-actions">
+            <button (click)="selectUser(user)" class="btn-select">Select</button>
+            <button (click)="viewUserProfile(user.id)" class="btn-view">View Profile</button>
           </div>
         </div>
 
-        <div
-          *ngIf="!isLoading && searchResults.length === 0 && searchTerm"
-          class="no-results"
-        >
-          No users found for "{{ searchTerm }}"
+        <!-- 🚫 NO RESULTS MESSAGE -->
+        <div *ngIf="(searchResults$ | async)?.length === 0 && (currentQuery$ | async) && !(isLoading$ | async)"
+             class="no-results">
+          <p>No users found for "<strong>{{ currentQuery$ | async }}</strong>"</p>
+          <small>Try a different search term or check spelling</small>
+        </div>
+
+        <!-- ⚠️ ERROR MESSAGE -->
+        <div *ngIf="searchError$ | async as error" class="error-message">
+          <p>❌ Search failed: {{ error.message }}</p>
+          <button (click)="retrySearch()" class="btn-retry">Retry Search</button>
         </div>
       </div>
     </div>
-  `,
+
+`,
+styleUrls: ['./user-search.component.scss'] // 🎨 Component styles
 })
 export class UserSearchComponent implements OnInit, OnDestroy {
-  @ViewChild("searchInput") searchInput!: ElementRef;
+@ViewChild('searchInput') searchInput!: ElementRef; // 🔗 Reference to search input
 
-  searchResults: User[] = [];
-  isLoading = false;
-  searchTerm = "";
+// 🎮 COMPONENT STATE - Reactive observables for UI state management
+searchResults$!: Observable<User[]>; // 📋 Search results stream
+  isLoading$!: Observable<boolean>; // ⏳ Loading state stream
+currentQuery$!: Observable<string>; // 📝 Current search query stream
+  searchError$!: Observable<any>; // ❌ Error state stream
 
-  private destroy$ = new Subject<void>();
+selectedUserId: number | null = null; // 🎯 Currently selected user
+defaultAvatar = 'assets/default-avatar.png'; // 🖼️ Fallback avatar image
 
-  constructor(private userService: UserService) {}
+private destroy$ = new Subject<void>(); // 🧹 Cleanup subject for subscriptions
 
-  ngOnInit() {
-    // Set up reactive search
-    fromEvent(this.searchInput.nativeElement, "input")
-      .pipe(
-        map((event: any) => event.target.value),
-        debounceTime(300), // Wait 300ms after user stops typing
-        distinctUntilChanged(), // Only search if term actually changed
-        tap((term) => {
-          this.searchTerm = term;
-          this.isLoading = !!term; // Show loading for non-empty searches
-        }),
-        switchMap((term) => {
-          // Cancel previous search when new one starts
-          if (!term.trim()) {
-            return of([]); // Return empty array for empty search
-          }
+constructor(
+private userSearchService: UserSearchService, // 🔍 Inject search service
+private cdr: ChangeDetectorRef // 🔄 Change detection control
+) {}
+
+ngOnInit(): void {
+this.setupReactiveSearch(); // 🎮 Initialize reactive search functionality
+}
+
+ngOnDestroy(): void {
+// 🧹 CLEANUP - Prevent memory leaks
+this.destroy$.next();
+    this.destroy$.complete();
+}
+
+// 🎮 REACTIVE SEARCH SETUP - Core functionality using switchMap
+private setupReactiveSearch(): void {
+// 🎮 CREATE SEARCH STREAM - Listen to input changes
+const searchInput$ = fromEvent(this.searchInput.nativeElement, 'input').pipe(
+map((event: any) => event.target.value.trim()), // 📝 Extract search term
+startWith(''), // 🚀 Start with empty string
+debounceTime(300), // ⏱️ Wait 300ms after user stops typing
+distinctUntilChanged(), // 🔄 Only emit when value actually changes
+takeUntil(this.destroy$) // 🧹 Auto-unsubscribe on component destroy
+);
+
+    // 📝 CURRENT QUERY STREAM - Track what user is searching for
+    this.currentQuery$ = searchInput$;
+
+    // ⏳ LOADING STATE MANAGEMENT - Track when search is in progress
+    const loadingSubject = new BehaviorSubject<boolean>(false);
+    this.isLoading$ = loadingSubject.asObservable();
+
+    // ❌ ERROR STATE MANAGEMENT - Track search errors
+    const errorSubject = new BehaviorSubject<any>(null);
+    this.searchError$ = errorSubject.asObservable();
+
+    // 🔍 MAIN SEARCH LOGIC - switchMap cancels previous searches automatically
+    this.searchResults$ = searchInput$.pipe(
+      // 📊 LOG SEARCH ATTEMPTS - Debug search behavior
+      tap((query) => {
+        console.log(`🎮 User search input: "${query}"`); // 📝 Log user input
+        if (query.length >= 2) {
+          loadingSubject.next(true); // ⏳ Start loading
+          errorSubject.next(null); // 🧹 Clear previous errors
+        }
+      }),
+
+      // 🔄 SWITCHMAP MAGIC - Cancel previous search when new input arrives
+      switchMap((query: string) => {
+        // 🚫 HANDLE EMPTY/SHORT QUERIES - Don't search for short terms
+        if (!query || query.length < 2) {
+          loadingSubject.next(false); // ⏳ Stop loading
+          return of([]); // 📋 Return empty results
+        }
+
+        console.log(`🔄 switchMap: Starting search for "${query}"`); // 📝 Log search start
+
+        // 🔍 EXECUTE SEARCH - Call service method
+        return this.userSearchService.searchUsers(query).pipe(
+          // ✅ SUCCESS HANDLING - Process successful results
+          tap((results) => {
+            console.log(`✅ switchMap: Search completed for "${query}" with ${results.length} results`);
+            loadingSubject.next(false); // ⏳ Stop loading
+          }),
+
+          // ❌ ERROR HANDLING - Handle search failures gracefully
+          catchError((error) => {
+            console.error(`❌ switchMap: Search failed for "${query}":`, error);
+            loadingSubject.next(false); // ⏳ Stop loading
+            errorSubject.next(error); // ❌ Set error state
+            return of([]); // 📋 Return empty results to keep stream alive
+          })
+        );
+      }),
+
+      // 🎨 RESULT ENHANCEMENT - Add UI-specific properties
+      map((results: User[]) => {
+        return results.map(user => ({
+          ...user,
+          displayName: this.formatUserDisplayName(user), // 🎨 Formatted display name
+          searchRelevance: this.calculateSearchRelevance(user, this.searchInput.nativeElement.value) // 📊 Relevance score
+        }));
+      }),
+
+      // 🔄 SHARE RESULTS - Prevent duplicate API calls for multiple subscribers
+      shareReplay(1),
+
+      // 🧹 AUTO CLEANUP - Clean up when component destroys
+      takeUntil(this.destroy$)
+    );
+
+    /* 📋 SEARCH BEHAVIOR WITH SWITCHMAP:
+
+    When user types "john" quickly then "jane":
+
+    🎮 User search input: "j"           // Too short, no search
+    🎮 User search input: "jo"          // Starts search
+    🔄 switchMap: Starting search for "jo"
+    🎮 User search input: "joh"         // Cancels "jo" search, starts "joh"
+    🔄 switchMap: Starting search for "joh"
+    🎮 User search input: "john"        // Cancels "joh" search, starts "john"
+    🔄 switchMap: Starting search for "john"
+    🎮 User search input: "jane"        // Cancels "john" search, starts "jane"
+    🔄 switchMap: Starting search for "jane"
+    ✅ switchMap: Search completed for "jane" with 3 results // Only "jane" completes
+
+    Benefits:
+    - 🚫 Prevents race conditions (older results overwriting newer ones)
+    - 💰 Saves API calls (cancelled requests don't hit server)
+    - ⚡ Improves performance (only process latest search)
+    - 🎨 Better UX (no flickering results)
+    */
+
+}
+
+// 🎯 USER INTERACTION METHODS - Handle user actions
+
+selectUser(user: User): void {
+this.selectedUserId = user.id; // 🎯 Set selected user
+console.log(`👤 User selected:`, user); // 📝 Log selection
+// 🔄 Emit selection event or update parent component
+}
+
+viewUserProfile(userId: number): void {
+console.log(`👀 Viewing profile for user ${userId}`); // 📝 Log profile view
+// 🔄 Navigate to user profile page or open modal
+}
+
+retrySearch(): void {
+const currentValue = this.searchInput.nativeElement.value; // 📝 Get current search term
+this.searchInput.nativeElement.dispatchEvent(new Event('input')); // 🔄 Trigger search retry
+}
+
+onImageError(event: any): void {
+event.target.src = this.defaultAvatar; // 🖼️ Fallback to default avatar
+}
+
+// 🎨 UI HELPER METHODS - Format and enhance display
+
+trackByUserId(index: number, user: User): number {
+return user.id; // 🔄 Track users by ID for efficient Angular change detection
+}
+
+highlightMatch(text: string, query: string): string {
+if (!query) return text; // 🚫 No highlighting for empty query
+
+    const regex = new RegExp(`(${query})`, 'gi'); // 📝 Case-insensitive match
+    return text.replace(regex, '<strong>$1</strong>'); // 🎨 Wrap matches in strong tags
+
+}
+
+formatUserDisplayName(user: User): string {
+return `${user.name} (${user.email})`; // 📝 Formatted name with email
+}
+
+calculateSearchRelevance(user: User, query: string): number {
+// 📊 Simple relevance scoring based on match position and exactness
+if (!query) return 0;
+
+    let score = 0;
+    const lowerQuery = query.toLowerCase();
+    const lowerName = user.name.toLowerCase();
+
+    if (lowerName.startsWith(lowerQuery)) score += 10; // 🎯 Name starts with query
+    if (lowerName.includes(lowerQuery)) score += 5; // 🎯 Name contains query
+    if (user.email.toLowerCase().includes(lowerQuery)) score += 3; // 🎯 Email contains query
+
+    return score;
+
+}
+}
+
+searchResults: User[] = [];
+isLoading = false;
+searchTerm = "";
+
+private destroy$ = new Subject<void>();
+
+constructor(private userService: UserService) {}
+
+ngOnInit() {
+// Set up reactive search
+fromEvent(this.searchInput.nativeElement, "input")
+.pipe(
+map((event: any) => event.target.value),
+debounceTime(300), // Wait 300ms after user stops typing
+distinctUntilChanged(), // Only search if term actually changed
+tap((term) => {
+this.searchTerm = term;
+this.isLoading = !!term; // Show loading for non-empty searches
+}),
+switchMap((term) => {
+// Cancel previous search when new one starts
+if (!term.trim()) {
+return of([]); // Return empty array for empty search
+}
 
           return this.userService.searchUsers(term).pipe(
             catchError((error) => {
@@ -1423,166 +2282,465 @@ export class UserSearchComponent implements OnInit, OnDestroy {
       .subscribe((results) => {
         this.searchResults = results;
       });
-  }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 }
-```
+
+ngOnDestroy() {
+this.destroy$.next();
+    this.destroy$.complete();
+}
+}
+
+````
 
 ### **3. mergeMap - Merge All Inner Observables**
 
 ```typescript
-import { of, interval } from "rxjs";
-import { mergeMap, map, take, delay } from "rxjs/operators";
+import { of, interval, from } from "rxjs";
+import { mergeMap, map, take, delay, catchError, toArray } from "rxjs/operators";
 
-// mergeMap doesn't cancel previous inner observables
-console.log("=== mergeMap() Basic Example ===");
+// 🔄 MERGEMAP PARALLEL EXECUTION - Doesn't cancel previous inner observables
+console.log("=== 🔄 mergeMap() Basic Example ===");
 
-const letters = of("A", "B", "C");
+const letters = of("A", "B", "C"); // 📊 Source emits three letters synchronously
 
 letters
   .pipe(
+    // 🔄 MERGE ALL INNER OBSERVABLES - Run all simultaneously without cancellation
     mergeMap((letter) => {
-      console.log(`🚀 Starting inner observable for: ${letter}`);
-      return interval(1000).pipe(
-        take(3),
-        map((value) => `${letter}${value + 1}`)
+      console.log(`🚀 Starting inner observable for: ${letter}`); // 🎯 Each letter starts its own timer
+      return interval(1000).pipe( // ⏱️ Create timer that emits every second
+        take(3), // 🔢 Only take 3 values from interval (1, 2, 3)
+        map((value) => `${letter}${value + 1}`) // 📝 Combine letter with counter (A1, A2, A3)
       );
     })
   )
   .subscribe({
-    next: (value) => console.log("📨 Received:", value),
-    complete: () => console.log("✅ mergeMap completed"),
+    next: (value) => console.log("📨 Received:", value), // 📊 Display results as they arrive
+    complete: () => console.log("✅ mergeMap completed"), // 🎉 All inner observables completed
   });
 
-/* Output:
-🚀 Starting inner observable for: A
-🚀 Starting inner observable for: B  
-🚀 Starting inner observable for: C
-📨 Received: A1
-📨 Received: B1
-📨 Received: C1
+/* 📋 MERGEMAP PARALLEL OUTPUT:
+🚀 Starting inner observable for: A  // All three start immediately
+🚀 Starting inner observable for: B  // No cancellation like switchMap
+🚀 Starting inner observable for: C  // All run in parallel
+📨 Received: A1                      // Results arrive interleaved
+📨 Received: B1                      // Based on their individual timing
+📨 Received: C1                      // All complete independently
 📨 Received: A2
 📨 Received: B2
 📨 Received: C2
 📨 Received: A3
 📨 Received: B3
 📨 Received: C3
-✅ mergeMap completed
+✅ mergeMap completed                // Only completes when ALL inner observables complete
 */
 
-// Practical example: Parallel API calls
-const userIds = of(1, 2, 3, 4, 5);
+// 🌐 PRACTICAL EXAMPLE - Parallel API calls with realistic delays
+const userIds = of(1, 2, 3, 4, 5); // 👥 Multiple user IDs to fetch
 
-console.log("=== mergeMap() Parallel API Calls ===");
+console.log("=== 🌐 mergeMap() Parallel API Calls ===");
 
 userIds
   .pipe(
+    // 🔄 FETCH ALL USERS IN PARALLEL - No waiting for previous calls
     mergeMap((userId) => {
-      console.log(`🌐 Fetching user ${userId}...`);
+      console.log(`🌐 Fetching user ${userId}...`); // 📝 Log API call start
 
-      // Simulate API call with different delays
+      // 🌐 SIMULATE API CALL - Mock HTTP request with varying delays
       return of({
-        id: userId,
-        name: `User ${userId}`,
-        email: `user${userId}@example.com`,
+        id: userId, // 🆔 User identifier
+        name: `User ${userId}`, // 👤 User display name
+        email: `user${userId}@example.com`, // 📧 User email address
+        department: `Dept ${userId * 10}`, // 🏢 User department
+        role: userId === 1 ? 'Admin' : userId === 2 ? 'Manager' : 'Employee', // 👔 User role
+        lastLogin: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) // 📅 Random last login
       }).pipe(
-        delay(Math.random() * 2000), // Random delay 0-2 seconds
+        delay(Math.random() * 2000), // ⏱️ Random delay 0-2 seconds to simulate network variance
+        // 📊 LOG SUCCESSFUL FETCH - Track completion
         map((user) => {
-          console.log(`✅ Loaded user ${user.id}`);
+          console.log(`✅ Loaded user ${user.id} after ${Math.random() * 2000}ms`);
           return user;
         })
       );
     })
   )
   .subscribe({
-    next: (user) => console.log("👤 User loaded:", user.name),
-    complete: () => console.log("✅ All users loaded"),
+    next: (user) => {
+      console.log(`👤 User received: ${user.name} (${user.role}) - ${user.email}`); // 📊 Display user info
+    },
+    complete: () => console.log("✅ All users loaded in parallel"), // 🎉 All API calls complete
   });
-```
 
-**Real-world Angular use case:**
+/* 📋 PARALLEL API BEHAVIOR:
+🌐 Fetching user 1...     // All API calls start simultaneously
+🌐 Fetching user 2...     // No waiting for previous calls
+🌐 Fetching user 3...     // Maximum parallelism
+🌐 Fetching user 4...     // Network requests concurrent
+🌐 Fetching user 5...     // All in flight at once
+✅ Loaded user 3 after 456ms  // Results arrive in completion order
+👤 User received: User 3 (Employee) - user3@example.com
+✅ Loaded user 1 after 723ms  // Not source order
+👤 User received: User 1 (Admin) - user1@example.com
+✅ Loaded user 5 after 891ms  // Fastest completes first
+👤 User received: User 5 (Employee) - user5@example.com
+✅ Loaded user 2 after 1245ms
+👤 User received: User 2 (Manager) - user2@example.com
+✅ Loaded user 4 after 1678ms
+👤 User received: User 4 (Employee) - user4@example.com
+✅ All users loaded in parallel
+*/
+
+// 🎯 CONCURRENCY CONTROL - Limit parallel operations to prevent overwhelming
+console.log("=== 🎯 mergeMap() Concurrency Control ===");
+
+const manyTasks = from(Array.from({length: 10}, (_, i) => i + 1)); // 📊 Create 10 tasks
+
+manyTasks
+  .pipe(
+    // 🔄 CONTROLLED PARALLELISM - Maximum 3 concurrent operations
+    mergeMap((taskId) => {
+      console.log(`🚀 Starting task ${taskId}...`); // 📝 Log task start
+
+      // 🎯 SIMULATE HEAVY OPERATION - CPU or I/O intensive task
+      return of(`Task ${taskId} completed`).pipe(
+        delay(1000 + Math.random() * 1000), // ⏱️ 1-2 second processing time
+        map((result) => {
+          console.log(`✅ ${result}`); // 📊 Log task completion
+          return result;
+        })
+      );
+    }, 3) // 🔢 CONCURRENCY LIMIT - Only 3 tasks run simultaneously
+  )
+  .subscribe({
+    next: (result) => console.log(`📋 Received: ${result}`), // 📊 Display completed tasks
+    complete: () => console.log("🎉 All tasks completed with controlled concurrency"), // 🎯 Final completion
+  });
+
+/* 📋 CONCURRENCY CONTROL OUTPUT:
+🚀 Starting task 1...     // First 3 tasks start immediately
+🚀 Starting task 2...     // Up to concurrency limit
+🚀 Starting task 3...     // No more until one completes
+✅ Task 2 completed       // Task 2 finishes first
+📋 Received: Task 2 completed
+🚀 Starting task 4...     // New task starts when slot opens
+✅ Task 1 completed       // Task 1 finishes
+📋 Received: Task 1 completed
+🚀 Starting task 5...     // Another slot opens
+...                       // Pattern continues until all complete
+🎉 All tasks completed with controlled concurrency
+
+This prevents:
+- 💥 System overload (too many concurrent operations)
+- 🌐 Server rate limiting (API call limits)
+- 💾 Memory exhaustion (resource management)
+- 📊 Better performance (optimal resource usage)
+*/
+````
+
+**🎯 Real-world Angular Service Implementation:**
 
 ```typescript
-// Bulk file upload service
-@Injectable()
-export class FileUploadService {
-  constructor(private http: HttpClient) {}
+// 🚀 BULK FILE UPLOAD SERVICE - Production-ready implementation with mergeMap
+@Injectable({
+  providedIn: 'root' // 🌐 Available application-wide
+})
+export class BulkFileUploadService {
+  private readonly MAX_CONCURRENT_UPLOADS = 3; // 🔢 Prevent server overload
+  private readonly CHUNK_SIZE = 1024 * 1024; // 📊 1MB chunks for large files
 
-  uploadFiles(files: File[]): Observable<UploadResult[]> {
-    return from(files).pipe(
-      mergeMap((file) => this.uploadSingleFile(file), 3), // Limit to 3 concurrent uploads
-      toArray(), // Collect all results
-      map((results) => {
-        const successful = results.filter((r) => r.success).length;
-        const failed = results.filter((r) => !r.success).length;
+  constructor(
+    private http: HttpClient, // 🌐 HTTP client for API calls
+    private notificationService: NotificationService // 📢 User notifications
+  ) {}
 
-        console.log(
-          `Upload completed: ${successful} successful, ${failed} failed`
-        );
-        return results;
+  // 🎯 MAIN UPLOAD METHOD - Handles multiple files with progress tracking
+  uploadFiles(files: File[]): Observable<BulkUploadResult> {
+    console.log(`🚀 Starting bulk upload of ${files.length} files...`); // 📝 Log upload start
+
+    const startTime = Date.now(); // ⏰ Track total upload time
+
+    return from(files).pipe( // 📊 Convert file array to observable stream
+
+      // 🔄 PARALLEL UPLOAD WITH CONCURRENCY CONTROL
+      mergeMap((file) => this.uploadSingleFile(file), this.MAX_CONCURRENT_UPLOADS),
+
+      // 📊 COLLECT ALL RESULTS - Wait for all uploads to complete
+      toArray(),
+
+      // 📈 CALCULATE SUMMARY STATISTICS
+      map((results: UploadResult[]) => {
+        const endTime = Date.now();
+        const totalTime = endTime - startTime;
+
+        const successful = results.filter(r => r.success); // ✅ Successful uploads
+        const failed = results.filter(r => !r.success); // ❌ Failed uploads
+        const totalSize = files.reduce((sum, file) => sum + file.size, 0); // 📊 Total bytes uploaded
+
+        // 📋 CREATE SUMMARY REPORT
+        const summary: BulkUploadResult = {
+          totalFiles: files.length,
+          successfulUploads: successful.length,
+          failedUploads: failed.length,
+          totalSizeBytes: totalSize,
+          totalTimeMs: totalTime,
+          averageSpeedBytesPerSecond: totalSize / (totalTime / 1000),
+          results: results,
+          uploadRate: (successful.length / files.length) * 100 // 📊 Success percentage
+        };
+
+        console.log(`📊 Upload Summary:`, summary); // 📝 Log final summary
+
+        // 📢 NOTIFY USER OF COMPLETION
+        if (failed.length === 0) {
+          this.notificationService.showSuccess(
+            `🎉 All ${successful.length} files uploaded successfully!`
+          );
+        } else {
+          this.notificationService.showWarning(
+            `⚠️ ${successful.length} files uploaded, ${failed.length} failed`
+          );
+        }
+
+        return summary;
+      }),
+
+      // ❌ GLOBAL ERROR HANDLING - Handle service-level failures
+      catchError((error) => {
+        console.error('❌ Bulk upload service error:', error);
+        this.notificationService.showError('❌ Upload service failed');
+
+        // 🔄 Return error summary instead of breaking the stream
+        return of({
+          totalFiles: files.length,
+          successfulUploads: 0,
+          failedUploads: files.length,
+          totalSizeBytes: 0,
+          totalTimeMs: 0,
+          averageSpeedBytesPerSecond: 0,
+          results: files.map(file => ({
+            fileName: file.name,
+            fileSize: file.size,
+            success: false,
+            error: error.message
+          })),
+          uploadRate: 0
+        } as BulkUploadResult);
       })
     );
   }
 
+  // 🎯 SINGLE FILE UPLOAD - Individual file processing with chunking
   private uploadSingleFile(file: File): Observable<UploadResult> {
+    console.log(`📤 Starting upload: ${file.name} (${this.formatFileSize(file.size)})`);
+
+    const startTime = Date.now(); // ⏰ Track individual file upload time
+
+    // 🔍 PRE-UPLOAD VALIDATION
+    const validationError = this.validateFile(file);
+    if (validationError) {
+      console.warn(`⚠️ File validation failed: ${file.name} - ${validationError}`);
+      return of({
+        fileName: file.name,
+        fileSize: file.size,
+        success: false,
+        error: validationError,
+        uploadTimeMs: 0
+      });
+    }
+
+    // 📋 PREPARE UPLOAD DATA
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file); // 📎 Attach file
+    formData.append('fileName', file.name); // 📝 Original filename
+    formData.append('fileSize', file.size.toString()); // 📊 File size for validation
+    formData.append('uploadTimestamp', new Date().toISOString()); // ⏰ Upload timestamp
 
-    console.log(`🚀 Starting upload: ${file.name}`);
+    // 🌐 EXECUTE HTTP UPLOAD
+    return this.http.post<UploadApiResponse>('/api/files/upload', formData, {
+      reportProgress: true, // 📊 Enable progress tracking
+      observe: 'events' // 🎯 Listen to HTTP events
+    }).pipe(
 
-    return this.http
-      .post<any>("/api/upload", formData, {
-        reportProgress: true,
-        observe: "events",
+      // 📊 PROCESS UPLOAD EVENTS - Track progress and completion
+      map((event: HttpEvent<UploadApiResponse>) => {
+        switch (event.type) {
+
+          case HttpEventType.UploadProgress:
+            // 📈 PROGRESS TRACKING - Calculate upload percentage
+            if (event.total) {
+              const progress = Math.round((100 * event.loaded) / event.total);
+              console.log(`📊 Upload progress: ${file.name} - ${progress}%`);
+
+              // 🔄 Return progress state (will be filtered out)
+              return {
+                fileName: file.name,
+                fileSize: file.size,
+                progress: progress,
+                success: false,
+                uploading: true,
+                uploadTimeMs: Date.now() - startTime
+              } as UploadResult;
+            }
+            break;
+
+          case HttpEventType.Response:
+            // ✅ UPLOAD COMPLETION - Process successful response
+            const endTime = Date.now();
+            const uploadTime = endTime - startTime;
+
+            console.log(`✅ Upload completed: ${file.name} in ${uploadTime}ms`);
+
+            return {
+              fileName: file.name,
+              fileSize: file.size,
+              success: true,
+              uploading: false,
+              uploadTimeMs: uploadTime,
+              fileUrl: event.body?.fileUrl, // 🔗 Uploaded file URL
+              fileId: event.body?.fileId, // 🆔 Server file identifier
+              uploadSpeed: file.size / (uploadTime / 1000) // 📊 Bytes per second
+            } as UploadResult;
+        }
+
+        // 🔄 DEFAULT STATE - Initial upload state
+        return {
+          fileName: file.name,
+          fileSize: file.size,
+          progress: 0,
+          success: false,
+          uploading: true,
+          uploadTimeMs: Date.now() - startTime
+        } as UploadResult;
+      }),
+
+      // 🎯 FILTER PROGRESS EVENTS - Only emit final result
+      filter((result: UploadResult) => !result.uploading),
+
+      // ❌ INDIVIDUAL FILE ERROR HANDLING - Don't fail entire batch
+      catchError((error) => {
+        const endTime = Date.now();
+        const uploadTime = endTime - startTime;
+
+        console.error(`❌ Upload failed: ${file.name}`, error);
+
+        // 📊 RETURN ERROR RESULT - Keep the stream alive
+        return of({
+          fileName: file.name,
+          fileSize: file.size,
+          success: false,
+          uploading: false,
+          uploadTimeMs: uploadTime,
+          error: this.getErrorMessage(error), // 📝 Human-readable error
+          httpStatusCode: error.status // 🔢 HTTP error code
+        } as UploadResult);
       })
-      .pipe(
-        // Track upload progress
-        map((event) => {
-          switch (event.type) {
-            case HttpEventType.UploadProgress:
-              const progress = Math.round((100 * event.loaded) / event.total!);
-              return {
-                fileName: file.name,
-                progress,
-                success: false,
-                uploading: true,
-              };
-            case HttpEventType.Response:
-              console.log(`✅ Upload completed: ${file.name}`);
-              return {
-                fileName: file.name,
-                progress: 100,
-                success: true,
-                uploading: false,
-                url: event.body.url,
-              };
-            default:
-              return {
-                fileName: file.name,
-                progress: 0,
-                success: false,
-                uploading: true,
-              };
-          }
-        }),
-        catchError((error) => {
-          console.error(`❌ Upload failed: ${file.name}`, error);
-          return of({
-            fileName: file.name,
-            progress: 0,
-            success: false,
-            uploading: false,
-            error: error.message,
-          });
-        }),
-        // Only emit the final result
-        filter((result) => !result.uploading)
-      );
+    );
   }
+
+  // 🔍 FILE VALIDATION - Pre-upload checks
+  private validateFile(file: File): string | null {
+    const MAX_FILE_SIZE = 100 * 1024 * 1024; // 📊 100MB limit
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain'];
+
+    if (file.size > MAX_FILE_SIZE) {
+      return `File too large: ${this.formatFileSize(file.size)}. Maximum: ${this.formatFileSize(MAX_FILE_SIZE)}`;
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return `File type not allowed: ${file.type}. Allowed: ${ALLOWED_TYPES.join(', ')}`;
+    }
+
+    if (file.name.length > 255) {
+      return `Filename too long: ${file.name.length} characters. Maximum: 255`;
+    }
+
+    return null; // ✅ Validation passed
+  }
+
+  // 🔧 UTILITY METHODS - Helper functions
+
+  private formatFileSize(bytes: number): string {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+
+    return `${size.toFixed(1)} ${units[unitIndex]}`;
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error.error?.message) return error.error.message;
+    if (error.message) return error.message;
+    return `HTTP ${error.status}: ${error.statusText || 'Unknown error'}`;
+  }
+}
+
+// 📋 TYPE DEFINITIONS - Strong typing for upload results
+
+interface UploadResult {
+  fileName: string; // 📝 Original filename
+  fileSize: number; // 📊 File size in bytes
+  success: boolean; // ✅ Upload success status
+  uploading?: boolean; // 🔄 Currently uploading flag
+  progress?: number; // 📊 Upload progress percentage
+  uploadTimeMs?: number; // ⏱️ Time taken to upload
+  uploadSpeed?: number; // 📈 Upload speed in bytes/second
+  fileUrl?: string; // 🔗 URL of uploaded file
+  fileId?: string; // 🆔 Server file identifier
+  error?: string; // ❌ Error message if failed
+  httpStatusCode?: number; // 🔢 HTTP response status code
+}
+
+interface BulkUploadResult {
+  totalFiles: number; // 📊 Total files attempted
+  successfulUploads: number; // ✅ Successfully uploaded count
+  failedUploads: number; // ❌ Failed upload count
+  totalSizeBytes: number; // 📊 Total data transferred
+  totalTimeMs: number; // ⏱️ Total operation time
+  averageSpeedBytesPerSecond: number; // 📈 Average upload speed
+  uploadRate: number; // 📊 Success percentage
+  results: UploadResult[]; // 📋 Individual file results
+}
+
+interface UploadApiResponse {
+  fileUrl: string; // 🔗 Uploaded file URL
+  fileId: string; // 🆔 Server file identifier
+  message?: string; // 📝 Server message
+}
+
+/* 📋 MERGEMAP BENEFITS IN FILE UPLOAD:
+
+✅ PARALLEL PROCESSING:
+- Multiple files upload simultaneously (up to concurrency limit)
+- Faster overall completion time vs sequential processing
+- Better resource utilization (network, CPU)
+
+✅ CONCURRENCY CONTROL:
+- Prevents overwhelming server with too many simultaneous requests
+- Respects API rate limits and server capacity
+- Configurable based on server capabilities
+
+✅ ERROR ISOLATION:
+- One failed upload doesn't stop others
+- Individual error handling per file
+- Partial success scenarios handled gracefully
+
+✅ PROGRESS TRACKING:
+- Real-time progress updates for each file
+- Overall batch progress calculation
+- User feedback during long operations
+
+❌ CONSIDERATIONS:
+- Results arrive in completion order, not source order
+- Memory usage proportional to concurrent uploads
+- May overwhelm slower networks or devices
+- Server must handle concurrent requests efficiently
+*/
 }
 ```
 

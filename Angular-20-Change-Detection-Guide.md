@@ -7171,4 +7171,481 @@ export class ChangeDetectionMonitor {
 }
 ```
 
+---
+
+## 🎯 Senior Developer Interview Questions & Detailed Answers
+
+### **Q1: What is the fundamental difference between `detectChanges()` and `markForCheck()` in Angular? When would you use each one?**
+
+#### **Answer with Detailed Technical Analysis:**
+
+The key difference lies in **timing** and **scope** of change detection execution:
+
+#### **🔄 markForCheck() - Asynchronous Scheduling**
+
+```typescript
+// markForCheck() - Schedules change detection for next cycle
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<p>Counter: {{ counter }}</p>`
+})
+export class MarkForCheckExample {
+  counter = 0;
+  
+  constructor(private cdr: ChangeDetectorRef) {}
+  
+  updateWithMarkForCheck() {
+    console.log('1. Before state change');
+    this.counter++; // Line 1: Update state
+    console.log('2. After state change, before markForCheck');
+    
+    this.cdr.markForCheck(); // Line 2: Schedule for next cycle
+    console.log('3. After markForCheck - UI not updated yet');
+    
+    // Line 3: UI will update on next change detection cycle
+    setTimeout(() => {
+      console.log('4. Next tick - UI should be updated now');
+    }, 0);
+  }
+}
+
+// Internal behavior visualization:
+// markForCheck() marks component and ancestors as "dirty"
+// Waits for next change detection cycle to run
+// Updates DOM asynchronously
+```
+
+**markForCheck() Characteristics:**
+- ⏰ **Asynchronous** - schedules for next cycle
+- 📈 **Bottom-up** - marks component AND all ancestors as dirty
+- 🔄 **Batched** - multiple calls get batched together
+- 🎯 **Efficient** - optimal for multiple rapid updates
+
+#### **⚡ detectChanges() - Immediate Synchronous Execution**
+
+```typescript
+// detectChanges() - Immediate synchronous change detection
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<p>Counter: {{ counter }}</p>`
+})
+export class DetectChangesExample {
+  counter = 0;
+  
+  constructor(private cdr: ChangeDetectorRef) {}
+  
+  updateWithDetectChanges() {
+    console.log('1. Before state change');
+    this.counter++; // Line 1: Update state
+    console.log('2. After state change, before detectChanges');
+    
+    this.cdr.detectChanges(); // Line 2: Immediate detection
+    console.log('3. After detectChanges - UI updated synchronously');
+    
+    // Line 3: UI is already updated at this point
+  }
+}
+
+// Internal behavior visualization:
+// detectChanges() immediately runs change detection
+// Only checks this component and its children (top-down)
+// Updates DOM synchronously
+```
+
+**detectChanges() Characteristics:**
+- ⚡ **Synchronous** - immediate execution
+- 📉 **Top-down** - only checks this component and children
+- 🔄 **Immediate** - DOM updates happen instantly
+- 🎯 **Precise** - use when you need guaranteed immediate update
+
+#### **📊 Performance Comparison Diagram**
+
+```mermaid
+sequenceDiagram
+    participant Code as Your Code
+    participant CDR as ChangeDetectorRef
+    participant CD as Change Detection
+    participant DOM as DOM
+    
+    Note over Code,DOM: markForCheck() Flow
+    Code->>CDR: this.cdr.markForCheck()
+    CDR-->>CDR: Mark component dirty
+    Note right of CDR: Returns immediately
+    Code->>Code: Continue execution
+    Note over Code,DOM: Next Change Detection Cycle
+    CD->>DOM: Update DOM (later)
+    
+    Note over Code,DOM: detectChanges() Flow
+    Code->>CDR: this.cdr.detectChanges()
+    CDR->>CD: Run detection immediately
+    CD->>DOM: Update DOM (now)
+    CDR-->>Code: Return after DOM update
+    Code->>Code: Continue with updated DOM
+```
+
+#### **🛠️ When to Use Each Method:**
+
+**Use `markForCheck()` when:**
+- Multiple rapid state updates
+- Performance is critical
+- Working with OnPush strategy
+- Async operations (HTTP, timers, observables)
+- You don't need immediate DOM access
+
+```typescript
+// Example: Multiple updates with markForCheck
+updateMultipleProperties() {
+  this.property1 = 'new value 1';
+  this.property2 = 'new value 2'; 
+  this.property3 = 'new value 3';
+  // Single markForCheck batches all updates
+  this.cdr.markForCheck();
+}
+```
+
+**Use `detectChanges()` when:**
+- Need immediate DOM access after update
+- Testing scenarios
+- Single critical update
+- Working with third-party DOM libraries
+
+```typescript
+// Example: Immediate DOM access needed
+updateAndMeasure() {
+  this.height = 200;
+  this.cdr.detectChanges(); // Must have immediate DOM update
+  
+  // Now safe to measure DOM
+  const element = this.elementRef.nativeElement;
+  const actualHeight = element.offsetHeight;
+  console.log('Measured height:', actualHeight);
+}
+```
+
+---
+
+### **Q2: Explain the difference between `detach()` and `reattach()`. In what scenarios would you use these methods?**
+
+#### **Answer with Component Tree Management:**
+
+`detach()` and `reattach()` control whether a component participates in Angular's automatic change detection tree.
+
+#### **🔓 detach() - Removing from Change Detection Tree**
+
+```typescript
+// Component tree visualization BEFORE detach():
+// Root Component (checks automatically)
+//   ├── Parent Component (checks automatically) 
+//   └── Child Component (checks automatically)  ← This component
+
+@Component({
+  selector: 'app-performance-heavy',
+  template: `
+    <div>
+      <h3>Heavy Component ({{ isDetached ? 'DETACHED' : 'ATTACHED' }})</h3>
+      <p>Counter: {{ counter }}</p>
+      <p>Auto Timer: {{ autoTimer }}</p>
+      <button (click)="detachComponent()">Detach</button>
+      <button (click)="manualUpdate()">Manual Update</button>
+    </div>
+  `
+})
+export class PerformanceHeavyComponent implements OnInit {
+  counter = 0;
+  autoTimer = 0;
+  isDetached = false;
+  private intervalId: any;
+  
+  constructor(private cdr: ChangeDetectorRef) {}
+  
+  ngOnInit() {
+    // Auto-incrementing timer for demonstration
+    this.intervalId = setInterval(() => {
+      this.autoTimer++; // Line 1: This updates state
+      console.log(`Auto timer: ${this.autoTimer} ${this.isDetached ? '(detached - no UI update)' : '(attached - UI updates)'}`);
+    }, 1000);
+  }
+  
+  detachComponent() {
+    console.log('🔓 Detaching from change detection tree...');
+    this.cdr.detach(); // Line 2: Remove from CD tree
+    this.isDetached = true;
+    
+    // Line 3: Force final update to show detached status
+    this.cdr.detectChanges();
+    
+    console.log('✅ Component detached - automatic updates stopped');
+    // After this:
+    // - autoTimer continues incrementing (logic still runs)
+    // - UI won't update automatically (not in CD tree)
+    // - Manual detectChanges() still works
+  }
+}
+
+// Component tree visualization AFTER detach():
+// Root Component (checks automatically)
+//   ├── Parent Component (checks automatically)
+//   └── Child Component (DETACHED - skipped) ← Excluded from automatic checks
+```
+
+**What happens when detached:**
+- ❌ Component is **skipped** during automatic change detection cycles
+- ✅ Component logic **continues to run** normally
+- ✅ Manual `detectChanges()` **still works**
+- ✅ Event handlers **still trigger** (but need manual detection)
+- ⚡ **Performance boost** - no automatic checking overhead
+
+#### **🔗 reattach() - Adding back to Change Detection Tree**
+
+```typescript
+reattachComponent() {
+  console.log('🔗 Reattaching to change detection tree...');
+  this.cdr.reattach(); // Line 4: Add back to CD tree
+  this.isDetached = false;
+  
+  console.log('✅ Component reattached - automatic updates resumed');
+  // Line 5: reattach() automatically triggers change detection
+  // No need for manual detectChanges() call
+}
+
+// Component tree visualization AFTER reattach():
+// Root Component (checks automatically)
+//   ├── Parent Component (checks automatically)
+//   └── Child Component (checks automatically) ← Back in automatic checks
+```
+
+**What happens when reattached:**
+- ✅ Component **rejoins** automatic change detection cycles
+- ⚡ `reattach()` **automatically triggers** change detection
+- 🔄 All pending state changes get **synchronized** to UI
+- 📊 Component resumes normal change detection behavior
+
+#### **🎯 Real-World Use Cases:**
+
+**1. High-Frequency Updates Optimization:**
+
+```typescript
+@Component({
+  template: `
+    <div>
+      <h3>Stock Price Ticker</h3>
+      <div *ngFor="let stock of stocks">
+        {{ stock.symbol }}: ${{ stock.price }}
+      </div>
+      <p>Updates/sec: {{ updatesPerSecond }}</p>
+    </div>
+  `
+})
+export class StockTickerComponent implements OnInit {
+  stocks: Stock[] = [];
+  updatesPerSecond = 0;
+  private updateCount = 0;
+  
+  constructor(private cdr: ChangeDetectorRef) {}
+  
+  ngOnInit() {
+    // Detach for high-frequency updates
+    this.cdr.detach();
+    
+    // Simulate high-frequency stock updates
+    setInterval(() => {
+      this.updateStockPrices(); // Line 6: Update data rapidly
+      this.updateCount++;
+      
+      // Only update UI every 10 updates (performance optimization)
+      if (this.updateCount % 10 === 0) {
+        this.cdr.detectChanges(); // Line 7: Periodic UI sync
+      }
+    }, 100); // 10 times per second
+    
+    // Update counter every second
+    setInterval(() => {
+      this.updatesPerSecond = this.updateCount;
+      this.updateCount = 0;
+      this.cdr.detectChanges(); // Line 8: Update counter display
+    }, 1000);
+  }
+  
+  private updateStockPrices() {
+    // Simulate rapid price changes
+    this.stocks.forEach(stock => {
+      stock.price += (Math.random() - 0.5) * 2; // Random price change
+    });
+  }
+}
+```
+
+**2. Animation Performance:**
+
+```typescript
+@Component({
+  template: `
+    <div class="animation-container">
+      <div class="animated-box" [style.transform]="transform"></div>
+      <button (click)="startAnimation()">Start Animation</button>
+      <button (click)="stopAnimation()">Stop Animation</button>
+    </div>
+  `
+})
+export class AnimationComponent {
+  transform = 'translateX(0px)';
+  private animationId: number = 0;
+  private position = 0;
+  
+  constructor(private cdr: ChangeDetectorRef) {}
+  
+  startAnimation() {
+    // Detach to avoid change detection on every frame
+    this.cdr.detach();
+    this.animate();
+  }
+  
+  private animate() {
+    this.position += 2; // Move 2px per frame
+    this.transform = `translateX(${this.position}px)`;
+    
+    // Manual update for smooth 60fps animation
+    this.cdr.detectChanges();
+    
+    if (this.position < 500) {
+      this.animationId = requestAnimationFrame(() => this.animate());
+    } else {
+      this.stopAnimation();
+    }
+  }
+  
+  stopAnimation() {
+    cancelAnimationFrame(this.animationId);
+    // Reattach to resume normal change detection
+    this.cdr.reattach();
+  }
+}
+```
+
+**3. Conditional Performance Mode:**
+
+```typescript
+@Component({
+  template: `
+    <div>
+      <label>
+        <input type="checkbox" (change)="togglePerformanceMode($event)">
+        Performance Mode
+      </label>
+      <p>Mode: {{ performanceMode ? 'High Performance' : 'Normal' }}</p>
+      <heavy-computation-component></heavy-computation-component>
+    </div>
+  `
+})
+export class PerformanceModeComponent {
+  performanceMode = false;
+  
+  constructor(private cdr: ChangeDetectorRef) {}
+  
+  togglePerformanceMode(event: any) {
+    this.performanceMode = event.target.checked;
+    
+    if (this.performanceMode) {
+      console.log('🚀 Enabling performance mode - detaching from CD');
+      this.cdr.detach();
+      
+      // Set up manual update interval for performance mode
+      setInterval(() => {
+        this.cdr.detectChanges(); // Line 9: Manual updates every 100ms
+      }, 100);
+      
+    } else {
+      console.log('🔄 Disabling performance mode - reattaching to CD');
+      this.cdr.reattach(); // Line 10: Resume automatic updates
+    }
+  }
+}
+```
+
+#### **📋 Comprehensive Comparison Table: Change Detection Methods**
+
+| Aspect | `markForCheck()` | `detectChanges()` | `detach()` | `reattach()` |
+|--------|-----------------|-------------------|------------|--------------|
+| **🕐 Execution Timing** | Asynchronous - schedules for next cycle | Synchronous - executes immediately | Immediate - removes from tree instantly | Immediate - adds back to tree instantly |
+| **🎯 Scope of Detection** | Component + all ancestors (bottom-up) | Component + all children (top-down) | No detection - component excluded | Resumes normal detection for component |
+| **🔄 Change Detection Trigger** | Schedules component as "dirty" | Forces immediate check and DOM update | Stops automatic change detection | Re-enables automatic change detection |
+| **⚡ Performance Impact** | Excellent - batches multiple updates | Good - immediate but single execution | Excellent - eliminates unnecessary checks | Excellent - optimizes when to resume |
+| **🎨 DOM Update Timing** | Next change detection cycle | Immediately after method call | No automatic DOM updates | Next change detection cycle |
+| **🏗️ Use Case Scenarios** | OnPush strategy, async operations, multiple rapid updates | Immediate DOM access needed, testing, third-party integrations | High-frequency updates, animations, performance optimization | Resuming normal behavior after optimization |
+| **🔧 Complexity Level** | Low - simple method call | Low - simple method call | Medium - requires planning for reattachment | Medium - must pair with detach() |
+| **⚠️ Common Pitfalls** | Overuse can cause unnecessary cycles | Excessive calls hurt performance | Forgetting to reattach causes broken UI | Calling without prior detach() is redundant |
+| **🎪 Component Tree Effect** | Marks ancestors up to root | Only affects current branch downward | Removes component from detection tree | Adds component back to detection tree |
+| **📱 Event Handler Behavior** | Works normally with event handlers | Works normally with event handlers | Event handlers need manual detection | Event handlers work automatically again |
+| **🌊 Async Operation Support** | Perfect for HTTP, timers, observables | Not ideal for async operations | Requires manual updates for async | Resumes automatic async handling |
+| **🧪 Testing Considerations** | Good for integration tests | Excellent for unit tests requiring immediate DOM | Requires careful test setup | Must be paired with detach in tests |
+| **💾 Memory Implications** | Minimal - just marks flags | Minimal - single execution | None - reduces memory pressure | None - normal memory behavior |
+| **🔄 Lifecycle Hook Integration** | Works with all lifecycle hooks | Works with all lifecycle hooks | Affects ngDoCheck, ngAfterViewChecked | Resumes normal lifecycle behavior |
+| **🎭 Zone.js Interaction** | Works with or without Zone.js | Works with or without Zone.js | Independent of Zone.js | Independent of Zone.js |
+| **📊 Best Performance Pattern** | Multiple state changes + single call | Critical single update | Detach → work → detectChanges → reattach | Always pair with detach() |
+| **🚀 Angular Version Support** | Angular 2+ | Angular 2+ | Angular 2+ | Angular 2+ |
+| **🎯 OnPush Strategy** | Essential for OnPush components | Alternative for OnPush components | Performance boost for OnPush | Standard behavior for OnPush |
+| **🔍 Debugging Difficulty** | Easy - predictable timing | Easy - immediate results | Medium - requires understanding tree state | Medium - requires understanding tree state |
+| **⚖️ Bundle Size Impact** | None | None | None | None |
+
+#### **📋 Quick Reference Summary:**
+
+| Method | Use When | Performance Impact | Complexity |
+|--------|----------|-------------------|------------|
+| `markForCheck()` | Multiple updates, OnPush strategy | ⭐⭐⭐⭐⭐ Excellent | 🟢 Low |
+| `detectChanges()` | Need immediate DOM access | ⭐⭐⭐ Good | 🟢 Low |
+| `detach()` | High-frequency updates, animations | ⭐⭐⭐⭐⭐ Excellent | 🟡 Medium |
+| `reattach()` | Resume normal behavior | ⭐⭐⭐⭐⭐ Excellent | 🟡 Medium |
+
+#### **🎯 Decision Matrix:**
+
+| Scenario | Recommended Method | Reason |
+|----------|-------------------|--------|
+| **Multiple property updates** | `markForCheck()` | Batches all updates efficiently |
+| **Need immediate DOM measurement** | `detectChanges()` | Synchronous DOM update required |
+| **High-frequency data streaming** | `detach()` → periodic `detectChanges()` | Prevents performance bottlenecks |
+| **Animation with requestAnimationFrame** | `detach()` → `detectChanges()` per frame | Smooth 60fps performance |
+| **Component entering performance mode** | `detach()` | Eliminates unnecessary check overhead |
+| **Component exiting performance mode** | `reattach()` | Resumes normal change detection |
+| **OnPush component with async data** | `markForCheck()` | Standard pattern for OnPush |
+| **Testing component state changes** | `detectChanges()` | Immediate verification needed |
+| **WebSocket real-time updates** | `markForCheck()` | Handles async updates efficiently |
+| **Canvas/WebGL rendering loop** | `detach()` → manual updates | Maximum rendering performance |
+
+**🚨 Common Pitfalls to Avoid:**
+
+```typescript
+// ❌ WRONG: Forgetting to reattach
+detachForPerformance() {
+  this.cdr.detach();
+  // ... do performance-critical work
+  // PROBLEM: Component stays detached forever!
+}
+
+// ✅ CORRECT: Always plan reattachment
+detachForPerformance() {
+  this.cdr.detach();
+  // ... do performance-critical work
+  // Always reattach when done
+  this.cdr.reattach(); // or schedule reattachment
+}
+
+// ❌ WRONG: Excessive detectChanges calls
+updateLoop() {
+  for (let i = 0; i < 1000; i++) {
+    this.items[i].value = Math.random();
+    this.cdr.detectChanges(); // Very expensive!
+  }
+}
+
+// ✅ CORRECT: Batch updates
+updateLoop() {
+  this.cdr.detach(); // Detach first
+  for (let i = 0; i < 1000; i++) {
+    this.items[i].value = Math.random();
+  }
+  this.cdr.detectChanges(); // Single update
+  this.cdr.reattach(); // Reattach when done
+}
+```
+
 This comprehensive guide covers all aspects of Angular 20 Change Detection with detailed explanations and real-world examples. Each code block includes line-by-line explanations to help you understand the concepts thoroughly.

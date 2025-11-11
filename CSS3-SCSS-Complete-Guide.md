@@ -40,22 +40,264 @@ Understanding the CSS Box Model is crucial for precise layout control. Every HTM
 └─────────────────────────────────────┘
 ```
 
-### **💻 Box Model Implementation**
+### **💻 Box Model Implementation with HTML Examples**
+
+```html
+<!-- 🎯 HTML STRUCTURE for Box Model Examples -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS Box Model Examples</title>
+    <!-- 📄 Link to CSS file -->
+    <link rel="stylesheet" href="box-model-styles.css" />
+  </head>
+  <body>
+    <!-- 🔍 BOX MODEL COMPARISON CONTAINER -->
+    <div class="box-model-demo">
+      <!-- 📋 Section heading -->
+      <h2>Box Model Comparison</h2>
+
+      <!-- 📦 Standard box model example -->
+      <div class="demo-container">
+        <h3>Standard Box Model (content-box)</h3>
+        <div class="standard-box">
+          <!-- 📝 Content inside the box -->
+          <p>This box uses the standard box model.</p>
+          <p>Width: 200px, Padding: 20px, Border: 5px, Margin: 10px</p>
+          <p>Total width: 270px</p>
+        </div>
+      </div>
+
+      <!-- 🎯 Border-box model example -->
+      <div class="demo-container">
+        <h3>Border Box Model (border-box)</h3>
+        <div class="border-box">
+          <!-- 📝 Content inside the box -->
+          <p>This box uses border-box sizing.</p>
+          <p>Width: 200px (includes padding & border)</p>
+          <p>Content width: 150px</p>
+        </div>
+      </div>
+
+      <!-- 🎨 Product card practical example -->
+      <div class="demo-container">
+        <h3>Practical Example: Product Card</h3>
+        <article class="product-card">
+          <!-- 🖼️ Product image -->
+          <img
+            src="https://via.placeholder.com/260x160/3498db/white?text=Product"
+            alt="Product Image"
+            class="product-image"
+          />
+
+          <!-- 📝 Product information -->
+          <div class="product-info">
+            <h4 class="product-title">Premium Headphones</h4>
+            <p class="product-description">
+              High-quality wireless headphones with noise cancellation and
+              30-hour battery life.
+            </p>
+
+            <!-- 💰 Price and action section -->
+            <div class="product-footer">
+              <span class="product-price">$299.99</span>
+              <button class="add-to-cart-btn" type="button">Add to Cart</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </body>
+</html>
+```
 
 ```css
 /* 🎯 STANDARD BOX MODEL - Default behavior */
 .standard-box {
-  width: 200px; /* 📏 Content width only */
-  height: 100px; /* 📏 Content height only */
-  padding: 20px; /* 📦 Internal spacing */
-  border: 5px solid #333; /* 🖼️ Border thickness */
+  width: 200px;                    /* 📏 Content width only */
+  height: 100px;                   /* 📏 Content height only */
+  padding: 20px;                   /* 📦 Internal spacing */
+  border: 5px solid #333;          /* 🖼️ Border thickness */
+  margin: 10px;                    /* 🌌 External spacing */
+  background-color: #e74c3c;       /* 🔴 Red background for visibility */
+  color: white;                    /* 🔤 White text for contrast */
+
+  /* 📊 TOTAL DIMENSIONS CALCULATION:
+     Total Width = width + (padding × 2) + (border × 2) + (margin × 2)
+                 = 200px + (20px × 2) + (5px × 2) + (10px × 2)
+                 = 200px + 40px + 10px + 20px = 270px
+
+     Total Height = height + (padding × 2) + (border × 2) + (margin × 2)
+                  = 100px + (20px × 2) + (5px × 2) + (10px × 2)
+                  = 100px + 40px + 10px + 20px = 170px
+  */
+}
+
+/* 🎯 BORDER-BOX MODEL - Modern approach */
+.border-box {
+  box-sizing: border-box;          /* 🎛️ Include padding & border in width/height */
+  width: 200px;                    /* 📏 Total width including padding & border */
+  height: 100px;                   /* 📏 Total height including padding & border */
+  padding: 20px;                   /* 📦 Internal spacing (included in width) */
+  border: 5px solid #333;          /* 🖼️ Border thickness (included in width) */
+  margin: 10px;                    /* 🌌 External spacing (NOT included) */
+  background-color: #3498db;       /* 🔵 Blue background for distinction */
+  color: white;                    /* 🔤 White text for contrast */
+
+  /* 📊 BORDER-BOX CALCULATION:
+     Content Width = width - (padding × 2) - (border × 2)
+                   = 200px - (20px × 2) - (5px × 2)
+                   = 200px - 40px - 10px = 150px
+
+     Total Width = width + (margin × 2)
+                 = 200px + (10px × 2) = 220px
+  */
+}
+
+/* 🌟 UNIVERSAL BORDER-BOX - Best Practice */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;          /* 📦 Apply to all elements */
+}
+/*
+🔍 Universal border-box explanation:
+- Applies to all elements (*) and pseudo-elements (::before, ::after)
+- Makes all elements use border-box sizing by default
+- Prevents unexpected layout issues
+- Industry standard best practice
+*/
+
+/* 🎨 PRACTICAL BOX MODEL EXAMPLE - Card Component */
+.product-card {
+  /* 📐 DIMENSIONS */
+  width: 300px;                    /* 📏 Card width */
+  height: 400px;                   /* 📏 Card height */
+
+  /* 📦 SPACING */
+  padding: 0;                      /* 📦 No padding on card container */
+  margin: 16px;                    /* 🌌 Space between cards */
+
+  /* 🖼️ VISUAL STYLING */
+  background: white;               /* ⚪ White background */
+  border-radius: 12px;             /* 🔄 Rounded corners */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* 🌫️ Subtle shadow */
+  overflow: hidden;                /* 🚫 Hide overflowing content */
+
+  /* 📦 LAYOUT */
+  display: flex;                   /* 📦 Flexbox for internal layout */
+  flex-direction: column;          /* 📐 Vertical stacking */
+}
+
+.product-image {
+  /* 📐 IMAGE DIMENSIONS */
+  width: 100%;                     /* 📏 Full card width */
+  height: 160px;                   /* 📏 Fixed image height */
+  object-fit: cover;               /* 🖼️ Cover entire area */
+  object-position: center;         /* 🎯 Center the image */
+  display: block;                  /* 📦 Remove inline spacing */
+}
+/*
+🔍 Image styling explanation:
+- width: 100% makes image span full card width
+- height: 160px creates consistent image heights
+- object-fit: cover crops image to fit without distortion
+- object-position: center focuses on center of image
+*/
+
+.product-info {
+  /* 📦 CONTENT AREA SPACING */
+  padding: 20px;                   /* 📦 Internal content spacing */
+  flex: 1;                         /* 📈 Expand to fill available space */
+  display: flex;                   /* 📦 Flexbox for content layout */
+  flex-direction: column;          /* 📐 Vertical content stacking */
+}
+
+.product-title {
+  /* 📝 TITLE STYLING */
+  font-size: 1.25rem;              /* 📏 20px title size */
+  font-weight: 600;                /* 📝 Semi-bold weight */
+  color: #2c3e50;                  /* 🎨 Dark blue-gray */
+  margin: 0 0 12px 0;              /* 🌌 Bottom margin only */
+  line-height: 1.3;                /* 📏 Tight line height for headings */
+}
+
+.product-description {
+  /* 📝 DESCRIPTION STYLING */
+  font-size: 0.875rem;             /* 📏 14px description size */
+  color: #7f8c8d;                  /* 🎨 Medium gray text */
+  line-height: 1.5;                /* 📏 Readable line height */
+  margin: 0 0 20px 0;              /* 🌌 Bottom margin for spacing */
+  flex: 1;                         /* 📈 Take available vertical space */
+}
+
+.product-footer {
+  /* 📦 FOOTER LAYOUT */
+  display: flex;                   /* 📦 Horizontal footer layout */
+  justify-content: space-between;  /* 📏 Space between price and button */
+  align-items: center;             /* 📐 Vertical alignment */
+  margin-top: auto;                /* ⬆️ Push footer to bottom */
+}
+
+.product-price {
+  /* 💰 PRICE STYLING */
+  font-size: 1.5rem;               /* 📏 24px price size */
+  font-weight: 700;                /* 📝 Bold price */
+  color: #e74c3c;                  /* 🔴 Red price color for attention */
+}
+
+.add-to-cart-btn {
+  /* 🔲 BUTTON DIMENSIONS */
+  padding: 10px 20px;              /* 📦 Button padding */
+  border: none;                    /* 🚫 Remove default border */
+  border-radius: 6px;              /* 🔄 Rounded button corners */
+
+  /* 🎨 BUTTON STYLING */
+  background: #3498db;             /* 🔵 Blue button background */
+  color: white;                    /* 🔤 White button text */
+  font-size: 0.875rem;             /* 📏 14px button text */
+  font-weight: 500;                /* 📝 Medium button weight */
+  cursor: pointer;                 /* 👆 Pointer cursor on hover */
+
+  /* ⚡ INTERACTION */
+  transition: background 0.3s ease; /* 🌊 Smooth background transition */
+}
+
+.add-to-cart-btn:hover {
+  background: #2980b9;             /* 🔵 Darker blue on hover */
+}
+
+/* 📋 DEMO CONTAINER STYLING */
+.box-model-demo {
+  max-width: 1200px;               /* 📏 Maximum container width */
+  margin: 0 auto;                  /* 🎯 Center container */
+  padding: 40px 20px;              /* 📦 Container padding */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* 🔤 Font stack */
+}
+
+.demo-container {
+  margin-bottom: 40px;             /* 🌌 Space between demo sections */
+  padding: 20px;                   /* 📦 Section padding */
+  border: 1px solid #ddd;          /* 🖼️ Light border */
+  border-radius: 8px;              /* 🔄 Rounded section corners */
+  background: #f8f9fa;             /* 🎨 Light background */
+}
+
+.demo-container h3 {
+  margin-top: 0;                   /* 🚫 Remove top margin */
+  color: #2c3e50;                  /* 🎨 Dark heading color */
+  border-bottom: 2px solid #3498db; /* 🖼️ Blue underline */
+  padding-bottom: 8px;             /* 📦 Underline spacing */
+}
   margin: 10px; /* 🌌 External spacing */
 
   /* 📊 TOTAL DIMENSIONS CALCULATION:
      Total Width = width + (padding × 2) + (border × 2) + (margin × 2)
                  = 200px + (20px × 2) + (5px × 2) + (10px × 2)
                  = 200px + 40px + 10px + 20px = 270px
-     
+
      Total Height = height + (padding × 2) + (border × 2) + (margin × 2)
                   = 100px + (20px × 2) + (5px × 2) + (10px × 2)
                   = 100px + 40px + 10px + 20px = 170px
@@ -75,7 +317,7 @@ Understanding the CSS Box Model is crucial for precise layout control. Every HTM
      Content Width = width - (padding × 2) - (border × 2)
                    = 200px - (20px × 2) - (5px × 2)
                    = 200px - 40px - 10px = 150px
-     
+
      Total Width = width + (margin × 2)
                  = 200px + (10px × 2) = 220px
   */
@@ -156,53 +398,480 @@ Understanding the CSS Box Model is crucial for precise layout control. Every HTM
 
 CSS3 introduced powerful features that enable complex layouts, animations, and visual effects without JavaScript.
 
-### **🎭 CSS3 Selectors & Pseudo-classes**
+### **🎭 CSS3 Selectors & Pseudo-classes with HTML Examples**
+
+```html
+<!-- 🎯 HTML STRUCTURE for CSS3 Advanced Features -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS3 Advanced Features Demo</title>
+    <link rel="stylesheet" href="css3-features.css" />
+  </head>
+  <body>
+    <!-- 📧 CONTACT FORM - Attribute Selectors Demo -->
+    <section class="contact-section">
+      <h2>Contact Form - Attribute Selectors</h2>
+      <form class="contact-form">
+        <!-- 📧 Email input with attribute selector styling -->
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+          />
+          <!-- 📝 type="email" triggers [type="email"] selector -->
+        </div>
+
+        <!-- 📱 Phone input with different styling -->
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="Enter your phone"
+          />
+          <!-- 📞 type="tel" triggers [type="tel"] selector -->
+        </div>
+
+        <!-- 📝 Text area with custom styling -->
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            placeholder="Enter your message"
+            required
+          ></textarea>
+          <!-- 📋 required attribute triggers [required] selector -->
+        </div>
+
+        <!-- 🔲 Submit button -->
+        <button type="submit" class="submit-btn">Send Message</button>
+      </form>
+    </section>
+
+    <!-- 🖼️ GALLERY - Structural Pseudo-selectors Demo -->
+    <section class="gallery-section">
+      <h2>Photo Gallery - Structural Selectors</h2>
+      <div class="gallery-grid">
+        <!-- 🖼️ Gallery items for nth-child demonstrations -->
+        <div class="gallery-item">
+          <img
+            src="https://via.placeholder.com/300x200/e74c3c/white?text=Photo+1"
+            alt="Gallery Photo 1"
+          />
+          <p>Photo 1 - First Child</p>
+        </div>
+
+        <div class="gallery-item">
+          <img
+            src="https://via.placeholder.com/300x200/3498db/white?text=Photo+2"
+            alt="Gallery Photo 2"
+          />
+          <p>Photo 2 - Second Child</p>
+        </div>
+
+        <div class="gallery-item">
+          <img
+            src="https://via.placeholder.com/300x200/2ecc71/white?text=Photo+3"
+            alt="Gallery Photo 3"
+          />
+          <p>Photo 3 - Third Child (3n)</p>
+        </div>
+
+        <div class="gallery-item">
+          <img
+            src="https://via.placeholder.com/300x200/f39c12/white?text=Photo+4"
+            alt="Gallery Photo 4"
+          />
+          <p>Photo 4 - Fourth Child</p>
+        </div>
+
+        <div class="gallery-item">
+          <img
+            src="https://via.placeholder.com/300x200/9b59b6/white?text=Photo+5"
+            alt="Gallery Photo 5"
+          />
+          <p>Photo 5 - Fifth Child (odd)</p>
+        </div>
+
+        <div class="gallery-item">
+          <img
+            src="https://via.placeholder.com/300x200/1abc9c/white?text=Photo+6"
+            alt="Gallery Photo 6"
+          />
+          <p>Photo 6 - Sixth Child (3n)</p>
+        </div>
+
+        <div class="gallery-item">
+          <img
+            src="https://via.placeholder.com/300x200/e67e22/white?text=Photo+7"
+            alt="Gallery Photo 7"
+          />
+          <p>Photo 7 - Last Child</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 🎨 PSEUDO-ELEMENTS - Before/After Demo -->
+    <section class="pseudo-elements-section">
+      <h2>Pseudo-elements Demo</h2>
+
+      <!-- 💬 Quote with decorative pseudo-elements -->
+      <blockquote class="inspirational-quote">
+        <p>The best way to predict the future is to create it.</p>
+        <cite>Peter Drucker</cite>
+      </blockquote>
+
+      <!-- 🏷️ Badge elements with counters -->
+      <div class="notification-list">
+        <div class="notification-item">New message received</div>
+        <div class="notification-item">File uploaded successfully</div>
+        <div class="notification-item">System update available</div>
+      </div>
+
+      <!-- 🎯 Call-to-action with decorative elements -->
+      <div class="cta-banner">
+        <h3>Join Our Newsletter</h3>
+        <p>Get the latest updates and exclusive offers</p>
+        <button class="cta-button">Subscribe Now</button>
+      </div>
+    </section>
+  </body>
+</html>
+```
 
 ```css
 /* 🎯 ATTRIBUTE SELECTORS - Target elements based on attributes */
+
+/* 📧 EMAIL INPUT STYLING */
 input[type="email"] {
-  border-color: #4caf50; /* 💚 Green border for email inputs */
-  background-image: url("email-icon.svg"); /* 📧 Email icon */
-  background-repeat: no-repeat;
-  background-position: right 10px center;
+  border: 2px solid #4caf50; /* 💚 Green border for email inputs */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%234caf50' viewBox='0 0 24 24'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; /* 🚫 Don't repeat icon */
+  background-position: right 10px center; /* 📍 Position icon right */
+  background-size: 20px 20px; /* 📏 Icon size */
   padding-right: 40px; /* 📦 Space for icon */
+  border-radius: 6px; /* � Rounded corners */
 }
 
-/* 🔍 Line-by-line explanation:
-   - input[type="email"]: Targets only email input fields
-   - border-color: Changes border to green for visual feedback
-   - background-image: Adds email icon for better UX
-   - background-position: Positions icon on the right side
-   - padding-right: Prevents text overlap with icon
+/* 📱 TELEPHONE INPUT STYLING */
+input[type="tel"] {
+  border: 2px solid #2196f3; /* 🔵 Blue border for phone inputs */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%232196f3' viewBox='0 0 24 24'%3E%3Cpath d='M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 20px 20px;
+  padding-right: 40px;
+  border-radius: 6px;
+}
+
+/* 📋 REQUIRED FIELD INDICATOR */
+[required] {
+  position: relative; /* 📍 Position context for pseudo-element */
+}
+
+[required]::after {
+  content: "*"; /* 📝 Add required asterisk */
+  color: #e74c3c; /* 🔴 Red asterisk */
+  font-weight: bold; /* 📝 Bold asterisk */
+  margin-left: 4px; /* 🌌 Small spacing */
+}
+
+/* 🔍 Attribute selector explanation:
+   [type="email"]: Targets elements with type="email"
+   [required]: Targets elements with required attribute
+   ::after: Creates virtual element after content
+   SVG data URI: Inline SVG icon for better performance
 */
 
 /* 🎯 STRUCTURAL PSEUDO-SELECTORS - Dynamic element targeting */
+
+/* 🎨 ALTERNATE ROW COLORS */
 .gallery-item:nth-child(odd) {
-  background-color: #f5f5f5; /* 🎨 Alternate row colors */
+  background-color: #f8f9fa; /* 🎨 Light gray for odd items */
+  transform: translateY(-4px); /* ⬆️ Slight lift effect */
 }
 
+.gallery-item:nth-child(even) {
+  background-color: #ffffff; /* ⚪ White for even items */
+}
+
+/* 🎯 EVERY THIRD ITEM STYLING */
 .gallery-item:nth-child(3n) {
-  margin-right: 0; /* 🌌 Remove margin from every 3rd item */
+  border: 3px solid #3498db; /* 🔵 Blue border every 3rd item */
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.2); /* 🌫️ Blue shadow */
 }
 
+/* 🔄 FIRST AND LAST CHILD STYLING */
 .gallery-item:first-child {
-  border-top-left-radius: 12px; /* 🔄 Round first item corner */
-  border-bottom-left-radius: 12px;
+  border-top-left-radius: 16px; /* 🔄 Round first item corners */
+  border-bottom-left-radius: 16px;
+  position: relative;
+}
+
+.gallery-item:first-child::before {
+  content: "FEATURED"; /* 📋 Add "FEATURED" label */
+  position: absolute; /* 📍 Position absolutely */
+  top: 10px; /* 📐 From top */
+  left: 10px; /* 📐 From left */
+  background: #e74c3c; /* 🔴 Red badge background */
+  color: white; /* ⚪ White text */
+  padding: 4px 8px; /* 📦 Badge padding */
+  font-size: 0.75rem; /* 📏 Small font size */
+  font-weight: bold; /* 📝 Bold text */
+  border-radius: 4px; /* 🔄 Rounded badge */
+  z-index: 10; /* 🌊 Above other content */
 }
 
 .gallery-item:last-child {
-  border-top-right-radius: 12px; /* 🔄 Round last item corner */
-  border-bottom-right-radius: 12px;
+  border-top-right-radius: 16px; /* 🔄 Round last item corners */
+  border-bottom-right-radius: 16px;
+  position: relative;
 }
 
-/* 🔍 Theory explanation:
-   :nth-child(odd) - Selects 1st, 3rd, 5th... elements
-   :nth-child(3n) - Selects every 3rd element (3, 6, 9...)
+.gallery-item:last-child::after {
+  content: "NEW"; /* � Add "NEW" label */
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #2ecc71; /* 🟢 Green badge background */
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* 🔍 Structural selector theory:
+   :nth-child(odd) - Selects 1st, 3rd, 5th... elements (zebra striping)
+   :nth-child(even) - Selects 2nd, 4th, 6th... elements
+   :nth-child(3n) - Selects every 3rd element (3, 6, 9, 12...)
    :first-child - Selects the first child element
    :last-child - Selects the last child element
+   Useful for dynamic styling without classes
 */
 
 /* ⚡ PSEUDO-ELEMENTS - Create virtual elements */
+
+/* 💬 INSPIRATIONAL QUOTE STYLING */
+.inspirational-quote {
+  position: relative; /* 📍 Position context */
+  padding: 30px 40px; /* 📦 Quote padding */
+  margin: 40px 0; /* 🌌 Vertical spacing */
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 100%
+  ); /* 🌈 Gradient background */
+  color: white; /* ⚪ White text */
+  border-radius: 12px; /* 🔄 Rounded corners */
+  font-style: italic; /* 📝 Italic text */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* 🌫️ Deep shadow */
+}
+
+.inspirational-quote::before {
+  content: "" ";                   /* 📝 Opening quote mark */
+  position: absolute;             /* 📍 Absolute positioning */
+  top: -10px;                     /* 📐 Above the quote */
+  left: 20px;                     /* 📐 From left edge */
+  font-size: 4rem;                /* 📏 Large quote mark */
+  color: rgba(255, 255, 255, 0.3); /* ⚪ Semi-transparent white */
+  font-family: Georgia, serif;    /* 📝 Serif font for quotes */
+  line-height: 1;                 /* 📏 Tight line height */
+}
+
+.inspirational-quote::after {
+  content: " ""; /* 📝 Closing quote mark */
+  position: absolute;
+  bottom: -30px; /* 📐 Below the quote */
+  right: 20px; /* 📐 From right edge */
+  font-size: 4rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+/* 🏷️ NOTIFICATION COUNTER */
+.notification-list {
+  counter-reset: notification-counter; /* 🔢 Reset counter */
+  padding: 20px;
+}
+
+.notification-item {
+  counter-increment: notification-counter; /* 🔢 Increment counter */
+  position: relative;
+  padding: 15px 15px 15px 50px; /* 📦 Padding with space for counter */
+  margin-bottom: 10px; /* 🌌 Space between items */
+  background: #f8f9fa; /* 🎨 Light background */
+  border-left: 4px solid #3498db; /* 🔵 Blue left border */
+  border-radius: 6px;
+}
+
+.notification-item::before {
+  content: counter(notification-counter); /* 🔢 Display counter */
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%); /* 📐 Center vertically */
+  width: 25px;
+  height: 25px;
+  background: #3498db; /* 🔵 Blue counter background */
+  color: white; /* ⚪ White number */
+  border-radius: 50%; /* ⭕ Circular counter */
+  display: flex; /* 📦 Flex for centering */
+  align-items: center; /* 📐 Center content */
+  justify-content: center; /* 📐 Center content */
+  font-weight: bold; /* 📝 Bold number */
+  font-size: 0.75rem; /* 📏 Small font */
+}
+
+/* 🎯 CTA BANNER WITH DECORATIVE ELEMENTS */
+.cta-banner {
+  position: relative;
+  background: linear-gradient(
+    45deg,
+    #ff6b6b,
+    #ffa500
+  ); /* 🌈 Orange-red gradient */
+  color: white;
+  padding: 40px;
+  text-align: center;
+  border-radius: 16px;
+  overflow: hidden; /* 🚫 Hide overflowing decorations */
+}
+
+.cta-banner::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.1) 1px,
+    transparent 1px
+  ); /* ⚪ Dot pattern */
+  background-size: 20px 20px; /* 📏 Dot spacing */
+  animation: float 6s ease-in-out infinite; /* 🔄 Floating animation */
+}
+
+.cta-banner::after {
+  content: "✨"; /* ✨ Sparkle decoration */
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 2rem;
+  animation: sparkle 2s ease-in-out infinite; /* ✨ Sparkle animation */
+}
+
+/* 🎬 ANIMATIONS FOR PSEUDO-ELEMENTS */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+/* 📋 FORM STYLING */
+.contact-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* 🖼️ GALLERY STYLING */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.gallery-item {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.gallery-item p {
+  padding: 15px;
+  margin: 0;
+  font-weight: 500;
+  color: #2c3e50;
+}
 .quote-text::before {
   content: '"'; /* 📝 Opening quote mark */
   font-size: 2em; /* 📏 Large quote size */
@@ -427,10 +1096,140 @@ Each code block includes:
 
 SCSS (Sassy CSS) is a CSS preprocessor that adds powerful features like variables, nesting, mixins, and functions. Angular has built-in SCSS support for component-level and global styling.
 
-### **🚀 Angular SCSS Setup & Configuration**
+### **🚀 Angular SCSS Setup & Configuration with HTML Implementation**
+
+```html
+<!-- 📱 ANGULAR COMPONENT HTML - product-card.component.html -->
+<article
+  class="product-card"
+  [class.product-card--loading]="isLoading"
+  [class.product-card--featured]="isFeatured"
+>
+  <!-- 🖼️ PRODUCT IMAGE SECTION -->
+  <div class="product-card__image-container">
+    <!-- 📸 Main product image -->
+    <img
+      class="product-card__image"
+      [src]="product.imageUrl"
+      [alt]="product.name"
+      (load)="onImageLoad()"
+      (error)="onImageError()"
+    />
+
+    <!-- 🏷️ Product badges with dynamic classes -->
+    <div class="product-card__badges" *ngIf="product.badges?.length">
+      <span
+        class="product-card__badge"
+        [ngClass]="'product-card__badge--' + badge.type"
+        *ngFor="let badge of product.badges"
+      >
+        {{ badge.text }}
+      </span>
+    </div>
+
+    <!-- ❤️ Favorite button with state -->
+    <button
+      class="product-card__favorite-btn"
+      [class.product-card__favorite-btn--active]="isFavorite"
+      (click)="toggleFavorite()"
+      type="button"
+      [attr.aria-label]="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+    >
+      <svg class="product-card__favorite-icon" viewBox="0 0 24 24">
+        <path
+          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <!-- 📄 PRODUCT CONTENT SECTION -->
+  <div class="product-card__content">
+    <!-- 🏷️ Product category -->
+    <span class="product-card__category">{{ product.category }}</span>
+
+    <!-- � Product title -->
+    <h3 class="product-card__title">{{ product.name }}</h3>
+
+    <!-- ⭐ Product rating -->
+    <div class="product-card__rating" *ngIf="product.rating">
+      <div class="product-card__stars">
+        <span
+          class="product-card__star"
+          [class.product-card__star--filled]="i <= product.rating"
+          *ngFor="let i of [1,2,3,4,5]"
+          >★</span
+        >
+      </div>
+      <span class="product-card__rating-text"
+        >({{ product.reviewCount }} reviews)</span
+      >
+    </div>
+
+    <!-- 📝 Product description -->
+    <p class="product-card__description">{{ product.description }}</p>
+  </div>
+
+  <!-- 💰 PRODUCT FOOTER SECTION -->
+  <footer class="product-card__footer">
+    <!-- 💸 Price information -->
+    <div class="product-card__price-container">
+      <span class="product-card__price product-card__price--current">
+        {{ product.currentPrice | currency }}
+      </span>
+      <span
+        class="product-card__price product-card__price--original"
+        *ngIf="product.originalPrice && product.originalPrice !== product.currentPrice"
+      >
+        {{ product.originalPrice | currency }}
+      </span>
+      <span class="product-card__discount" *ngIf="product.discountPercentage">
+        {{ product.discountPercentage }}% OFF
+      </span>
+    </div>
+
+    <!-- 🛒 Action buttons -->
+    <div class="product-card__actions">
+      <button
+        class="product-card__btn product-card__btn--secondary"
+        (click)="quickView()"
+        type="button"
+      >
+        Quick View
+      </button>
+      <button
+        class="product-card__btn product-card__btn--primary"
+        [disabled]="!product.inStock"
+        (click)="addToCart()"
+        type="button"
+      >
+        <span *ngIf="product.inStock; else outOfStock">Add to Cart</span>
+        <ng-template #outOfStock>Out of Stock</ng-template>
+      </button>
+    </div>
+  </footer>
+
+  <!-- 🔄 Loading overlay -->
+  <div class="product-card__loading-overlay" *ngIf="isLoading">
+    <div class="product-card__spinner">
+      <svg class="product-card__spinner-svg" viewBox="0 0 50 50">
+        <circle
+          class="product-card__spinner-path"
+          cx="25"
+          cy="25"
+          r="20"
+          fill="none"
+          stroke="#3498db"
+          stroke-width="2"
+        />
+      </svg>
+    </div>
+  </div>
+</article>
+```
 
 ```typescript
-// 🔧 ANGULAR.JSON SCSS CONFIGURATION
+// �🔧 ANGULAR.JSON SCSS CONFIGURATION
 {
   "projects": {
     "your-app": {
@@ -473,7 +1272,94 @@ SCSS (Sassy CSS) is a CSS preprocessor that adds powerful features like variable
 */
 ```
 
-### **🎨 SCSS Variables & Theming System**
+```typescript
+// 📱 ANGULAR COMPONENT TypeScript - product-card.component.ts
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+
+export interface Product {
+  id: string; // 🆔 Unique product identifier
+  name: string; // 📝 Product name
+  description: string; // 📄 Product description
+  category: string; // 🏷️ Product category
+  imageUrl: string; // 🖼️ Product image URL
+  currentPrice: number; // 💰 Current price
+  originalPrice?: number; // 💸 Original price (for discounts)
+  discountPercentage?: number; // 📊 Discount percentage
+  rating: number; // ⭐ Product rating (1-5)
+  reviewCount: number; // 📊 Number of reviews
+  inStock: boolean; // 📦 Stock availability
+  badges?: ProductBadge[]; // 🏷️ Product badges (new, sale, etc.)
+}
+
+export interface ProductBadge {
+  type: "sale" | "new" | "featured" | "limited"; // 🎨 Badge types for styling
+  text: string; // 📝 Badge display text
+}
+
+@Component({
+  selector: "app-product-card", // 🏷️ Component selector
+  templateUrl: "./product-card.component.html",
+  styleUrls: ["./product-card.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush, // ⚡ Performance optimization
+})
+export class ProductCardComponent {
+  // 📥 INPUT PROPERTIES
+  @Input() product!: Product; // 🛍️ Product data from parent
+  @Input() isFeatured = false; // ⭐ Featured product flag
+  @Input() isLoading = false; // 🔄 Loading state flag
+
+  // 📤 OUTPUT EVENTS
+  @Output() favoriteToggle = new EventEmitter<{
+    productId: string;
+    isFavorite: boolean;
+  }>();
+  @Output() addToCartClick = new EventEmitter<string>(); // 🛒 Add to cart event
+  @Output() quickViewClick = new EventEmitter<string>(); // 👁️ Quick view event
+
+  // 🔧 COMPONENT STATE
+  isFavorite = false; // ❤️ Favorite state
+
+  // 🖼️ IMAGE EVENT HANDLERS
+  onImageLoad(): void {
+    console.log("Product image loaded successfully"); // 📸 Image load success
+  }
+
+  onImageError(): void {
+    console.error("Failed to load product image"); // ❌ Image load error
+    // Could set fallback image here
+  }
+
+  // ❤️ FAVORITE TOGGLE
+  toggleFavorite(): void {
+    this.isFavorite = !this.isFavorite; // 🔄 Toggle state
+    this.favoriteToggle.emit({
+      productId: this.product.id,
+      isFavorite: this.isFavorite,
+    });
+  }
+
+  // 🛒 ADD TO CART
+  addToCart(): void {
+    if (this.product.inStock) {
+      // ✅ Check stock availability
+      this.addToCartClick.emit(this.product.id);
+    }
+  }
+
+  // 👁️ QUICK VIEW
+  quickView(): void {
+    this.quickViewClick.emit(this.product.id);
+  }
+}
+```
+
+### **🎨 SCSS Variables & Theming System with Component Implementation**
 
 ```scss
 // 📁 src/app/shared/styles/_variables.scss
@@ -497,7 +1383,7 @@ $primary-colors: (
   // 🔵 Dark blue
   800: #1565c0,
   // 🔵 Very dark blue
-  900: #0d47a1 // 🔵 Darkest blue,,
+  900: #0d47a1 // 🔵 Darkest blue,,,,
 ) !default;
 
 // 🔍 SCSS Map explanation:
@@ -510,7 +1396,7 @@ $accent-colors: (
   // 🌸 Lightest pink
   500: #e91e63,
   // 🌸 Primary pink
-  900: #880e4f // 🌸 Darkest pink,,
+  900: #880e4f // 🌸 Darkest pink,,,,
 ) !default;
 
 // 🎯 SEMANTIC COLOR VARIABLES - Easy to remember names
@@ -1160,12 +2046,439 @@ Would you like me to continue with Part 3 covering positioning systems, transfor
 
 CSS positioning is fundamental to creating complex layouts. Understanding the positioning context and stacking order is crucial for modern web development.
 
-### **📐 CSS Positioning Types - Complete Understanding**
+### **📐 CSS Positioning Types with HTML Examples**
+
+```html
+<!-- 📐 CSS POSITIONING DEMO HTML -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS Positioning Complete Guide</title>
+    <link rel="stylesheet" href="positioning-styles.css" />
+  </head>
+  <body>
+    <!-- 🎯 POSITIONING DEMONSTRATIONS -->
+    <div class="positioning-demo">
+      <!-- 📋 SECTION 1: Static vs Relative Positioning -->
+      <section class="demo-section">
+        <h2>Static vs Relative Positioning</h2>
+
+        <!-- 🔍 STATIC POSITIONING DEMO -->
+        <div class="demo-container">
+          <h3>Static Positioning (Default)</h3>
+          <div class="static-demo">
+            <div class="box static-box">Static Box 1</div>
+            <div class="box static-box highlighted">
+              Static Box 2 (highlighted)
+            </div>
+            <div class="box static-box">Static Box 3</div>
+            <p>
+              📍 All boxes follow normal document flow. The middle box cannot be
+              moved with position properties.
+            </p>
+          </div>
+        </div>
+
+        <!-- 📍 RELATIVE POSITIONING DEMO -->
+        <div class="demo-container">
+          <h3>Relative Positioning</h3>
+          <div class="relative-demo">
+            <div class="box relative-box">Relative Box 1</div>
+            <div class="box relative-box relative-moved">
+              Relative Box 2 (moved)
+            </div>
+            <div class="box relative-box">Relative Box 3</div>
+            <p>
+              📍 The middle box is moved 30px right and 20px down, but its
+              original space is preserved.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 2: Absolute Positioning -->
+      <section class="demo-section">
+        <h2>Absolute Positioning Examples</h2>
+
+        <!-- 📌 ABSOLUTE POSITIONING CONTAINER -->
+        <div class="demo-container">
+          <h3>Absolute Positioning with Relative Parent</h3>
+          <div class="absolute-container">
+            <div class="container-content">
+              <p>
+                This is the container content. The absolutely positioned
+                elements are positioned relative to this container.
+              </p>
+
+              <!-- 📌 ABSOLUTELY POSITIONED ELEMENTS -->
+              <div class="absolute-box top-left">Top Left</div>
+              <div class="absolute-box top-right">Top Right</div>
+              <div class="absolute-box bottom-left">Bottom Left</div>
+              <div class="absolute-box bottom-right">Bottom Right</div>
+              <div class="absolute-box center">Centered</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 🎯 PRACTICAL EXAMPLE: IMAGE WITH OVERLAY -->
+        <div class="demo-container">
+          <h3>Practical Example: Image Card with Overlay</h3>
+          <div class="image-card">
+            <img
+              src="https://via.placeholder.com/400x250/3498db/white?text=Beautiful+Landscape"
+              alt="Landscape Photo"
+              class="card-image"
+            />
+
+            <!-- 📍 OVERLAY ELEMENTS -->
+            <div class="image-overlay">
+              <h4>Beautiful Landscape</h4>
+              <p>Stunning mountain view captured at sunset</p>
+            </div>
+
+            <div class="image-badge">Featured</div>
+
+            <div class="image-actions">
+              <button class="action-btn like-btn">❤️ Like</button>
+              <button class="action-btn share-btn">📤 Share</button>
+            </div>
+
+            <div class="image-info">
+              <span class="camera-info">📷 Canon EOS R5</span>
+              <span class="location-info">📍 Swiss Alps</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 3: Fixed Positioning -->
+      <section class="demo-section">
+        <h2>Fixed Positioning Examples</h2>
+
+        <!-- 📱 FIXED HEADER DEMO -->
+        <div class="demo-container">
+          <h3>Fixed Header Navigation</h3>
+          <div class="fixed-demo-wrapper">
+            <!-- 📍 FIXED HEADER -->
+            <header class="fixed-header">
+              <div class="header-content">
+                <div class="logo">🚀 MyBrand</div>
+                <nav class="main-nav">
+                  <a href="#" class="nav-link">Home</a>
+                  <a href="#" class="nav-link">About</a>
+                  <a href="#" class="nav-link">Services</a>
+                  <a href="#" class="nav-link">Contact</a>
+                </nav>
+                <div class="header-actions">
+                  <button class="header-btn">Login</button>
+                </div>
+              </div>
+            </header>
+
+            <!-- 📄 SCROLLABLE CONTENT -->
+            <div class="scrollable-content">
+              <h4>Scroll down to see the fixed header in action</h4>
+              <p>
+                This content area is scrollable. The header above stays fixed at
+                the top of the viewport.
+              </p>
+
+              <div class="content-block">
+                <h5>Content Block 1</h5>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+              </div>
+
+              <div class="content-block">
+                <h5>Content Block 2</h5>
+                <p>
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
+                </p>
+              </div>
+
+              <div class="content-block">
+                <h5>Content Block 3</h5>
+                <p>
+                  Duis aute irure dolor in reprehenderit in voluptate velit esse
+                  cillum dolore eu fugiat nulla pariatur.
+                </p>
+              </div>
+
+              <div class="content-block">
+                <h5>Content Block 4</h5>
+                <p>
+                  Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                  qui officia deserunt mollit anim id est laborum.
+                </p>
+              </div>
+            </div>
+
+            <!-- 📍 FIXED SIDEBAR -->
+            <aside class="fixed-sidebar">
+              <h4>Quick Links</h4>
+              <ul>
+                <li><a href="#">📊 Dashboard</a></li>
+                <li><a href="#">📈 Analytics</a></li>
+                <li><a href="#">👥 Users</a></li>
+                <li><a href="#">⚙️ Settings</a></li>
+              </ul>
+            </aside>
+
+            <!-- 🔔 FIXED NOTIFICATION -->
+            <div class="fixed-notification">
+              <span>🔔 3 new messages</span>
+              <button class="close-btn">✖️</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 4: Sticky Positioning -->
+      <section class="demo-section">
+        <h2>Sticky Positioning Examples</h2>
+
+        <!-- 📌 STICKY TABLE HEADER -->
+        <div class="demo-container">
+          <h3>Sticky Table Header</h3>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr class="sticky-header-row">
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>iPhone 15 Pro</td>
+                  <td>Electronics</td>
+                  <td>$999.00</td>
+                  <td>25</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>Samsung Galaxy S24</td>
+                  <td>Electronics</td>
+                  <td>$899.00</td>
+                  <td>18</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>MacBook Pro M3</td>
+                  <td>Computers</td>
+                  <td>$1,999.00</td>
+                  <td>12</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>Dell XPS 13</td>
+                  <td>Computers</td>
+                  <td>$1,299.00</td>
+                  <td>8</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>Sony WH-1000XM5</td>
+                  <td>Audio</td>
+                  <td>$399.00</td>
+                  <td>45</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>AirPods Pro</td>
+                  <td>Audio</td>
+                  <td>$249.00</td>
+                  <td>67</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>iPad Pro 12.9"</td>
+                  <td>Tablets</td>
+                  <td>$1,099.00</td>
+                  <td>22</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>Surface Pro 9</td>
+                  <td>Tablets</td>
+                  <td>$999.00</td>
+                  <td>15</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>Nintendo Switch</td>
+                  <td>Gaming</td>
+                  <td>$299.00</td>
+                  <td>33</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+                <tr>
+                  <td>PlayStation 5</td>
+                  <td>Gaming</td>
+                  <td>$499.00</td>
+                  <td>7</td>
+                  <td><button class="table-btn">Edit</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 📌 STICKY SIDEBAR SECTIONS -->
+        <div class="demo-container">
+          <h3>Sticky Navigation Sections</h3>
+          <div class="sticky-nav-demo">
+            <div class="content-area">
+              <!-- 📌 STICKY SECTION 1 -->
+              <div class="content-section">
+                <h4 class="sticky-section-title">📱 Mobile Development</h4>
+                <div class="section-content">
+                  <p>
+                    Mobile development focuses on creating applications for
+                    mobile devices. This includes native iOS and Android
+                    development, as well as cross-platform solutions.
+                  </p>
+                  <p>
+                    Key technologies include Swift for iOS, Kotlin for Android,
+                    React Native, Flutter, and Ionic for cross-platform
+                    development.
+                  </p>
+                  <p>
+                    Mobile developers need to consider device constraints, touch
+                    interfaces, and platform-specific design guidelines.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 📌 STICKY SECTION 2 -->
+              <div class="content-section">
+                <h4 class="sticky-section-title">🌐 Web Development</h4>
+                <div class="section-content">
+                  <p>
+                    Web development encompasses frontend and backend
+                    development. Frontend involves HTML, CSS, JavaScript, and
+                    frameworks like React, Vue, or Angular.
+                  </p>
+                  <p>
+                    Backend development includes server-side programming with
+                    languages like Node.js, Python, Java, or PHP, along with
+                    databases and APIs.
+                  </p>
+                  <p>
+                    Modern web development also includes DevOps practices, CI/CD
+                    pipelines, and cloud deployment strategies.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 📌 STICKY SECTION 3 -->
+              <div class="content-section">
+                <h4 class="sticky-section-title">🤖 AI & Machine Learning</h4>
+                <div class="section-content">
+                  <p>
+                    Artificial Intelligence and Machine Learning are
+                    transforming technology. Python is the dominant language
+                    with libraries like TensorFlow, PyTorch, and scikit-learn.
+                  </p>
+                  <p>
+                    Key areas include deep learning, natural language
+                    processing, computer vision, and reinforcement learning.
+                  </p>
+                  <p>
+                    AI applications span from recommendation systems to
+                    autonomous vehicles and medical diagnosis.
+                  </p>
+                </div>
+              </div>
+
+              <!-- 📌 STICKY SECTION 4 -->
+              <div class="content-section">
+                <h4 class="sticky-section-title">☁️ Cloud Computing</h4>
+                <div class="section-content">
+                  <p>
+                    Cloud computing provides scalable, on-demand access to
+                    computing resources. Major platforms include AWS, Azure, and
+                    Google Cloud Platform.
+                  </p>
+                  <p>
+                    Key services include compute instances, storage solutions,
+                    databases, and serverless computing with functions.
+                  </p>
+                  <p>
+                    Cloud architecture patterns include microservices,
+                    containerization with Docker and Kubernetes, and
+                    Infrastructure as Code.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 5: Z-Index and Stacking Context -->
+      <section class="demo-section">
+        <h2>Z-Index and Stacking Context</h2>
+
+        <!-- 🌊 Z-INDEX DEMONSTRATION -->
+        <div class="demo-container">
+          <h3>Z-Index Layering</h3>
+          <div class="z-index-demo">
+            <div class="layer layer-1">Layer 1 (z-index: 1)</div>
+            <div class="layer layer-2">Layer 2 (z-index: 10)</div>
+            <div class="layer layer-3">Layer 3 (z-index: 5)</div>
+            <div class="layer layer-4">Layer 4 (z-index: 15)</div>
+            <p>
+              🌊 Higher z-index values appear above lower ones. Layer 4 (15) is
+              highest, then Layer 2 (10), then Layer 3 (5), then Layer 1 (1).
+            </p>
+          </div>
+        </div>
+
+        <!-- 🏗️ STACKING CONTEXT DEMO -->
+        <div class="demo-container">
+          <h3>Stacking Context Example</h3>
+          <div class="stacking-context-demo">
+            <div class="context-parent-1">
+              <span class="context-label">Parent 1 (z-index: 2)</span>
+              <div class="context-child">Child (z-index: 999)</div>
+            </div>
+
+            <div class="context-parent-2">
+              <span class="context-label">Parent 2 (z-index: 1)</span>
+              <div class="context-child">Child (z-index: 999)</div>
+            </div>
+
+            <p>
+              🏗️ Even though both children have z-index: 999, Parent 1's child
+              appears above Parent 2's child because Parent 1 has a higher
+              z-index.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
+```
 
 ```css
 /* 🔍 STATIC POSITIONING - Default behavior */
-.element-static {
+.static-box {
   position: static; /* 📍 Default value - elements flow normally */
+  background: #ecf0f1; /* 🎨 Light gray background */
+  border: 2px solid #bdc3c7; /* 🖼️ Gray border */
+  padding: 1rem; /* 📦 Internal padding */
+  margin: 0.5rem; /* 🌌 External spacing */
+  border-radius: 8px; /* 🔄 Rounded corners */
   /* top, right, bottom, left have NO EFFECT */
   /* z-index has NO EFFECT */
 }
@@ -1173,18 +2486,35 @@ CSS positioning is fundamental to creating complex layouts. Understanding the po
 /*
 🔍 Static positioning explanation:
 - Elements follow normal document flow
-- Position properties (top, right, bottom, left) ignored
+- Position properties (top, right, bottom, left) ignored  
 - Cannot create stacking contexts
 - Most common positioning type
 - Block elements stack vertically, inline elements horizontally
 */
 
+.highlighted {
+  background: #f39c12 !important; /* 🟠 Orange highlight */
+  color: white; /* ⚪ White text */
+  font-weight: bold; /* 📝 Bold text */
+}
+
 /* 📍 RELATIVE POSITIONING - Offset from original position */
-.element-relative {
-  position: relative; /* 📍 Positioned relative to its original location */
+.relative-box {
+  position: relative; /* 📍 Positioned relative to original location */
+  background: #3498db; /* 🔵 Blue background */
+  color: white; /* ⚪ White text */
+  padding: 1rem; /* 📦 Internal padding */
+  margin: 0.5rem; /* 🌌 External spacing */
+  border-radius: 8px; /* 🔄 Rounded corners */
+  transition: all 0.3s ease; /* ⚡ Smooth transitions */
+}
+
+.relative-moved {
   top: 20px; /* ⬇️ Move 20px down from original position */
   left: 30px; /* ➡️ Move 30px right from original position */
   z-index: 10; /* 🌊 Can participate in stacking context */
+  background: #e74c3c; /* 🔴 Red to show it's moved */
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); /* 🌫️ Red shadow */
 }
 
 /*
@@ -1196,19 +2526,63 @@ CSS positioning is fundamental to creating complex layouts. Understanding the po
 - Commonly used as positioning context for absolute children
 */
 
-/* 📌 ABSOLUTE POSITIONING - Positioned relative to nearest positioned ancestor */
-.container {
+/* 📌 ABSOLUTE POSITIONING CONTAINER */
+.absolute-container {
   position: relative; /* 📍 Creates positioning context for children */
-  width: 500px; /* 📏 Container width */
-  height: 300px; /* 📏 Container height */
+  width: 100%; /* 📏 Full width */
+  height: 400px; /* 📏 Container height */
+  background: #f8f9fa; /* 🎨 Light background */
+  border: 3px dashed #dee2e6; /* 🖼️ Dashed border */
+  border-radius: 12px; /* 🔄 Rounded container */
+  overflow: hidden; /* 🚫 Hide overflow */
 }
 
-.element-absolute {
-  position: absolute; /* 📌 Positioned relative to .container */
-  top: 50%; /* 📐 50% from top of container */
-  left: 50%; /* 📐 50% from left of container */
-  transform: translate(-50%, -50%); /* 🎯 Perfect centering technique */
+.container-content {
+  padding: 2rem; /* 📦 Content padding */
+  color: #7f8c8d; /* 🎨 Gray text */
+  font-style: italic; /* 📝 Italic text */
+}
+
+/* 📌 ABSOLUTELY POSITIONED ELEMENTS */
+.absolute-box {
+  position: absolute; /* 📌 Positioned relative to .absolute-container */
+  background: #9b59b6; /* 🟣 Purple background */
+  color: white; /* ⚪ White text */
+  padding: 0.75rem 1rem; /* 📦 Box padding */
+  border-radius: 6px; /* 🔄 Rounded corners */
+  font-weight: 500; /* 📝 Medium weight */
+  font-size: 0.875rem; /* 📏 Smaller text */
+  box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3); /* 🌫️ Purple shadow */
   z-index: 20; /* 🌊 Higher stacking order */
+}
+
+.top-left {
+  top: 15px; /* 📐 15px from top */
+  left: 15px; /* 📐 15px from left */
+}
+
+.top-right {
+  top: 15px; /* 📐 15px from top */
+  right: 15px; /* 📐 15px from right */
+}
+
+.bottom-left {
+  bottom: 15px; /* 📐 15px from bottom */
+  left: 15px; /* 📐 15px from left */
+}
+
+.bottom-right {
+  bottom: 15px; /* 📐 15px from bottom */
+  right: 15px; /* 📐 15px from right */
+}
+
+.center {
+  top: 50%; /* 📐 50% from top */
+  left: 50%; /* 📐 50% from left */
+  transform: translate(-50%, -50%); /* 🎯 Perfect centering technique */
+  background: #e74c3c; /* 🔴 Red for center element */
+  padding: 1rem 1.5rem; /* 📦 Larger padding */
+  font-weight: bold; /* 📝 Bold text */
 }
 
 /*
@@ -1220,15 +2594,268 @@ CSS positioning is fundamental to creating complex layouts. Understanding the po
 - Creates new stacking context
 */
 
-/* 📍 FIXED POSITIONING - Positioned relative to viewport */
-.element-fixed {
+/* 🎯 IMAGE CARD WITH OVERLAY */
+.image-card {
+  position: relative; /* 📍 Creates positioning context */
+  width: 400px; /* 📏 Card width */
+  border-radius: 12px; /* 🔄 Rounded card */
+  overflow: hidden; /* 🚫 Hide overflow */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* 🌫️ Card shadow */
+  transition: transform 0.3s ease; /* ⚡ Smooth transform */
+}
+
+.image-card:hover {
+  transform: translateY(-4px); /* ⬆️ Lift on hover */
+}
+
+.card-image {
+  width: 100%; /* 📏 Full width image */
+  height: 250px; /* 📏 Fixed height */
+  object-fit: cover; /* 🖼️ Cover entire area */
+  object-position: center; /* 🎯 Center image */
+}
+
+/* 📍 OVERLAY ELEMENTS */
+.image-overlay {
+  position: absolute; /* 📍 Absolute positioning */
+  bottom: 0; /* 📐 Bottom of card */
+  left: 0; /* 📐 Left edge */
+  right: 0; /* 📐 Right edge */
+  background: linear-gradient(
+    transparent,
+    rgba(0, 0, 0, 0.8)
+  ); /* 🌈 Gradient overlay */
+  color: white; /* ⚪ White text */
+  padding: 3rem 1.5rem 1.5rem; /* 📦 Overlay padding */
+  transform: translateY(100%); /* 🔄 Hidden by default */
+  transition: transform 0.4s ease; /* ⚡ Smooth slide */
+}
+
+.image-card:hover .image-overlay {
+  transform: translateY(0); /* 🔄 Slide in on hover */
+}
+
+.image-badge {
+  position: absolute; /* 📍 Absolute positioning */
+  top: 15px; /* 📐 Top spacing */
+  left: 15px; /* 📐 Left spacing */
+  background: #e74c3c; /* 🔴 Red badge */
+  color: white; /* ⚪ White text */
+  padding: 0.5rem 1rem; /* 📦 Badge padding */
+  border-radius: 20px; /* 🔄 Rounded badge */
+  font-size: 0.75rem; /* 📏 Small text */
+  font-weight: bold; /* 📝 Bold badge */
+  text-transform: uppercase; /* 🔤 Uppercase text */
+  letter-spacing: 0.05em; /* 📏 Letter spacing */
+}
+
+.image-actions {
+  position: absolute; /* 📍 Absolute positioning */
+  top: 15px; /* 📐 Top spacing */
+  right: 15px; /* 📐 Right spacing */
+  display: flex; /* 📦 Flex layout */
+  gap: 0.5rem; /* 🌌 Space between buttons */
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.9); /* 🎨 Semi-transparent white */
+  border: none; /* 🚫 No border */
+  padding: 0.5rem; /* 📦 Button padding */
+  border-radius: 50%; /* 🔄 Circular button */
+  cursor: pointer; /* 👆 Pointer cursor */
+  transition: all 0.3s ease; /* ⚡ Smooth transitions */
+  width: 40px; /* 📏 Button width */
+  height: 40px; /* 📏 Button height */
+  display: flex; /* 📦 Flex for centering */
+  align-items: center; /* 📐 Center vertically */
+  justify-content: center; /* 📐 Center horizontally */
+  opacity: 0; /* 🔍 Hidden by default */
+}
+
+.image-card:hover .action-btn {
+  opacity: 1; /* 🔍 Show on hover */
+}
+
+.action-btn:hover {
+  background: white; /* ⚪ Full white on hover */
+  transform: scale(1.1); /* 🔍 Scale on hover */
+}
+
+.image-info {
+  position: absolute; /* 📍 Absolute positioning */
+  bottom: 15px; /* 📐 Bottom spacing */
+  left: 15px; /* 📐 Left spacing */
+  right: 15px; /* 📐 Right spacing */
+  display: flex; /* 📦 Flex layout */
+  justify-content: space-between; /* 📏 Space between items */
+  background: rgba(0, 0, 0, 0.7); /* 🎨 Dark overlay */
+  color: white; /* ⚪ White text */
+  padding: 0.75rem 1rem; /* 📦 Info padding */
+  border-radius: 8px; /* 🔄 Rounded info */
+  font-size: 0.75rem; /* 📏 Small text */
+  opacity: 0; /* 🔍 Hidden by default */
+  transition: opacity 0.3s ease; /* ⚡ Smooth fade */
+}
+
+.image-card:hover .image-info {
+  opacity: 1; /* 🔍 Show on hover */
+}
+
+/* 📍 FIXED POSITIONING EXAMPLES */
+.fixed-demo-wrapper {
+  position: relative; /* 📍 Container for demo */
+  height: 400px; /* 📏 Fixed height for demo */
+  overflow: hidden; /* 🚫 Hide overflow */
+  border: 2px solid #dee2e6; /* 🖼️ Container border */
+  border-radius: 12px; /* 🔄 Rounded container */
+  background: #f8f9fa; /* 🎨 Light background */
+}
+
+.fixed-header {
   position: fixed; /* 📍 Fixed to viewport */
-  top: 0; /* ⬆️ Stick to top of viewport */
-  right: 0; /* ➡️ Stick to right of viewport */
-  width: 300px; /* 📏 Fixed width */
-  height: 100vh; /* 📏 Full viewport height */
+  top: 0; /* ⬆️ Stick to top */
+  left: 0; /* ⬅️ Stick to left */
+  right: 0; /* ➡️ Stick to right */
   z-index: 1000; /* 🌊 High stacking order */
-  background: rgba(0, 0, 0, 0.8); /* 🎨 Semi-transparent background */
+  background: #2c3e50; /* 🎨 Dark header */
+  color: white; /* ⚪ White text */
+  box-shadow: 0 2px 10px rgba(44, 62, 80, 0.3); /* 🌫️ Header shadow */
+}
+
+/* Note: In real implementation, this would be fixed to actual viewport */
+.fixed-demo-wrapper .fixed-header {
+  position: absolute; /* 📍 Absolute for demo container */
+  top: 0; /* ⬆️ Top of demo container */
+}
+
+.header-content {
+  display: flex; /* 📦 Flex layout */
+  justify-content: space-between; /* 📏 Space between elements */
+  align-items: center; /* 📐 Center alignment */
+  padding: 1rem 2rem; /* 📦 Header padding */
+  max-width: 1200px; /* 📏 Max content width */
+  margin: 0 auto; /* 🎯 Center content */
+}
+
+.logo {
+  font-size: 1.25rem; /* 📏 Logo size */
+  font-weight: bold; /* 📝 Bold logo */
+}
+
+.main-nav {
+  display: flex; /* 📦 Flex navigation */
+  gap: 2rem; /* 🌌 Space between links */
+}
+
+.nav-link {
+  color: white; /* ⚪ White links */
+  text-decoration: none; /* 🚫 No underline */
+  font-weight: 500; /* 📝 Medium weight */
+  transition: color 0.3s ease; /* ⚡ Color transition */
+}
+
+.nav-link:hover {
+  color: #3498db; /* 🔵 Blue on hover */
+}
+
+.header-btn {
+  background: #3498db; /* 🔵 Blue button */
+  color: white; /* ⚪ White text */
+  border: none; /* 🚫 No border */
+  padding: 0.5rem 1rem; /* 📦 Button padding */
+  border-radius: 6px; /* 🔄 Rounded button */
+  cursor: pointer; /* 👆 Pointer cursor */
+  font-weight: 500; /* 📝 Medium weight */
+  transition: background 0.3s ease; /* ⚡ Background transition */
+}
+
+.header-btn:hover {
+  background: #2980b9; /* 🔵 Darker blue on hover */
+}
+
+.scrollable-content {
+  margin-top: 70px; /* 🌌 Space for fixed header */
+  padding: 2rem; /* 📦 Content padding */
+  height: 300px; /* 📏 Fixed height for scrolling */
+  overflow-y: auto; /* 📜 Vertical scrolling */
+}
+
+.content-block {
+  margin-bottom: 2rem; /* 🌌 Block spacing */
+  padding: 1.5rem; /* 📦 Block padding */
+  background: white; /* ⚪ White background */
+  border-radius: 8px; /* 🔄 Rounded blocks */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* 🌫️ Block shadow */
+}
+
+.fixed-sidebar {
+  position: fixed; /* 📍 Fixed positioning */
+  top: 70px; /* 📐 Below header */
+  right: 20px; /* 📐 Right spacing */
+  width: 200px; /* 📏 Sidebar width */
+  background: white; /* ⚪ White background */
+  border-radius: 12px; /* 🔄 Rounded sidebar */
+  padding: 1.5rem; /* 📦 Sidebar padding */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 🌫️ Sidebar shadow */
+  z-index: 999; /* 🌊 High z-index */
+}
+
+/* Demo container adjustment */
+.fixed-demo-wrapper .fixed-sidebar {
+  position: absolute; /* 📍 Absolute for demo */
+  top: 70px; /* 📐 Below header in demo */
+  right: 10px; /* 📐 Right spacing in demo */
+}
+
+.fixed-sidebar ul {
+  list-style: none; /* 🚫 No bullets */
+  padding: 0; /* 🚫 No padding */
+  margin: 0; /* 🚫 No margin */
+}
+
+.fixed-sidebar li {
+  margin-bottom: 0.5rem; /* 🌌 Item spacing */
+}
+
+.fixed-sidebar a {
+  color: #2c3e50; /* 🎨 Dark text */
+  text-decoration: none; /* 🚫 No underline */
+  font-size: 0.875rem; /* 📏 Small text */
+  transition: color 0.3s ease; /* ⚡ Color transition */
+}
+
+.fixed-sidebar a:hover {
+  color: #3498db; /* 🔵 Blue on hover */
+}
+
+.fixed-notification {
+  position: fixed; /* 📍 Fixed positioning */
+  bottom: 20px; /* 📐 Bottom spacing */
+  right: 20px; /* 📐 Right spacing */
+  background: #e74c3c; /* 🔴 Red notification */
+  color: white; /* ⚪ White text */
+  padding: 1rem 1.5rem; /* 📦 Notification padding */
+  border-radius: 8px; /* 🔄 Rounded notification */
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); /* 🌫️ Red shadow */
+  z-index: 9999; /* 🌊 Highest z-index */
+  display: flex; /* 📦 Flex layout */
+  align-items: center; /* 📐 Center alignment */
+  gap: 1rem; /* 🌌 Space between elements */
+}
+
+/* Demo container adjustment */
+.fixed-demo-wrapper .fixed-notification {
+  position: absolute; /* 📍 Absolute for demo */
+  bottom: 10px; /* 📐 Bottom in demo */
+  right: 10px; /* 📐 Right in demo */
+}
+
+.close-btn {
+  background: none; /* 🔍 Transparent background */
+  border: none; /* 🚫 No border */
+  color: white; /* ⚪ White text */
+  cursor: pointer; /* 👆 Pointer cursor */
+  font-size: 0.875rem; /* 📏 Small close button */
 }
 
 /*
@@ -1240,13 +2867,86 @@ CSS positioning is fundamental to creating complex layouts. Understanding the po
 - Creates new stacking context
 */
 
-/* 📌 STICKY POSITIONING - Hybrid behavior */
-.element-sticky {
+/* 📌 STICKY POSITIONING EXAMPLES */
+.table-container {
+  height: 300px; /* 📏 Container height */
+  overflow-y: auto; /* 📜 Vertical scrolling */
+  border: 1px solid #dee2e6; /* 🖼️ Container border */
+  border-radius: 8px; /* 🔄 Rounded container */
+}
+
+.data-table {
+  width: 100%; /* 📏 Full width table */
+  border-collapse: collapse; /* 🖼️ Collapsed borders */
+  background: white; /* ⚪ White background */
+}
+
+.sticky-header-row {
   position: sticky; /* 📌 Sticky positioning */
-  top: 20px; /* 📐 Stick when 20px from top */
-  background: #fff; /* 🎨 Background for visibility */
-  z-index: 100; /* 🌊 Above other content */
-  padding: 10px; /* 📦 Internal spacing */
+  top: 0; /* 📐 Stick at top */
+  background: #2c3e50; /* 🎨 Dark header */
+  color: white; /* ⚪ White text */
+  z-index: 10; /* 🌊 Above table content */
+}
+
+.data-table th,
+.data-table td {
+  padding: 1rem; /* 📦 Cell padding */
+  text-align: left; /* ⬅️ Left alignment */
+  border-bottom: 1px solid #dee2e6; /* 🖼️ Bottom border */
+}
+
+.data-table th {
+  font-weight: 600; /* 📝 Bold headers */
+  white-space: nowrap; /* 🚫 No text wrapping */
+}
+
+.table-btn {
+  background: #3498db; /* 🔵 Blue button */
+  color: white; /* ⚪ White text */
+  border: none; /* 🚫 No border */
+  padding: 0.5rem 1rem; /* 📦 Button padding */
+  border-radius: 4px; /* 🔄 Rounded button */
+  cursor: pointer; /* 👆 Pointer cursor */
+  font-size: 0.875rem; /* 📏 Small button text */
+  transition: background 0.3s ease; /* ⚡ Background transition */
+}
+
+.table-btn:hover {
+  background: #2980b9; /* 🔵 Darker blue on hover */
+}
+
+/* 📌 STICKY SECTIONS */
+.content-section {
+  margin-bottom: 2rem; /* 🌌 Section spacing */
+}
+
+.sticky-section-title {
+  position: sticky; /* 📌 Sticky positioning */
+  top: 20px; /* 📐 Stick 20px from top */
+  background: #3498db; /* 🔵 Blue background */
+  color: white; /* ⚪ White text */
+  padding: 1rem 1.5rem; /* 📦 Title padding */
+  margin: 0 0 1rem 0; /* 🌌 Bottom margin only */
+  border-radius: 8px; /* 🔄 Rounded title */
+  font-size: 1.125rem; /* 📏 Title size */
+  font-weight: 600; /* 📝 Semi-bold title */
+  z-index: 5; /* 🌊 Above content */
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3); /* 🌫️ Blue shadow */
+}
+
+.section-content {
+  background: white; /* ⚪ White content background */
+  padding: 2rem; /* 📦 Content padding */
+  border-radius: 8px; /* 🔄 Rounded content */
+  border: 1px solid #ecf0f1; /* 🖼️ Light border */
+  margin-bottom: 1rem; /* 🌌 Content spacing */
+}
+
+.section-content p {
+  margin-bottom: 1rem; /* 🌌 Paragraph spacing */
+  line-height: 1.6; /* 📏 Better readability */
+  color: #2c3e50; /* 🎨 Dark text */
 }
 
 /*
@@ -1257,6 +2957,172 @@ CSS positioning is fundamental to creating complex layouts. Understanding the po
 - Perfect for table headers, navigation bars
 - Requires threshold value (top, bottom, left, or right)
 */
+
+/* 🌊 Z-INDEX AND STACKING CONTEXT */
+.z-index-demo {
+  position: relative; /* 📍 Creates stacking context */
+  height: 200px; /* 📏 Demo height */
+  background: #f8f9fa; /* 🎨 Light background */
+  border: 2px dashed #dee2e6; /* 🖼️ Dashed border */
+  border-radius: 8px; /* 🔄 Rounded container */
+  margin-bottom: 1rem; /* 🌌 Bottom spacing */
+}
+
+.layer {
+  position: absolute; /* 📍 Absolute positioning */
+  width: 120px; /* 📏 Layer width */
+  height: 80px; /* 📏 Layer height */
+  color: white; /* ⚪ White text */
+  font-weight: bold; /* 📝 Bold text */
+  font-size: 0.875rem; /* 📏 Small text */
+  border-radius: 8px; /* 🔄 Rounded layers */
+  display: flex; /* 📦 Flex for centering */
+  align-items: center; /* 📐 Center vertically */
+  justify-content: center; /* 📐 Center horizontally */
+  text-align: center; /* 🎯 Center text */
+  border: 2px solid white; /* 🖼️ White border */
+}
+
+.layer-1 {
+  top: 20px; /* 📐 Top position */
+  left: 20px; /* 📐 Left position */
+  background: #e74c3c; /* 🔴 Red layer */
+  z-index: 1; /* 🌊 Lowest z-index */
+}
+
+.layer-2 {
+  top: 40px; /* 📐 Overlapping position */
+  left: 60px; /* 📐 Overlapping position */
+  background: #3498db; /* 🔵 Blue layer */
+  z-index: 10; /* 🌊 High z-index */
+}
+
+.layer-3 {
+  top: 60px; /* 📐 Overlapping position */
+  left: 100px; /* 📐 Overlapping position */
+  background: #2ecc71; /* 🟢 Green layer */
+  z-index: 5; /* 🌊 Medium z-index */
+}
+
+.layer-4 {
+  top: 80px; /* 📐 Overlapping position */
+  left: 140px; /* 📐 Overlapping position */
+  background: #9b59b6; /* 🟣 Purple layer */
+  z-index: 15; /* 🌊 Highest z-index */
+}
+
+/* 🏗️ STACKING CONTEXT DEMO */
+.stacking-context-demo {
+  display: flex; /* 📦 Side by side parents */
+  gap: 2rem; /* 🌌 Space between parents */
+  margin-bottom: 1rem; /* 🌌 Bottom spacing */
+}
+
+.context-parent-1,
+.context-parent-2 {
+  position: relative; /* 📍 Creates stacking context */
+  width: 200px; /* 📏 Parent width */
+  height: 150px; /* 📏 Parent height */
+  border: 2px solid #34495e; /* 🖼️ Dark border */
+  border-radius: 8px; /* 🔄 Rounded parents */
+  background: #ecf0f1; /* 🎨 Light background */
+}
+
+.context-parent-1 {
+  z-index: 2; /* 🌊 Higher parent z-index */
+}
+
+.context-parent-2 {
+  z-index: 1; /* 🌊 Lower parent z-index */
+}
+
+.context-label {
+  position: absolute; /* 📍 Label positioning */
+  top: 10px; /* 📐 Top spacing */
+  left: 10px; /* 📐 Left spacing */
+  background: #34495e; /* 🎨 Dark label background */
+  color: white; /* ⚪ White label text */
+  padding: 0.25rem 0.5rem; /* 📦 Label padding */
+  border-radius: 4px; /* 🔄 Rounded label */
+  font-size: 0.75rem; /* 📏 Small label text */
+  font-weight: bold; /* 📝 Bold label */
+}
+
+.context-child {
+  position: absolute; /* 📍 Child positioning */
+  bottom: 15px; /* 📐 Bottom spacing */
+  right: 15px; /* 📐 Right spacing */
+  width: 100px; /* 📏 Child width */
+  height: 60px; /* 📏 Child height */
+  background: #e74c3c; /* 🔴 Red child */
+  color: white; /* ⚪ White text */
+  border-radius: 6px; /* 🔄 Rounded child */
+  display: flex; /* 📦 Flex for centering */
+  align-items: center; /* 📐 Center vertically */
+  justify-content: center; /* 📐 Center horizontally */
+  font-size: 0.75rem; /* 📏 Small text */
+  font-weight: bold; /* 📝 Bold text */
+  z-index: 999; /* 🌊 Very high z-index */
+  border: 2px solid white; /* 🖼️ White border */
+}
+
+/*
+🔍 Stacking context explanation:
+- z-index only compares within same stacking context
+- Parent's z-index determines child's context level
+- Child cannot escape parent's stacking context
+- Even z-index: 999 won't help if parent has lower z-index
+*/
+
+/* 📋 DEMO LAYOUT STYLING */
+.positioning-demo {
+  max-width: 1200px; /* 📏 Maximum width */
+  margin: 0 auto; /* 🎯 Center container */
+  padding: 2rem; /* 📦 Container padding */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f8f9fa; /* 🎨 Light background */
+}
+
+.demo-section {
+  background: white; /* ⚪ White section background */
+  margin-bottom: 3rem; /* 🌌 Section spacing */
+  padding: 2.5rem; /* 📦 Section padding */
+  border-radius: 16px; /* 🔄 Rounded sections */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); /* 🌫️ Section shadow */
+}
+
+.demo-section h2 {
+  color: #2c3e50; /* 🎨 Dark heading */
+  margin-top: 0; /* 🚫 No top margin */
+  margin-bottom: 2rem; /* 🌌 Bottom margin */
+  padding-bottom: 1rem; /* 📦 Bottom padding */
+  border-bottom: 3px solid #3498db; /* 🖼️ Blue underline */
+  font-size: 1.75rem; /* 📏 Large heading */
+}
+
+.demo-container {
+  margin-bottom: 2.5rem; /* 🌌 Container spacing */
+  padding: 1.5rem; /* 📦 Container padding */
+  border: 1px solid #ecf0f1; /* 🖼️ Light border */
+  border-radius: 12px; /* 🔄 Rounded container */
+  background: #fafbfc; /* 🎨 Very light background */
+}
+
+.demo-container h3 {
+  margin-top: 0; /* 🚫 No top margin */
+  margin-bottom: 1.5rem; /* 🌌 Bottom margin */
+  color: #34495e; /* 🎨 Dark gray heading */
+  font-size: 1.125rem; /* 📏 Medium heading size */
+  font-weight: 600; /* 📝 Semi-bold heading */
+}
+
+.demo-container p {
+  color: #7f8c8d; /* 🎨 Gray explanatory text */
+  font-style: italic; /* 📝 Italic explanation */
+  margin-top: 1rem; /* 🌌 Top spacing */
+  font-size: 0.875rem; /* 📏 Small explanatory text */
+  line-height: 1.5; /* 📏 Better readability */
+}
 ```
 
 ### **🎯 Advanced Positioning Techniques**
@@ -1768,13 +3634,319 @@ CSS positioning is fundamental to creating complex layouts. Understanding the po
 
 Flexbox is a one-dimensional layout method that provides efficient arrangement of items in a container, even when their size is unknown or dynamic.
 
-### **📦 Flexbox Container Properties - Parent Element Control**
+### **📦 Flexbox Container Properties with HTML Examples**
+
+```html
+<!-- 📦 FLEXBOX DEMO HTML STRUCTURE -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flexbox Complete Guide</title>
+    <link rel="stylesheet" href="flexbox-styles.css" />
+  </head>
+  <body>
+    <!-- 🏠 FLEX CONTAINER DEMONSTRATIONS -->
+    <main class="demo-wrapper">
+      <!-- 📋 SECTION 1: Basic Flex Direction Examples -->
+      <section class="demo-section">
+        <h2>Flex Direction Examples</h2>
+
+        <!-- ➡️ ROW DIRECTION (Default) -->
+        <div class="demo-group">
+          <h3>flex-direction: row (default)</h3>
+          <div class="flex-container flex-direction-row">
+            <div class="flex-item">Item 1</div>
+            <div class="flex-item">Item 2</div>
+            <div class="flex-item">Item 3</div>
+            <div class="flex-item">Item 4</div>
+          </div>
+        </div>
+
+        <!-- ⬅️ ROW REVERSE DIRECTION -->
+        <div class="demo-group">
+          <h3>flex-direction: row-reverse</h3>
+          <div class="flex-container flex-direction-row-reverse">
+            <div class="flex-item">Item 1</div>
+            <div class="flex-item">Item 2</div>
+            <div class="flex-item">Item 3</div>
+            <div class="flex-item">Item 4</div>
+          </div>
+        </div>
+
+        <!-- ⬇️ COLUMN DIRECTION -->
+        <div class="demo-group">
+          <h3>flex-direction: column</h3>
+          <div class="flex-container flex-direction-column">
+            <div class="flex-item">Item 1</div>
+            <div class="flex-item">Item 2</div>
+            <div class="flex-item">Item 3</div>
+            <div class="flex-item">Item 4</div>
+          </div>
+        </div>
+
+        <!-- ⬆️ COLUMN REVERSE DIRECTION -->
+        <div class="demo-group">
+          <h3>flex-direction: column-reverse</h3>
+          <div class="flex-container flex-direction-column-reverse">
+            <div class="flex-item">Item 1</div>
+            <div class="flex-item">Item 2</div>
+            <div class="flex-item">Item 3</div>
+            <div class="flex-item">Item 4</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 2: Justify Content Examples -->
+      <section class="demo-section">
+        <h2>Justify Content - Main Axis Alignment</h2>
+
+        <!-- ⬅️ FLEX START -->
+        <div class="demo-group">
+          <h3>justify-content: flex-start</h3>
+          <div class="flex-container justify-flex-start">
+            <div class="flex-item">A</div>
+            <div class="flex-item">B</div>
+            <div class="flex-item">C</div>
+          </div>
+        </div>
+
+        <!-- 🎯 CENTER -->
+        <div class="demo-group">
+          <h3>justify-content: center</h3>
+          <div class="flex-container justify-center">
+            <div class="flex-item">A</div>
+            <div class="flex-item">B</div>
+            <div class="flex-item">C</div>
+          </div>
+        </div>
+
+        <!-- ➡️ FLEX END -->
+        <div class="demo-group">
+          <h3>justify-content: flex-end</h3>
+          <div class="flex-container justify-flex-end">
+            <div class="flex-item">A</div>
+            <div class="flex-item">B</div>
+            <div class="flex-item">C</div>
+          </div>
+        </div>
+
+        <!-- 📏 SPACE BETWEEN -->
+        <div class="demo-group">
+          <h3>justify-content: space-between</h3>
+          <div class="flex-container justify-space-between">
+            <div class="flex-item">A</div>
+            <div class="flex-item">B</div>
+            <div class="flex-item">C</div>
+          </div>
+        </div>
+
+        <!-- 🌌 SPACE AROUND -->
+        <div class="demo-group">
+          <h3>justify-content: space-around</h3>
+          <div class="flex-container justify-space-around">
+            <div class="flex-item">A</div>
+            <div class="flex-item">B</div>
+            <div class="flex-item">C</div>
+          </div>
+        </div>
+
+        <!-- ⚡ SPACE EVENLY -->
+        <div class="demo-group">
+          <h3>justify-content: space-evenly</h3>
+          <div class="flex-container justify-space-evenly">
+            <div class="flex-item">A</div>
+            <div class="flex-item">B</div>
+            <div class="flex-item">C</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 3: Align Items Examples -->
+      <section class="demo-section">
+        <h2>Align Items - Cross Axis Alignment</h2>
+
+        <!-- 📏 STRETCH (Default) -->
+        <div class="demo-group">
+          <h3>align-items: stretch (default)</h3>
+          <div class="flex-container align-stretch">
+            <div class="flex-item">Short</div>
+            <div class="flex-item">Medium content here</div>
+            <div class="flex-item">
+              Much longer content that spans multiple lines and takes up more
+              space
+            </div>
+          </div>
+        </div>
+
+        <!-- ⬆️ FLEX START -->
+        <div class="demo-group">
+          <h3>align-items: flex-start</h3>
+          <div class="flex-container align-flex-start">
+            <div class="flex-item">Short</div>
+            <div class="flex-item">Medium content here</div>
+            <div class="flex-item">
+              Much longer content that spans multiple lines
+            </div>
+          </div>
+        </div>
+
+        <!-- 🎯 CENTER -->
+        <div class="demo-group">
+          <h3>align-items: center</h3>
+          <div class="flex-container align-center">
+            <div class="flex-item">Short</div>
+            <div class="flex-item">Medium content here</div>
+            <div class="flex-item">
+              Much longer content that spans multiple lines
+            </div>
+          </div>
+        </div>
+
+        <!-- ⬇️ FLEX END -->
+        <div class="demo-group">
+          <h3>align-items: flex-end</h3>
+          <div class="flex-container align-flex-end">
+            <div class="flex-item">Short</div>
+            <div class="flex-item">Medium content here</div>
+            <div class="flex-item">
+              Much longer content that spans multiple lines
+            </div>
+          </div>
+        </div>
+
+        <!-- 📝 BASELINE -->
+        <div class="demo-group">
+          <h3>align-items: baseline</h3>
+          <div class="flex-container align-baseline">
+            <div class="flex-item small-text">Small</div>
+            <div class="flex-item medium-text">Medium</div>
+            <div class="flex-item large-text">Large</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 4: Real-World Navigation Example -->
+      <section class="demo-section">
+        <h2>Real-World Example: Navigation Bar</h2>
+
+        <nav class="navbar">
+          <!-- 🏠 Logo section -->
+          <div class="navbar__logo">
+            <img
+              src="https://via.placeholder.com/120x40/3498db/white?text=LOGO"
+              alt="Company Logo"
+            />
+          </div>
+
+          <!-- 🧭 Navigation menu -->
+          <ul class="navbar__menu">
+            <li class="navbar__item">
+              <a href="#" class="navbar__link">Home</a>
+            </li>
+            <li class="navbar__item">
+              <a href="#" class="navbar__link">Products</a>
+            </li>
+            <li class="navbar__item">
+              <a href="#" class="navbar__link">About</a>
+            </li>
+            <li class="navbar__item">
+              <a href="#" class="navbar__link">Contact</a>
+            </li>
+          </ul>
+
+          <!-- 🔧 Action buttons -->
+          <div class="navbar__actions">
+            <button class="navbar__btn navbar__btn--secondary">Login</button>
+            <button class="navbar__btn navbar__btn--primary">Sign Up</button>
+          </div>
+        </nav>
+      </section>
+
+      <!-- 📋 SECTION 5: Card Layout Example -->
+      <section class="demo-section">
+        <h2>Real-World Example: Product Cards</h2>
+
+        <div class="product-grid">
+          <!-- 🛍️ Product Card 1 -->
+          <article class="product-card">
+            <div class="product-card__image">
+              <img
+                src="https://via.placeholder.com/300x200/e74c3c/white?text=Product+1"
+                alt="Product 1"
+              />
+            </div>
+            <div class="product-card__content">
+              <h3 class="product-card__title">Premium Headphones</h3>
+              <p class="product-card__description">
+                High-quality wireless headphones with noise cancellation.
+              </p>
+              <div class="product-card__footer">
+                <span class="product-card__price">$299.99</span>
+                <button class="product-card__btn">Add to Cart</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 🛍️ Product Card 2 -->
+          <article class="product-card">
+            <div class="product-card__image">
+              <img
+                src="https://via.placeholder.com/300x200/3498db/white?text=Product+2"
+                alt="Product 2"
+              />
+            </div>
+            <div class="product-card__content">
+              <h3 class="product-card__title">Smart Watch</h3>
+              <p class="product-card__description">
+                Advanced smartwatch with health monitoring and GPS tracking
+                capabilities.
+              </p>
+              <div class="product-card__footer">
+                <span class="product-card__price">$399.99</span>
+                <button class="product-card__btn">Add to Cart</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 🛍️ Product Card 3 -->
+          <article class="product-card">
+            <div class="product-card__image">
+              <img
+                src="https://via.placeholder.com/300x200/2ecc71/white?text=Product+3"
+                alt="Product 3"
+              />
+            </div>
+            <div class="product-card__content">
+              <h3 class="product-card__title">Laptop Stand</h3>
+              <p class="product-card__description">
+                Ergonomic laptop stand for better posture and productivity.
+              </p>
+              <div class="product-card__footer">
+                <span class="product-card__price">$79.99</span>
+                <button class="product-card__btn">Add to Cart</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+```
 
 ```css
 /* 🏠 FLEX CONTAINER - Parent element setup */
 .flex-container {
-  display: flex; /* 📦 Enable flexbox layout */
+  display: flex;                   /* 📦 Enable flexbox layout */
   /* Alternative: display: inline-flex; for inline flex containers */
+  min-height: 120px;               /* 📏 Minimum height for visibility */
+  padding: 20px;                   /* 📦 Internal spacing */
+  margin: 10px 0;                  /* 🌌 Vertical spacing between examples */
+  background: #f8f9fa;             /* 🎨 Light background */
+  border: 2px dashed #dee2e6;      /* 🖼️ Dashed border for container */
+  border-radius: 8px;              /* 🔄 Rounded corners */
 }
 
 /*
@@ -1787,15 +3959,22 @@ Flexbox is a one-dimensional layout method that provides efficient arrangement o
 */
 
 /* ➡️ FLEX DIRECTION - Main axis direction */
-.flex-direction-examples {
-  /* 🔄 HORIZONTAL LAYOUTS */
-  display: flex;
-  flex-direction: row; /* ➡️ Left to right (default) */
-  /* flex-direction: row-reverse; */ /* ⬅️ Right to left */
+.flex-direction-row {
+  flex-direction: row;             /* ➡️ Left to right (default) */
+}
 
-  /* 🔄 VERTICAL LAYOUTS */
-  /* flex-direction: column; */ /* ⬇️ Top to bottom */
-  /* flex-direction: column-reverse; */ /* ⬆️ Bottom to top */
+.flex-direction-row-reverse {
+  flex-direction: row-reverse;     /* ⬅️ Right to left */
+}
+
+.flex-direction-column {
+  flex-direction: column;          /* ⬇️ Top to bottom */
+  min-height: 300px;               /* 📏 Taller container for column demo */
+}
+
+.flex-direction-column-reverse {
+  flex-direction: column-reverse;  /* ⬆️ Bottom to top */
+  min-height: 300px;               /* 📏 Taller container for column demo */
 }
 
 /*
@@ -1807,14 +3986,308 @@ Flexbox is a one-dimensional layout method that provides efficient arrangement o
 - Cross axis is perpendicular to main axis
 */
 
-/* 📦 FLEX WRAP - Item wrapping behavior */
-.flex-wrap-examples {
-  display: flex;
-  flex-wrap: nowrap; /* 🚫 No wrapping (default) */
-  /* flex-wrap: wrap; */ /* ✅ Wrap to new lines */
-  /* flex-wrap: wrap-reverse; */ /* ✅ Wrap in reverse order */
+/* 📏 JUSTIFY CONTENT - Main axis alignment */
+.justify-flex-start {
+  justify-content: flex-start;     /* ⬅️ Align to start (default) */
+}
 
-  /* 🔗 SHORTHAND */
+.justify-center {
+  justify-content: center;         /* 🎯 Center alignment */
+}
+
+.justify-flex-end {
+  justify-content: flex-end;       /* ➡️ Align to end */
+}
+
+.justify-space-between {
+  justify-content: space-between;  /* 📏 Space between items */
+}
+
+.justify-space-around {
+  justify-content: space-around;   /* 🌌 Space around items */
+}
+
+.justify-space-evenly {
+  justify-content: space-evenly;   /* ⚡ Even space distribution */
+}
+
+/*
+🔍 Justify content explanation:
+- Controls alignment along main axis
+- flex-start: items at start of container
+- flex-end: items at end of container
+- center: items centered in container
+- space-between: equal space between items
+- space-around: equal space around each item
+- space-evenly: equal space everywhere
+*/
+
+/* 📐 ALIGN ITEMS - Cross axis alignment */
+.align-stretch {
+  align-items: stretch;            /* 📏 Stretch to container height (default) */
+  min-height: 150px;               /* 📏 Height to demonstrate stretching */
+}
+
+.align-flex-start {
+  align-items: flex-start;         /* ⬆️ Align to cross-axis start */
+  min-height: 150px;
+}
+
+.align-center {
+  align-items: center;             /* 🎯 Center on cross-axis */
+  min-height: 150px;
+}
+
+.align-flex-end {
+  align-items: flex-end;           /* ⬇️ Align to cross-axis end */
+  min-height: 150px;
+}
+
+.align-baseline {
+  align-items: baseline;           /* 📝 Align to text baseline */
+  min-height: 150px;
+}
+
+/*
+🔍 Align items explanation:
+- Controls alignment along cross axis
+- stretch: items fill container height (default)
+- flex-start: items at start of cross axis
+- flex-end: items at end of cross axis
+- center: items centered on cross axis
+- baseline: items aligned by text baseline
+*/
+
+/* 🎨 FLEX ITEMS - Individual item styling */
+.flex-item {
+  background: #3498db;             /* 🔵 Blue background */
+  color: white;                    /* ⚪ White text */
+  padding: 15px 20px;              /* 📦 Internal padding */
+  margin: 5px;                     /* 🌌 Small margin between items */
+  border-radius: 6px;              /* 🔄 Rounded corners */
+  font-weight: 500;                /* 📝 Medium font weight */
+  text-align: center;              /* 🎯 Center text */
+  min-width: 80px;                 /* 📏 Minimum width */
+
+  /* 🎭 HOVER EFFECT */
+  transition: all 0.3s ease;       /* ⚡ Smooth transitions */
+  cursor: pointer;                 /* 👆 Pointer cursor */
+}
+
+.flex-item:hover {
+  background: #2980b9;             /* 🔵 Darker blue on hover */
+  transform: translateY(-2px);     /* ⬆️ Lift effect */
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3); /* 🌫️ Blue shadow */
+}
+
+/* 📝 BASELINE DEMONSTRATION - Different font sizes */
+.small-text {
+  font-size: 0.875rem;             /* 📏 Small text */
+}
+
+.medium-text {
+  font-size: 1.25rem;              /* 📏 Medium text */
+}
+
+.large-text {
+  font-size: 2rem;                 /* 📏 Large text */
+}
+
+/* 🧭 REAL-WORLD NAVBAR EXAMPLE */
+.navbar {
+  display: flex;                   /* 📦 Horizontal layout */
+  justify-content: space-between;  /* 📏 Logo left, actions right */
+  align-items: center;             /* 📐 Vertical centering */
+  padding: 1rem 2rem;              /* 📦 Navbar padding */
+  background: #2c3e50;             /* 🎨 Dark background */
+  color: white;                    /* ⚪ White text */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 🌫️ Subtle shadow */
+}
+
+.navbar__logo img {
+  height: 40px;                    /* 📏 Logo height */
+  width: auto;                     /* 📏 Maintain aspect ratio */
+}
+
+.navbar__menu {
+  display: flex;                   /* 📦 Horizontal menu items */
+  list-style: none;                /* 🚫 Remove bullet points */
+  margin: 0;                       /* 🚫 Remove default margin */
+  padding: 0;                      /* 🚫 Remove default padding */
+  gap: 2rem;                       /* 🌌 Space between menu items */
+}
+
+.navbar__link {
+  color: white;                    /* ⚪ White links */
+  text-decoration: none;           /* 🚫 Remove underline */
+  font-weight: 500;                /* 📝 Medium weight */
+  padding: 0.5rem 1rem;            /* 📦 Clickable area */
+  border-radius: 4px;              /* 🔄 Rounded corners */
+  transition: background 0.3s ease; /* ⚡ Smooth hover */
+}
+
+.navbar__link:hover {
+  background: rgba(255, 255, 255, 0.1); /* 🎭 Subtle hover effect */
+}
+
+.navbar__actions {
+  display: flex;                   /* 📦 Horizontal button layout */
+  gap: 1rem;                       /* 🌌 Space between buttons */
+}
+
+.navbar__btn {
+  padding: 0.5rem 1rem;            /* 📦 Button padding */
+  border: none;                    /* 🚫 Remove default border */
+  border-radius: 4px;              /* 🔄 Rounded corners */
+  font-weight: 500;                /* 📝 Medium weight */
+  cursor: pointer;                 /* 👆 Pointer cursor */
+  transition: all 0.3s ease;       /* ⚡ Smooth transitions */
+}
+
+.navbar__btn--secondary {
+  background: transparent;         /* 🔍 Transparent background */
+  color: white;                    /* ⚪ White text */
+  border: 1px solid white;         /* 🖼️ White border */
+}
+
+.navbar__btn--secondary:hover {
+  background: white;               /* ⚪ White background on hover */
+  color: #2c3e50;                  /* 🎨 Dark text on hover */
+}
+
+.navbar__btn--primary {
+  background: #3498db;             /* 🔵 Blue background */
+  color: white;                    /* ⚪ White text */
+}
+
+.navbar__btn--primary:hover {
+  background: #2980b9;             /* 🔵 Darker blue on hover */
+}
+
+/* 🛍️ PRODUCT CARDS LAYOUT */
+.product-grid {
+  display: flex;                   /* 📦 Flexible card layout */
+  flex-wrap: wrap;                 /* ✅ Allow wrapping */
+  gap: 2rem;                       /* 🌌 Space between cards */
+  padding: 2rem;                   /* 📦 Container padding */
+  justify-content: center;         /* 🎯 Center cards */
+}
+
+.product-card {
+  flex: 1 1 300px;                 /* 📏 Flexible cards, min 300px */
+  /* grow: 1, shrink: 1, basis: 300px */
+  max-width: 350px;                /* 📏 Maximum card width */
+  display: flex;                   /* 📦 Vertical card layout */
+  flex-direction: column;          /* 📐 Stack vertically */
+  background: white;               /* ⚪ White background */
+  border-radius: 12px;             /* 🔄 Rounded corners */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 🌫️ Card shadow */
+  overflow: hidden;                /* 🚫 Hide overflow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);     /* ⬆️ Lift on hover */
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* 🌫️ Enhanced shadow */
+}
+
+.product-card__image {
+  height: 200px;                   /* 📏 Fixed image height */
+  overflow: hidden;                /* 🚫 Hide image overflow */
+}
+
+.product-card__image img {
+  width: 100%;                     /* 📏 Full width image */
+  height: 100%;                    /* 📏 Full height image */
+  object-fit: cover;               /* 🖼️ Cover entire area */
+  object-position: center;         /* 🎯 Center image */
+}
+
+.product-card__content {
+  padding: 1.5rem;                 /* 📦 Content padding */
+  flex: 1;                         /* 📈 Expand to fill space */
+  display: flex;                   /* 📦 Vertical content layout */
+  flex-direction: column;          /* 📐 Stack content */
+}
+
+.product-card__title {
+  font-size: 1.25rem;              /* 📏 Title size */
+  font-weight: 600;                /* 📝 Semi-bold */
+  color: #2c3e50;                  /* 🎨 Dark title color */
+  margin: 0 0 0.75rem 0;           /* 🌌 Bottom margin */
+}
+
+.product-card__description {
+  color: #7f8c8d;                  /* 🎨 Gray description */
+  line-height: 1.6;                /* 📏 Readable line height */
+  flex: 1;                         /* 📈 Take available space */
+  margin: 0 0 1.5rem 0;            /* 🌌 Bottom margin */
+}
+
+.product-card__footer {
+  display: flex;                   /* 📦 Horizontal footer */
+  justify-content: space-between;  /* 📏 Space between price and button */
+  align-items: center;             /* 📐 Vertical alignment */
+  margin-top: auto;                /* ⬆️ Push to bottom */
+}
+
+.product-card__price {
+  font-size: 1.5rem;               /* 📏 Large price */
+  font-weight: 700;                /* 📝 Bold price */
+  color: #e74c3c;                  /* 🔴 Red price color */
+}
+
+.product-card__btn {
+  background: #3498db;             /* 🔵 Blue button */
+  color: white;                    /* ⚪ White text */
+  border: none;                    /* 🚫 No border */
+  padding: 0.75rem 1.5rem;         /* 📦 Button padding */
+  border-radius: 6px;              /* 🔄 Rounded button */
+  font-weight: 500;                /* 📝 Medium weight */
+  cursor: pointer;                 /* 👆 Pointer cursor */
+  transition: background 0.3s ease; /* ⚡ Smooth transition */
+}
+
+.product-card__btn:hover {
+  background: #2980b9;             /* 🔵 Darker blue on hover */
+}
+
+/* 📋 DEMO SECTION STYLING */
+.demo-wrapper {
+  max-width: 1200px;               /* 📏 Maximum content width */
+  margin: 0 auto;                  /* 🎯 Center content */
+  padding: 2rem;                   /* 📦 Wrapper padding */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.demo-section {
+  margin-bottom: 4rem;             /* 🌌 Section spacing */
+  padding: 2rem;                   /* 📦 Section padding */
+  background: white;               /* ⚪ White section background */
+  border-radius: 12px;             /* 🔄 Rounded section */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 🌫️ Section shadow */
+}
+
+.demo-section h2 {
+  color: #2c3e50;                  /* 🎨 Dark heading */
+  border-bottom: 3px solid #3498db; /* 🖼️ Blue underline */
+  padding-bottom: 1rem;            /* 📦 Underline spacing */
+  margin-bottom: 2rem;             /* 🌌 Bottom spacing */
+}
+
+.demo-group {
+  margin-bottom: 2rem;             /* 🌌 Group spacing */
+}
+
+.demo-group h3 {
+  color: #34495e;                  /* 🎨 Medium dark heading */
+  margin-bottom: 1rem;             /* 🌌 Bottom spacing */
+  font-family: 'Courier New', monospace; /* 🔤 Monospace for code */
+  background: #f8f9fa;             /* 🎨 Light code background */
+  padding: 0.5rem 1rem;            /* 📦 Code padding */
+  border-radius: 4px;              /* 🔄 Rounded code background */
+  border-left: 4px solid #3498db;  /* 🖼️ Blue accent */
+}
   /* flex-flow: row wrap; */ /* direction + wrap combined */
 }
 
@@ -2292,13 +4765,360 @@ Flexbox is a one-dimensional layout method that provides efficient arrangement o
 
 CSS Grid is a two-dimensional layout system that provides precise control over both rows and columns simultaneously.
 
-### **🏗️ Grid Container Properties - Parent Element Control**
+### **🏗️ Grid Container Properties with HTML Examples**
+
+```html
+<!-- 🏗️ CSS GRID DEMO HTML STRUCTURE -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS Grid Complete Guide</title>
+    <link rel="stylesheet" href="grid-styles.css" />
+  </head>
+  <body>
+    <!-- 🌐 GRID LAYOUT DEMONSTRATIONS -->
+    <main class="grid-demo-wrapper">
+      <!-- 📋 SECTION 1: Basic Grid Layout -->
+      <section class="demo-section">
+        <h2>Basic Grid Layout Examples</h2>
+
+        <!-- 📊 SIMPLE 3x3 GRID -->
+        <div class="demo-group">
+          <h3>Basic 3x3 Grid Layout</h3>
+          <div class="grid-container basic-grid">
+            <div class="grid-item">Item 1</div>
+            <div class="grid-item">Item 2</div>
+            <div class="grid-item">Item 3</div>
+            <div class="grid-item">Item 4</div>
+            <div class="grid-item">Item 5</div>
+            <div class="grid-item">Item 6</div>
+            <div class="grid-item">Item 7</div>
+            <div class="grid-item">Item 8</div>
+            <div class="grid-item">Item 9</div>
+          </div>
+        </div>
+
+        <!-- 📏 FRACTIONAL UNITS DEMONSTRATION -->
+        <div class="demo-group">
+          <h3>Fractional Units (fr) - 1fr 2fr 1fr</h3>
+          <div class="grid-container fractional-grid">
+            <div class="grid-item">1 Part</div>
+            <div class="grid-item">2 Parts (Double Width)</div>
+            <div class="grid-item">1 Part</div>
+          </div>
+        </div>
+
+        <!-- 🔄 REPEAT FUNCTION -->
+        <div class="demo-group">
+          <h3>Repeat Function - repeat(4, 1fr)</h3>
+          <div class="grid-container repeat-grid">
+            <div class="grid-item">Col 1</div>
+            <div class="grid-item">Col 2</div>
+            <div class="grid-item">Col 3</div>
+            <div class="grid-item">Col 4</div>
+          </div>
+        </div>
+
+        <!-- 🎯 MIXED UNITS -->
+        <div class="demo-group">
+          <h3>Mixed Units - 200px 1fr auto</h3>
+          <div class="grid-container mixed-units-grid">
+            <div class="grid-item fixed-width">Fixed 200px</div>
+            <div class="grid-item flexible">Flexible (1fr)</div>
+            <div class="grid-item auto-width">Auto Content Width</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 2: Grid Areas Layout -->
+      <section class="demo-section">
+        <h2>Grid Areas - Website Layout</h2>
+
+        <div class="website-layout">
+          <!-- 📋 HEADER -->
+          <header class="header">
+            <h1>My Website</h1>
+            <nav>
+              <a href="#">Home</a>
+              <a href="#">About</a>
+              <a href="#">Services</a>
+              <a href="#">Contact</a>
+            </nav>
+          </header>
+
+          <!-- 🎯 MAIN CONTENT AREA -->
+          <main class="content">
+            <article>
+              <h2>Main Article</h2>
+              <p>
+                This is the main content area. It takes up the central space and
+                contains the primary information.
+              </p>
+              <p>
+                The content area is flexible and expands to fill available space
+                while maintaining proper proportions with the sidebar.
+              </p>
+            </article>
+          </main>
+
+          <!-- 📌 SIDEBAR -->
+          <aside class="sidebar">
+            <h3>Sidebar</h3>
+            <ul>
+              <li>Recent Posts</li>
+              <li>Categories</li>
+              <li>Tags</li>
+              <li>Archives</li>
+            </ul>
+          </aside>
+
+          <!-- 🦶 FOOTER -->
+          <footer class="footer">
+            <p>&copy; 2024 My Website. All rights reserved.</p>
+          </footer>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 3: Grid Item Positioning -->
+      <section class="demo-section">
+        <h2>Grid Item Positioning</h2>
+
+        <!-- 📍 SPECIFIC POSITIONING -->
+        <div class="demo-group">
+          <h3>Specific Grid Positioning</h3>
+          <div class="grid-container positioned-grid">
+            <div class="grid-item item-1">
+              Item 1<br />Grid Position: 1/1 to 2/3
+            </div>
+            <div class="grid-item item-2">
+              Item 2<br />Grid Position: 2/3 to 4/4
+            </div>
+            <div class="grid-item item-3">
+              Item 3<br />Grid Position: 3/1 to 4/3
+            </div>
+            <div class="grid-item auto-item">Auto Item</div>
+            <div class="grid-item auto-item">Auto Item</div>
+          </div>
+        </div>
+
+        <!-- 🔗 GRID SPAN DEMONSTRATION -->
+        <div class="demo-group">
+          <h3>Grid Span Examples</h3>
+          <div class="grid-container span-grid">
+            <div class="grid-item span-item-1">Spans 2 Columns</div>
+            <div class="grid-item normal-item">Normal</div>
+            <div class="grid-item normal-item">Normal</div>
+            <div class="grid-item span-item-2">Spans 2 Rows</div>
+            <div class="grid-item normal-item">Normal</div>
+            <div class="grid-item normal-item">Normal</div>
+            <div class="grid-item span-item-3">Spans 3 Columns</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 4: Auto-fit and Auto-fill -->
+      <section class="demo-section">
+        <h2>Responsive Grid - Auto-fit vs Auto-fill</h2>
+
+        <!-- 🔧 AUTO-FIT DEMONSTRATION -->
+        <div class="demo-group">
+          <h3>auto-fit - Stretches to fill container</h3>
+          <div class="grid-container auto-fit-grid">
+            <div class="grid-item">Item 1</div>
+            <div class="grid-item">Item 2</div>
+            <div class="grid-item">Item 3</div>
+          </div>
+        </div>
+
+        <!-- 🔧 AUTO-FILL DEMONSTRATION -->
+        <div class="demo-group">
+          <h3>auto-fill - Maintains column size</h3>
+          <div class="grid-container auto-fill-grid">
+            <div class="grid-item">Item 1</div>
+            <div class="grid-item">Item 2</div>
+            <div class="grid-item">Item 3</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 5: Real-World Dashboard Example -->
+      <section class="demo-section">
+        <h2>Real-World Example: Dashboard Layout</h2>
+
+        <div class="dashboard">
+          <!-- 📊 DASHBOARD HEADER -->
+          <header class="dashboard__header">
+            <h1>Analytics Dashboard</h1>
+            <div class="dashboard__user">
+              <span>John Doe</span>
+              <img
+                src="https://via.placeholder.com/40/3498db/white?text=JD"
+                alt="User Avatar"
+              />
+            </div>
+          </header>
+
+          <!-- 🧭 NAVIGATION SIDEBAR -->
+          <nav class="dashboard__nav">
+            <ul>
+              <li><a href="#" class="active">📊 Overview</a></li>
+              <li><a href="#">📈 Analytics</a></li>
+              <li><a href="#">👥 Users</a></li>
+              <li><a href="#">💰 Revenue</a></li>
+              <li><a href="#">⚙️ Settings</a></li>
+            </ul>
+          </nav>
+
+          <!-- 📊 QUICK STATS CARDS -->
+          <section class="dashboard__stats">
+            <div class="stat-card">
+              <h3>Total Users</h3>
+              <p class="stat-number">12,487</p>
+              <span class="stat-change positive">+12%</span>
+            </div>
+            <div class="stat-card">
+              <h3>Revenue</h3>
+              <p class="stat-number">$45,892</p>
+              <span class="stat-change positive">+8%</span>
+            </div>
+            <div class="stat-card">
+              <h3>Orders</h3>
+              <p class="stat-number">1,247</p>
+              <span class="stat-change negative">-3%</span>
+            </div>
+          </section>
+
+          <!-- 📈 MAIN CHART AREA -->
+          <main class="dashboard__chart">
+            <div class="chart-container">
+              <h2>Revenue Overview</h2>
+              <div class="chart-placeholder">
+                📈 Chart visualization would go here
+                <p>Interactive charts and graphs displaying key metrics</p>
+              </div>
+            </div>
+          </main>
+
+          <!-- 📋 RECENT ACTIVITY -->
+          <aside class="dashboard__activity">
+            <h3>Recent Activity</h3>
+            <ul>
+              <li>New user registration</li>
+              <li>Order #1247 completed</li>
+              <li>Payment received</li>
+              <li>New message received</li>
+              <li>System backup completed</li>
+            </ul>
+          </aside>
+
+          <!-- 🎯 WIDGET AREA -->
+          <section class="dashboard__widgets">
+            <div class="widget">
+              <h4>Quick Actions</h4>
+              <button>Add User</button>
+              <button>Export Data</button>
+              <button>Generate Report</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- 📋 SECTION 6: Photo Gallery Grid -->
+      <section class="demo-section">
+        <h2>Real-World Example: Photo Gallery</h2>
+
+        <div class="photo-gallery">
+          <div class="photo-item large-photo">
+            <img
+              src="https://via.placeholder.com/400x300/e74c3c/white?text=Featured+Photo"
+              alt="Featured Photo"
+            />
+            <div class="photo-overlay">
+              <h3>Featured Image</h3>
+              <p>Main highlight photo</p>
+            </div>
+          </div>
+
+          <div class="photo-item">
+            <img
+              src="https://via.placeholder.com/300x200/3498db/white?text=Photo+1"
+              alt="Photo 1"
+            />
+            <div class="photo-overlay">
+              <h4>Photo 1</h4>
+            </div>
+          </div>
+
+          <div class="photo-item">
+            <img
+              src="https://via.placeholder.com/300x200/2ecc71/white?text=Photo+2"
+              alt="Photo 2"
+            />
+            <div class="photo-overlay">
+              <h4>Photo 2</h4>
+            </div>
+          </div>
+
+          <div class="photo-item tall-photo">
+            <img
+              src="https://via.placeholder.com/300x400/9b59b6/white?text=Tall+Photo"
+              alt="Tall Photo"
+            />
+            <div class="photo-overlay">
+              <h4>Portrait</h4>
+              <p>Tall format photo</p>
+            </div>
+          </div>
+
+          <div class="photo-item">
+            <img
+              src="https://via.placeholder.com/300x200/f39c12/white?text=Photo+3"
+              alt="Photo 3"
+            />
+            <div class="photo-overlay">
+              <h4>Photo 3</h4>
+            </div>
+          </div>
+
+          <div class="photo-item">
+            <img
+              src="https://via.placeholder.com/300x200/1abc9c/white?text=Photo+4"
+              alt="Photo 4"
+            />
+            <div class="photo-overlay">
+              <h4>Photo 4</h4>
+            </div>
+          </div>
+
+          <div class="photo-item wide-photo">
+            <img
+              src="https://via.placeholder.com/600x200/34495e/white?text=Panorama"
+              alt="Panorama"
+            />
+            <div class="photo-overlay">
+              <h4>Panorama</h4>
+              <p>Wide landscape photo</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+```
 
 ```css
 /* 📊 BASIC GRID SETUP */
 .grid-container {
-  display: grid; /* 🔲 Enable grid layout */
+  display: grid;                   /* 🔲 Enable grid layout */
   /* Alternative: display: inline-grid; for inline grid containers */
+  background: #f8f9fa;             /* 🎨 Light background */
+  border: 2px dashed #dee2e6;      /* 🖼️ Dashed border for visibility */
+  border-radius: 8px;              /* 🔄 Rounded corners */
+  padding: 20px;                   /* 📦 Container padding */
+  margin: 20px 0;                  /* 🌌 Vertical spacing */
 }
 
 /*
@@ -2307,88 +5127,598 @@ CSS Grid is a two-dimensional layout system that provides precise control over b
 - Direct children become grid items
 - Establishes implicit grid with auto-sized rows/columns
 - Block-level grid container by default
+- inline-grid creates inline-level grid containers
 */
 
-/* 📏 GRID TEMPLATE COLUMNS - Column structure */
-.grid-columns {
-  display: grid;
-
-  /* 🔢 FIXED COLUMN WIDTHS */
-  grid-template-columns: 200px 300px 100px; /* 📏 3 columns with specific widths */
-
-  /* 📈 FRACTIONAL UNITS (fr) */
-  /* grid-template-columns: 1fr 2fr 1fr; */ /* 📊 Proportional columns (1:2:1 ratio) */
-
-  /* 🔄 REPEAT FUNCTION */
-  /* grid-template-columns: repeat(4, 1fr); */ /* 📊 4 equal columns */
-  /* grid-template-columns: repeat(3, minmax(200px, 1fr)); */ /* 📊 3 responsive columns */
-
-  /* 🎯 MIXED UNITS */
-  /* grid-template-columns: 250px 1fr auto; */ /* 📊 Fixed, flexible, content-based */
+/* 📊 BASIC 3X3 GRID */
+.basic-grid {
+  grid-template-columns: repeat(3, 1fr); /* 📏 3 equal columns */
+  grid-template-rows: repeat(3, 100px);  /* 📏 3 rows, 100px each */
+  gap: 15px;                              /* 🌌 15px gap between items */
 }
 
 /*
-🔍 Grid template columns explanation:
-- Defines column sizes and count
-- fr unit represents fraction of available space
-- repeat() reduces repetition
-- minmax() creates flexible boundaries
-- auto sizes based on content
+🔍 Basic grid explanation:
+- repeat(3, 1fr): 3 columns, each taking 1 fraction of space
+- repeat(3, 100px): 3 rows, each exactly 100px tall
+- gap: Creates consistent spacing between all grid items
 */
 
-/* 📏 GRID TEMPLATE ROWS - Row structure */
-.grid-rows {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 📊 3 equal columns */
-
-  /* 🔢 FIXED ROW HEIGHTS */
-  grid-template-rows: 100px 200px auto; /* 📏 3 rows with specific heights */
-
-  /* 📈 FRACTIONAL ROWS */
-  /* grid-template-rows: 1fr 2fr 1fr; */ /* 📊 Proportional rows */
-
-  /* 🔄 REPEAT WITH ROWS */
-  /* grid-template-rows: repeat(4, 150px); */ /* 📏 4 rows, 150px each */
+/* 📈 FRACTIONAL UNITS DEMONSTRATION */
+.fractional-grid {
+  grid-template-columns: 1fr 2fr 1fr;    /* 📊 Proportional columns (1:2:1) */
+  grid-template-rows: 120px;              /* 📏 Single row height */
+  gap: 20px;                              /* 🌌 Gap between items */
 }
 
 /*
-🔍 Grid template rows explanation:
-- Similar to columns but for row sizing
-- auto adjusts to content height
-- fr units distribute available vertical space
-- Explicit rows vs implicit rows
+🔍 Fractional units explanation:
+- 1fr 2fr 1fr creates 1:2:1 ratio
+- Middle column gets twice the space
+- fr units distribute available space proportionally
+- Total fractions: 4fr (1+2+1), middle gets 2/4 = 50%
 */
 
-/* 🌌 GRID GAP - Spacing between grid items */
-.grid-gap {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 20px; /* 🌌 Equal gap for rows and columns */
-  /* row-gap: 15px; */ /* 🌌 Gap between rows only */
-  /* column-gap: 25px; */ /* 🌌 Gap between columns only */
-
-  /* 🔗 LEGACY SYNTAX */
-  /* grid-gap: 20px; */ /* 🌌 Older browsers (still works) */
-  /* grid-row-gap: 15px; */ /* 🌌 Legacy row gap */
-  /* grid-column-gap: 25px; */ /* 🌌 Legacy column gap */
+/* 🔄 REPEAT FUNCTION DEMONSTRATION */
+.repeat-grid {
+  grid-template-columns: repeat(4, 1fr);  /* 📊 4 equal columns */
+  grid-template-rows: 100px;               /* 📏 Single row */
+  gap: 15px;                               /* 🌌 Consistent spacing */
 }
 
 /*
-🔍 Grid gap explanation:
-- Creates gutters between grid items
-- Doesn't add space around grid edges
-- More predictable than margin-based spacing
-- gap is modern syntax, grid-gap for older browsers
+🔍 Repeat function explanation:
+- repeat(count, size) reduces repetition
+- repeat(4, 1fr) = 1fr 1fr 1fr 1fr
+- More maintainable than writing each column
+- Can combine with other sizes: 200px repeat(3, 1fr)
 */
 
-/* 📍 GRID AREAS - Named grid regions */
-.grid-areas {
+/* 🎯 MIXED UNITS GRID */
+.mixed-units-grid {
+  grid-template-columns: 200px 1fr auto;  /* 📊 Fixed, flexible, content-based */
+  grid-template-rows: 120px;               /* 📏 Single row height */
+  gap: 20px;                               /* 🌌 Gap between columns */
+}
+
+/*
+🔍 Mixed units explanation:
+- 200px: Fixed width column
+- 1fr: Takes remaining space after fixed columns
+- auto: Sizes to fit content width
+- Flexible layouts with controlled constraints
+*/
+
+/* 🏠 WEBSITE LAYOUT WITH GRID AREAS */
+.website-layout {
   display: grid;
-  grid-template-columns: 1fr 3fr 1fr; /* 📊 3 columns */
-  grid-template-rows: auto 1fr auto; /* 📏 3 rows */
+  grid-template-columns: 1fr 3fr 1fr;     /* 📊 Sidebar, content, sidebar ratio */
+  grid-template-rows: auto 1fr auto;      /* 📏 Header, content, footer */
   grid-template-areas:
-    "header  header  header" /* 📋 Header spans full width */
+    "header  header  header"             /* 📋 Header spans full width */
+    "sidebar content content"            /* 📋 Sidebar + content area */
+    "footer  footer  footer";            /* 📋 Footer spans full width */
+  min-height: 500px;                     /* 📏 Minimum layout height */
+  gap: 20px;                             /* 🌌 Gap between areas */
+  background: white;                     /* ⚪ White background */
+  border-radius: 12px;                   /* 🔄 Rounded corners */
+  overflow: hidden;                      /* 🚫 Hide content overflow */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 🌫️ Subtle shadow */
+}
+
+/*
+🔍 Grid template areas explanation:
+- Named grid regions for semantic layouts
+- Each string represents a row
+- Same names span across columns/rows
+- More readable than numeric positioning
+*/
+
+/* 📋 GRID AREA ASSIGNMENTS */
+.header {
+  grid-area: header;                     /* 📍 Assign to header area */
+  background: #2c3e50;                   /* 🎨 Dark header background */
+  color: white;                          /* ⚪ White text */
+  padding: 1.5rem 2rem;                  /* 📦 Header padding */
+  display: flex;                         /* 📦 Flex for header content */
+  justify-content: space-between;        /* 📏 Space between title and nav */
+  align-items: center;                   /* 📐 Center vertically */
+}
+
+.header h1 {
+  margin: 0;                             /* 🚫 Remove default margin */
+  font-size: 1.5rem;                     /* 📏 Header title size */
+}
+
+.header nav {
+  display: flex;                         /* 📦 Horizontal navigation */
+  gap: 2rem;                             /* 🌌 Space between nav items */
+}
+
+.header nav a {
+  color: white;                          /* ⚪ White nav links */
+  text-decoration: none;                 /* 🚫 Remove underline */
+  font-weight: 500;                      /* 📝 Medium font weight */
+  transition: color 0.3s ease;           /* ⚡ Smooth color transition */
+}
+
+.header nav a:hover {
+  color: #3498db;                        /* 🔵 Blue on hover */
+}
+
+.content {
+  grid-area: content;                    /* 📍 Assign to content area */
+  padding: 2rem;                         /* 📦 Content padding */
+  background: #ffffff;                   /* ⚪ White content background */
+}
+
+.sidebar {
+  grid-area: sidebar;                    /* 📍 Assign to sidebar area */
+  padding: 2rem;                         /* 📦 Sidebar padding */
+  background: #ecf0f1;                   /* 🎨 Light gray background */
+}
+
+.sidebar ul {
+  list-style: none;                      /* 🚫 Remove bullet points */
+  padding: 0;                            /* 🚫 Remove padding */
+  margin: 0;                             /* 🚫 Remove margin */
+}
+
+.sidebar li {
+  padding: 0.5rem 0;                     /* 📦 Vertical item padding */
+  border-bottom: 1px solid #bdc3c7;      /* 🖼️ Bottom border */
+}
+
+.footer {
+  grid-area: footer;                     /* 📍 Assign to footer area */
+  background: #34495e;                   /* 🎨 Dark footer background */
+  color: white;                          /* ⚪ White footer text */
+  padding: 1rem 2rem;                    /* 📦 Footer padding */
+  text-align: center;                    /* 🎯 Center footer text */
+}
+
+/* 📍 POSITIONED GRID DEMONSTRATION */
+.positioned-grid {
+  grid-template-columns: repeat(4, 1fr);  /* 📊 4 equal columns */
+  grid-template-rows: repeat(4, 100px);   /* 📏 4 rows, 100px each */
+  gap: 10px;                               /* 🌌 Small gap */
+}
+
+.item-1 {
+  grid-column: 1 / 3;                    /* 📍 Spans columns 1-2 */
+  grid-row: 1 / 2;                       /* 📍 Row 1 only */
+  background: #e74c3c !important;        /* 🔴 Red background */
+}
+
+.item-2 {
+  grid-column: 3 / 4;                    /* 📍 Column 3 only */
+  grid-row: 2 / 4;                       /* 📍 Spans rows 2-3 */
+  background: #3498db !important;        /* 🔵 Blue background */
+}
+
+.item-3 {
+  grid-column: 1 / 3;                    /* 📍 Spans columns 1-2 */
+  grid-row: 3 / 4;                       /* 📍 Row 3 only */
+  background: #2ecc71 !important;        /* 🟢 Green background */
+}
+
+/*
+🔍 Grid positioning explanation:
+- grid-column: start / end (1-based indexing)
+- grid-row: start / end (1-based indexing)
+- Line numbers refer to grid lines, not cells
+- Items can overlap if positioned on same area
+*/
+
+/* 🔗 GRID SPAN DEMONSTRATION */
+.span-grid {
+  grid-template-columns: repeat(4, 1fr);  /* 📊 4 columns */
+  grid-template-rows: repeat(3, 100px);   /* 📏 3 rows */
+  gap: 15px;                               /* 🌌 Gap between items */
+}
+
+.span-item-1 {
+  grid-column: span 2;                   /* 🔗 Spans 2 columns from current position */
+  background: #9b59b6 !important;        /* 🟣 Purple background */
+}
+
+.span-item-2 {
+  grid-row: span 2;                      /* 🔗 Spans 2 rows from current position */
+  background: #f39c12 !important;        /* 🟠 Orange background */
+}
+
+.span-item-3 {
+  grid-column: span 3;                   /* 🔗 Spans 3 columns */
+  background: #1abc9c !important;        /* 🐟 Teal background */
+}
+
+/*
+🔍 Grid span explanation:
+- span keyword means "span this many tracks"
+- More intuitive than calculating end positions
+- Automatically calculates end line
+- Works with auto-placement algorithm
+*/
+
+/* 🔧 AUTO-FIT GRID */
+.auto-fit-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 🔧 Responsive columns */
+  gap: 20px;                                                   /* 🌌 Gap between items */
+  min-height: 120px;                                           /* 📏 Minimum height */
+}
+
+/*
+🔍 Auto-fit explanation:
+- Creates as many columns as fit in container
+- minmax(200px, 1fr): min 200px, expand to fill
+- Columns stretch to fill available space
+- Empty columns collapse
+*/
+
+/* 🔧 AUTO-FILL GRID */
+.auto-fill-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* 🔧 Responsive columns */
+  gap: 20px;                                                    /* 🌌 Gap between items */
+  min-height: 120px;                                            /* 📏 Minimum height */
+}
+
+/*
+🔍 Auto-fill explanation:
+- Similar to auto-fit but maintains empty columns
+- Preserves grid structure even with few items
+- Empty columns remain at minimum size
+- Useful for consistent layouts
+*/
+
+/* 🎨 GRID ITEMS STYLING */
+.grid-item {
+  background: #3498db;                   /* 🔵 Blue background */
+  color: white;                          /* ⚪ White text */
+  padding: 20px;                         /* 📦 Internal padding */
+  border-radius: 8px;                    /* 🔄 Rounded corners */
+  display: flex;                         /* 📦 Flex for centering */
+  align-items: center;                   /* 📐 Center vertically */
+  justify-content: center;               /* 📐 Center horizontally */
+  font-weight: 500;                      /* 📝 Medium font weight */
+  text-align: center;                    /* 🎯 Center text */
+  transition: all 0.3s ease;             /* ⚡ Smooth transitions */
+  cursor: pointer;                       /* 👆 Pointer cursor */
+  line-height: 1.4;                      /* 📏 Better line spacing */
+}
+
+.grid-item:hover {
+  background: #2980b9;                   /* 🔵 Darker blue on hover */
+  transform: translateY(-2px);           /* ⬆️ Lift effect */
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3); /* 🌫️ Blue shadow */
+}
+
+/* 🎨 SPECIAL ITEM STYLING */
+.normal-item {
+  background: #95a5a6;                   /* 🎨 Gray background */
+}
+
+.auto-item {
+  background: #e67e22;                   /* 🟠 Orange background */
+}
+
+.fixed-width {
+  background: #e74c3c;                   /* 🔴 Red background */
+}
+
+.flexible {
+  background: #2ecc71;                   /* 🟢 Green background */
+}
+
+.auto-width {
+  background: #9b59b6;                   /* 🟣 Purple background */
+}
+
+/* 📊 DASHBOARD LAYOUT */
+.dashboard {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px; /* 📏 Sidebar, main, widgets */
+  grid-template-rows: auto auto 1fr auto; /* 📏 Header, stats, content, space */
+  grid-template-areas:
+    "header header header"
+    "nav stats stats"
+    "nav chart activity"
+    "nav widgets widgets";
+  min-height: 600px;                     /* 📏 Minimum dashboard height */
+  gap: 20px;                             /* 🌌 Gap between sections */
+  background: #f8f9fa;                   /* 🎨 Light background */
+  border-radius: 12px;                   /* 🔄 Rounded dashboard */
+  overflow: hidden;                      /* 🚫 Hide overflow */
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1); /* 🌫️ Dashboard shadow */
+}
+
+.dashboard__header {
+  grid-area: header;                     /* 📍 Header area */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 🌈 Gradient */
+  color: white;                          /* ⚪ White text */
+  padding: 1.5rem 2rem;                  /* 📦 Header padding */
+  display: flex;                         /* 📦 Flex layout */
+  justify-content: space-between;        /* 📏 Space between elements */
+  align-items: center;                   /* 📐 Center alignment */
+}
+
+.dashboard__user {
+  display: flex;                         /* 📦 User info flex */
+  align-items: center;                   /* 📐 Center user info */
+  gap: 1rem;                             /* 🌌 Space between name and avatar */
+}
+
+.dashboard__user img {
+  border-radius: 50%;                    /* 🔄 Circular avatar */
+  width: 40px;                           /* 📏 Avatar size */
+  height: 40px;                          /* 📏 Avatar size */
+}
+
+.dashboard__nav {
+  grid-area: nav;                        /* 📍 Navigation area */
+  background: #2c3e50;                   /* 🎨 Dark nav background */
+  padding: 2rem 0;                       /* 📦 Vertical padding */
+}
+
+.dashboard__nav ul {
+  list-style: none;                      /* 🚫 No bullets */
+  padding: 0;                            /* 🚫 No padding */
+  margin: 0;                             /* 🚫 No margin */
+}
+
+.dashboard__nav li {
+  margin: 0;                             /* 🚫 No margin */
+}
+
+.dashboard__nav a {
+  display: block;                        /* 📦 Block links */
+  color: #bdc3c7;                        /* 🎨 Light gray text */
+  text-decoration: none;                 /* 🚫 No underline */
+  padding: 1rem 2rem;                    /* 📦 Link padding */
+  transition: all 0.3s ease;             /* ⚡ Smooth transition */
+}
+
+.dashboard__nav a:hover,
+.dashboard__nav a.active {
+  background: #34495e;                   /* 🎨 Darker background */
+  color: #3498db;                        /* 🔵 Blue text */
+  border-right: 4px solid #3498db;       /* 🖼️ Blue accent */
+}
+
+.dashboard__stats {
+  grid-area: stats;                      /* 📍 Stats area */
+  display: flex;                         /* 📦 Horizontal stats */
+  gap: 1.5rem;                           /* 🌌 Space between cards */
+  padding: 0 2rem;                       /* 📦 Horizontal padding */
+}
+
+.stat-card {
+  background: white;                     /* ⚪ White card background */
+  padding: 2rem;                         /* 📦 Card padding */
+  border-radius: 12px;                   /* 🔄 Rounded cards */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 🌫️ Card shadow */
+  flex: 1;                               /* 📈 Equal width cards */
+  text-align: center;                    /* 🎯 Center text */
+}
+
+.stat-card h3 {
+  margin: 0 0 1rem 0;                    /* 🌌 Bottom margin only */
+  color: #7f8c8d;                        /* 🎨 Gray heading */
+  font-size: 0.875rem;                   /* 📏 Small heading */
+  text-transform: uppercase;             /* 🔤 Uppercase text */
+  letter-spacing: 0.05em;                /* 📏 Letter spacing */
+}
+
+.stat-number {
+  font-size: 2rem;                       /* 📏 Large number */
+  font-weight: 700;                      /* 📝 Bold number */
+  color: #2c3e50;                        /* 🎨 Dark number */
+  margin: 0 0 0.5rem 0;                  /* 🌌 Bottom margin */
+}
+
+.stat-change {
+  font-size: 0.875rem;                   /* 📏 Small change text */
+  font-weight: 500;                      /* 📝 Medium weight */
+}
+
+.stat-change.positive {
+  color: #27ae60;                        /* 🟢 Green for positive */
+}
+
+.stat-change.negative {
+  color: #e74c3c;                        /* 🔴 Red for negative */
+}
+
+.dashboard__chart {
+  grid-area: chart;                      /* 📍 Chart area */
+  background: white;                     /* ⚪ White background */
+  border-radius: 12px;                   /* 🔄 Rounded container */
+  padding: 2rem;                         /* 📦 Chart padding */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 🌫️ Chart shadow */
+}
+
+.chart-placeholder {
+  background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%),
+              linear-gradient(-45deg, #f8f9fa 25%, transparent 25%),
+              linear-gradient(45deg, transparent 75%, #f8f9fa 75%),
+              linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+  background-size: 20px 20px;           /* 📏 Pattern size */
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  border: 2px dashed #dee2e6;            /* 🖼️ Dashed border */
+  border-radius: 8px;                    /* 🔄 Rounded placeholder */
+  padding: 3rem;                         /* 📦 Placeholder padding */
+  text-align: center;                    /* 🎯 Center text */
+  color: #7f8c8d;                        /* 🎨 Gray text */
+  min-height: 200px;                     /* 📏 Minimum height */
+  display: flex;                         /* 📦 Flex for centering */
+  flex-direction: column;                /* 📐 Stack vertically */
+  justify-content: center;               /* 📐 Center vertically */
+  align-items: center;                   /* 📐 Center horizontally */
+}
+
+.dashboard__activity {
+  grid-area: activity;                   /* 📍 Activity area */
+  background: white;                     /* ⚪ White background */
+  border-radius: 12px;                   /* 🔄 Rounded container */
+  padding: 2rem;                         /* 📦 Activity padding */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 🌫️ Activity shadow */
+}
+
+.dashboard__activity h3 {
+  margin-top: 0;                         /* 🚫 No top margin */
+  color: #2c3e50;                        /* 🎨 Dark heading */
+  border-bottom: 2px solid #ecf0f1;      /* 🖼️ Bottom border */
+  padding-bottom: 1rem;                  /* 📦 Bottom padding */
+}
+
+.dashboard__activity ul {
+  list-style: none;                      /* 🚫 No bullets */
+  padding: 0;                            /* 🚫 No padding */
+}
+
+.dashboard__activity li {
+  padding: 0.75rem 0;                    /* 📦 Vertical padding */
+  border-bottom: 1px solid #ecf0f1;      /* 🖼️ Separator line */
+  color: #7f8c8d;                        /* 🎨 Gray text */
+}
+
+.dashboard__widgets {
+  grid-area: widgets;                    /* 📍 Widgets area */
+  background: white;                     /* ⚪ White background */
+  border-radius: 12px;                   /* 🔄 Rounded container */
+  padding: 2rem;                         /* 📦 Widget padding */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 🌫️ Widget shadow */
+}
+
+.widget h4 {
+  margin-top: 0;                         /* 🚫 No top margin */
+  color: #2c3e50;                        /* 🎨 Dark heading */
+  margin-bottom: 1.5rem;                 /* 🌌 Bottom margin */
+}
+
+.widget button {
+  display: block;                        /* 📦 Block buttons */
+  width: 100%;                           /* 📏 Full width */
+  margin: 0.5rem 0;                      /* 🌌 Vertical margin */
+  padding: 0.75rem 1rem;                 /* 📦 Button padding */
+  background: #3498db;                   /* 🔵 Blue background */
+  color: white;                          /* ⚪ White text */
+  border: none;                          /* 🚫 No border */
+  border-radius: 6px;                    /* 🔄 Rounded button */
+  cursor: pointer;                       /* 👆 Pointer cursor */
+  transition: background 0.3s ease;      /* ⚡ Smooth transition */
+}
+
+.widget button:hover {
+  background: #2980b9;                   /* 🔵 Darker blue on hover */
+}
+
+/* 🖼️ PHOTO GALLERY GRID */
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 🔧 Responsive columns */
+  grid-auto-rows: 200px;                 /* 📏 Default row height */
+  gap: 20px;                             /* 🌌 Gap between photos */
+  padding: 2rem;                         /* 📦 Gallery padding */
+}
+
+.photo-item {
+  position: relative;                    /* 📍 Relative positioning */
+  overflow: hidden;                      /* 🚫 Hide overflow */
+  border-radius: 12px;                   /* 🔄 Rounded photos */
+  cursor: pointer;                       /* 👆 Pointer cursor */
+  transition: transform 0.3s ease;       /* ⚡ Smooth transform */
+}
+
+.photo-item:hover {
+  transform: scale(1.02);                /* 🔍 Slight scale on hover */
+}
+
+.photo-item img {
+  width: 100%;                           /* 📏 Full width */
+  height: 100%;                          /* 📏 Full height */
+  object-fit: cover;                     /* 🖼️ Cover entire area */
+  object-position: center;               /* 🎯 Center image */
+}
+
+.large-photo {
+  grid-column: span 2;                   /* 🔗 Spans 2 columns */
+  grid-row: span 2;                      /* 🔗 Spans 2 rows */
+}
+
+.tall-photo {
+  grid-row: span 2;                      /* 🔗 Spans 2 rows */
+}
+
+.wide-photo {
+  grid-column: span 2;                   /* 🔗 Spans 2 columns */
+}
+
+.photo-overlay {
+  position: absolute;                    /* 📍 Absolute positioning */
+  bottom: 0;                             /* 📍 Bottom placement */
+  left: 0;                               /* 📍 Left alignment */
+  right: 0;                              /* 📍 Right alignment */
+  background: linear-gradient(transparent, rgba(0,0,0,0.7)); /* 🌈 Gradient overlay */
+  color: white;                          /* ⚪ White text */
+  padding: 2rem 1.5rem 1.5rem;          /* 📦 Overlay padding */
+  transform: translateY(100%);           /* 🔄 Hidden by default */
+  transition: transform 0.3s ease;       /* ⚡ Smooth slide */
+}
+
+.photo-item:hover .photo-overlay {
+  transform: translateY(0);              /* 🔄 Slide in on hover */
+}
+
+.photo-overlay h3,
+.photo-overlay h4 {
+  margin: 0 0 0.5rem 0;                  /* 🌌 Bottom margin only */
+}
+
+.photo-overlay p {
+  margin: 0;                             /* 🚫 No margin */
+  opacity: 0.9;                          /* 🎨 Slight transparency */
+}
+
+/* 📋 DEMO STYLING */
+.grid-demo-wrapper {
+  max-width: 1200px;                     /* 📏 Maximum width */
+  margin: 0 auto;                        /* 🎯 Center container */
+  padding: 2rem;                         /* 📦 Wrapper padding */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f8f9fa;                   /* 🎨 Light wrapper background */
+}
+
+.demo-section {
+  background: white;                     /* ⚪ White section background */
+  margin-bottom: 3rem;                   /* 🌌 Section spacing */
+  padding: 2.5rem;                       /* 📦 Section padding */
+  border-radius: 16px;                   /* 🔄 Rounded sections */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1); /* 🌫️ Section shadow */
+}
+
+.demo-section h2 {
+  color: #2c3e50;                        /* 🎨 Dark heading */
+  margin-top: 0;                         /* 🚫 No top margin */
+  margin-bottom: 2rem;                   /* 🌌 Bottom margin */
+  padding-bottom: 1rem;                  /* 📦 Bottom padding */
+  border-bottom: 3px solid #3498db;      /* 🖼️ Blue underline */
+  font-size: 1.75rem;                    /* 📏 Large heading */
+}
+
+.demo-group {
+  margin-bottom: 2.5rem;                 /* 🌌 Group spacing */
+}
+
+.demo-group h3 {
+  background: #34495e;                   /* 🎨 Dark background */
+  color: white;                          /* ⚪ White text */
+  padding: 0.75rem 1.25rem;              /* 📦 Heading padding */
+  border-radius: 6px;                    /* 🔄 Rounded heading */
+  font-family: 'Courier New', monospace; /* 🔤 Monospace font */
+  font-size: 0.95rem;                    /* 📏 Code font size */
+  margin-bottom: 1rem;                   /* 🌌 Bottom spacing */
+  border-left: 4px solid #3498db;        /* 🖼️ Blue accent */
+}
     "sidebar content ads" /* 📊 Main content area */
     "footer  footer  footer"; /* 📋 Footer spans full width */
   gap: 1rem; /* 🌌 Consistent spacing */
@@ -2455,11 +5785,1253 @@ CSS Grid is a two-dimensional layout system that provides precise control over b
 */
 ```
 
-This completes Part 4 covering:
+### **🎯 Grid Item Properties - Child Element Control**
 
-1. **Complete Flexbox System** - Container and item properties with real-world examples
-2. **Advanced Flexbox Layouts** - Navigation, cards, responsive sidebars
-3. **CSS Grid Fundamentals** - Grid container setup, columns, rows, gaps, and areas
-4. **Grid Alignment Systems** - Container-level positioning and spacing
+```css
+/* 📍 GRID POSITIONING - Line-based placement */
+.grid-positioning {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 📊 4 equal columns */
+  grid-template-rows: repeat(3, 100px); /* 📏 3 rows, 100px each */
+  gap: 10px; /* 🌌 Grid spacing */
+}
 
-Would you like me to continue with Part 5 covering advanced Grid techniques, responsive patterns, and layout combinations?
+.grid-item-positioned {
+  /* 📍 COLUMN POSITIONING */
+  grid-column-start: 2; /* ➡️ Start at column line 2 */
+  grid-column-end: 4; /* ➡️ End at column line 4 */
+  /* Shorthand: grid-column: 2 / 4; */ /* 📏 Spans from line 2 to 4 */
+
+  /* 📍 ROW POSITIONING */
+  grid-row-start: 1; /* ⬇️ Start at row line 1 */
+  grid-row-end: 3; /* ⬇️ End at row line 3 */
+  /* Shorthand: grid-row: 1 / 3; */ /* 📏 Spans from row 1 to 3 */
+
+  /* 🔗 ULTRA SHORTHAND */
+  /* grid-area: 1 / 2 / 3 / 4; */ /* 📏 row-start / col-start / row-end / col-end */
+
+  background: #e74c3c; /* 🔴 Red background for visibility */
+}
+
+/*
+🔍 Grid positioning explanation:
+- Grid lines start at 1, not 0
+- Lines exist between and around grid tracks
+- Negative values count from the end
+- Items can overlap by occupying same cells
+- grid-area combines all positioning values
+*/
+
+/* 🔢 SPAN NOTATION - Relative positioning */
+.grid-span-examples {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.span-item-1 {
+  grid-column: span 2; /* 📏 Span 2 columns from current position */
+  background: #3498db; /* 🔵 Blue background */
+}
+
+.span-item-2 {
+  grid-column: 3 / span 2; /* 📏 Start at column 3, span 2 columns */
+  grid-row: span 2; /* 📏 Span 2 rows from current position */
+  background: #2ecc71; /* 🟢 Green background */
+}
+
+.span-item-3 {
+  grid-area: span 2 / span 3; /* 📏 Span 2 rows and 3 columns */
+  background: #f39c12; /* 🟡 Orange background */
+}
+
+/*
+🔍 Span notation explanation:
+- span keyword creates relative positioning
+- More flexible than absolute line numbers
+- Works with both rows and columns
+- Can combine with absolute positioning
+- Useful for responsive designs
+*/
+
+/* 🎯 GRID ITEM ALIGNMENT - Individual positioning */
+.grid-item-alignment {
+  display: grid;
+  grid-template-columns: repeat(3, 200px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 10px;
+}
+
+.justify-self-item {
+  /* 🎯 HORIZONTAL ALIGNMENT within grid cell */
+  justify-self: center; /* 🎯 Center horizontally in cell */
+  /* justify-self: start; */ /* ⬅️ Align to left (default) */
+  /* justify-self: end; */ /* ➡️ Align to right */
+  /* justify-self: stretch; */ /* 📏 Fill cell width */
+
+  background: #9b59b6; /* 🟣 Purple background */
+  width: 100px; /* 📏 Fixed width to see alignment */
+}
+
+.align-self-item {
+  /* 🎯 VERTICAL ALIGNMENT within grid cell */
+  align-self: center; /* 🎯 Center vertically in cell */
+  /* align-self: start; */ /* ⬆️ Align to top (default) */
+  /* align-self: end; */ /* ⬇️ Align to bottom */
+  /* align-self: stretch; */ /* 📏 Fill cell height */
+
+  background: #1abc9c; /* 🟢 Teal background */
+  height: 50px; /* 📏 Fixed height to see alignment */
+}
+
+.place-self-item {
+  /* 🎯 BOTH ALIGNMENTS combined */
+  place-self: center; /* 🎯 Center both horizontally and vertically */
+  /* place-self: start end; */ /* 🎯 Top-left horizontal, bottom vertical */
+
+  background: #e67e22; /* 🟠 Orange background */
+  width: 80px; /* 📏 Fixed dimensions */
+  height: 60px; /* 📏 to see alignment */
+}
+
+/*
+🔍 Grid item alignment explanation:
+- justify-self: horizontal alignment within cell
+- align-self: vertical alignment within cell
+- place-self: shorthand for both alignments
+- Only affects individual grid items
+- Different from container-level alignment
+*/
+```
+
+### **🚀 Advanced Grid Techniques**
+
+```css
+/* 🔄 AUTO-FIT vs AUTO-FILL - Responsive columns */
+.grid-auto-fit {
+  display: grid;
+  gap: 20px;
+
+  /* 🎯 AUTO-FIT - Columns expand to fill space */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /*
+  🔍 auto-fit explanation:
+  - Creates as many columns as can fit
+  - Remaining space distributed among existing columns
+  - Columns expand when fewer items
+  - Better for flexible layouts
+  */
+}
+
+.grid-auto-fill {
+  display: grid;
+  gap: 20px;
+
+  /* 📊 AUTO-FILL - Maintains column count */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  /*
+  🔍 auto-fill explanation:
+  - Creates as many columns as can fit
+  - Empty columns remain in the layout
+  - Consistent column count regardless of content
+  - Better for uniform grids
+  */
+}
+
+/*
+🔍 Auto-fit vs Auto-fill comparison:
+AUTO-FIT: [Item] [Item] [    Expanded Items    ]
+AUTO-FILL: [Item] [Item] [Empty] [Empty] [Empty]
+*/
+
+/* 🎯 MINMAX FUNCTION - Flexible sizing */
+.grid-minmax {
+  display: grid;
+  gap: 15px;
+
+  grid-template-columns:
+    minmax(200px, 300px) /* 📏 Column 1: 200px to 300px */
+    minmax(150px, 1fr) /* 📈 Column 2: min 150px, grows */
+    minmax(auto, 200px); /* 🔄 Column 3: content-based to 200px */
+
+  grid-template-rows:
+    minmax(100px, auto) /* 📏 Row 1: min 100px, grows with content */
+    minmax(50px, 1fr); /* 📈 Row 2: min 50px, fills remaining space */
+}
+
+/*
+🔍 Minmax function explanation:
+- Sets minimum and maximum track sizes
+- First value: minimum size
+- Second value: maximum size
+- auto: adapts to content size
+- fr: fraction of available space
+- Prevents content overflow and layout breaks
+*/
+
+/* 🌊 IMPLICIT GRID - Auto-generated tracks */
+.grid-implicit {
+  display: grid;
+  grid-template-columns: repeat(3, 200px); /* 📊 3 explicit columns */
+  grid-template-rows: repeat(2, 100px); /* 📏 2 explicit rows */
+
+  /* 🎯 IMPLICIT TRACK SIZING */
+  grid-auto-columns: 150px; /* 📊 Auto-generated column size */
+  grid-auto-rows: 80px; /* 📏 Auto-generated row size */
+
+  /* 🔄 IMPLICIT GRID FLOW */
+  grid-auto-flow: row; /* ⬇️ Fill rows first (default) */
+  /* grid-auto-flow: column; */ /* ➡️ Fill columns first */
+  /* grid-auto-flow: row dense; */ /* ⬇️ Fill gaps in row direction */
+  /* grid-auto-flow: column dense; */ /* ➡️ Fill gaps in column direction */
+
+  gap: 10px;
+}
+
+/*
+🔍 Implicit grid explanation:
+- Grid automatically creates tracks for extra items
+- grid-auto-columns/rows: size auto-generated tracks
+- grid-auto-flow: controls placement direction
+- dense: fills gaps with smaller items
+- Essential for dynamic content layouts
+*/
+
+/* 🎨 DENSE PACKING - Efficient space usage */
+.grid-dense {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-flow: row dense; /* 🔄 Fill gaps efficiently */
+  gap: 10px;
+}
+
+.dense-item-large {
+  grid-column: span 2; /* 📏 Takes 2 columns */
+  grid-row: span 2; /* 📏 Takes 2 rows */
+  background: #e74c3c; /* 🔴 Red background */
+}
+
+.dense-item-small {
+  /* Auto-placement with dense packing */
+  background: #3498db; /* 🔵 Blue background */
+}
+
+/*
+🔍 Dense packing explanation:
+- Fills gaps left by larger items
+- Items may appear out of source order
+- Better space utilization
+- Use with caution for accessibility
+- Great for masonry-like layouts
+*/
+```
+
+### **📱 Responsive Grid Patterns**
+
+```css
+/* 🏗️ RESPONSIVE CARD GRID - Mobile-first approach */
+.responsive-card-grid {
+  display: grid;
+  gap: 1.5rem; /* 🌌 Base gap for mobile */
+  padding: 1rem; /* 📦 Container padding */
+
+  /* 📱 MOBILE FIRST - Single column */
+  grid-template-columns: 1fr; /* 📱 Full width on mobile */
+
+  /* 📱💻 TABLET - Two columns */
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr); /* 📊 2 columns on tablets */
+    gap: 2rem; /* 🌌 Increased gap */
+    padding: 1.5rem; /* 📦 More padding */
+  }
+
+  /* 💻 DESKTOP - Three columns */
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr); /* 📊 3 columns on desktop */
+    gap: 2.5rem; /* 🌌 Larger gap */
+    padding: 2rem; /* 📦 Maximum padding */
+  }
+
+  /* 🖥️ LARGE DESKTOP - Four columns */
+  @media (min-width: 1400px) {
+    grid-template-columns: repeat(4, 1fr); /* 📊 4 columns on large screens */
+    max-width: 1600px; /* 📏 Maximum container width */
+    margin: 0 auto; /* 🎯 Center container */
+  }
+}
+
+/*
+🔍 Responsive grid explanation:
+- Mobile-first approach for better performance
+- Breakpoints based on content, not devices
+- Progressive enhancement with media queries
+- Flexible gap and padding adjustments
+- Maximum width prevents over-stretching
+*/
+
+/* 🎯 ADAPTIVE GRID - Container query approach */
+.adaptive-grid {
+  display: grid;
+  gap: clamp(1rem, 4vw, 2.5rem); /* 🌊 Fluid gap sizing */
+
+  /* 🔄 DYNAMIC COLUMNS with auto-fit */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(clamp(250px, 30vw, 350px), /* 📏 Fluid column width */ 1fr)
+  );
+}
+
+/*
+🔍 Adaptive grid explanation:
+- clamp(): fluid sizing between min and max
+- vw units: viewport-width relative sizing
+- Container adapts to available space
+- No media queries needed for basic responsiveness
+- Modern CSS approach for 2021+
+*/
+
+/* 📰 MAGAZINE LAYOUT - Complex responsive grid */
+.magazine-layout {
+  display: grid;
+  gap: 1rem;
+
+  /* 📱 MOBILE LAYOUT */
+  grid-template-areas:
+    "hero"
+    "article1"
+    "article2"
+    "article3"
+    "sidebar"
+    "footer";
+
+  /* 📱💻 TABLET LAYOUT */
+  @media (min-width: 768px) {
+    grid-template-columns: 2fr 1fr; /* 📊 Main content + sidebar */
+    grid-template-areas:
+      "hero     hero"
+      "article1 sidebar"
+      "article2 sidebar"
+      "article3 sidebar"
+      "footer   footer";
+  }
+
+  /* 💻 DESKTOP LAYOUT */
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 2fr 1fr; /* 📊 3-column layout */
+    grid-template-areas:
+      "header   hero     sidebar"
+      "article1 hero     sidebar"
+      "article2 article3 sidebar"
+      "footer   footer   footer";
+  }
+}
+
+/* 🎯 MAGAZINE GRID ITEMS */
+.hero-section {
+  grid-area: hero;
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.article-1 {
+  grid-area: article1;
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+
+.article-2 {
+  grid-area: article2;
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+
+.article-3 {
+  grid-area: article3;
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+
+.sidebar-content {
+  grid-area: sidebar;
+  background: #e9ecef;
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+
+.footer-content {
+  grid-area: footer;
+  background: #343a40;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+
+/*
+🔍 Magazine layout explanation:
+- Complex multi-breakpoint grid areas
+- Different layouts for each screen size
+- Named areas make layout intentions clear
+- Progressive enhancement from mobile to desktop
+- Real-world responsive design pattern
+*/
+```
+
+### **🔄 Layout Combinations - Flexbox vs Grid**
+
+```css
+/* 🤝 NESTED LAYOUTS - Grid + Flexbox combination */
+.hybrid-layout {
+  /* 🔲 OUTER GRID - Page structure */
+  display: grid;
+  grid-template-columns: 250px 1fr; /* 📊 Sidebar + main content */
+  grid-template-rows: auto 1fr auto; /* 📏 Header + content + footer */
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main"
+    "sidebar footer";
+  min-height: 100vh; /* 📏 Full viewport height */
+  gap: 1rem;
+}
+
+.header-area {
+  grid-area: header;
+  /* 🧩 INNER FLEXBOX - Header content */
+  display: flex; /* 📦 Horizontal header layout */
+  justify-content: space-between; /* 📏 Logo left, nav right */
+  align-items: center; /* 📐 Vertical centering */
+  padding: 1rem 2rem; /* 📦 Header padding */
+  background: #2c3e50; /* 🎨 Dark header */
+  color: white; /* 🔤 White text */
+}
+
+.sidebar-area {
+  grid-area: sidebar;
+  /* 🧩 INNER FLEXBOX - Sidebar navigation */
+  display: flex; /* 📦 Vertical sidebar layout */
+  flex-direction: column; /* 📐 Stack navigation items */
+  padding: 1.5rem; /* 📦 Sidebar padding */
+  background: #34495e; /* 🎨 Sidebar color */
+  color: white; /* 🔤 White text */
+}
+
+.main-area {
+  grid-area: main;
+  /* 🧩 INNER GRID - Content layout */
+  display: grid; /* 🔲 Grid for main content */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 1fr)
+  ); /* 📊 Responsive cards */
+  gap: 2rem; /* 🌌 Card spacing */
+  padding: 2rem; /* 📦 Content padding */
+}
+
+/*
+🔍 Layout combination explanation:
+- Outer grid: page structure (header, sidebar, main, footer)
+- Inner flexbox: component-level layouts (navigation, headers)
+- Inner grid: content arrangements (cards, articles)
+- Each layout method used for its strengths
+- Maximum flexibility and maintainability
+*/
+
+/* 🎯 DECISION MATRIX - When to use what */
+
+/* 
+✅ USE FLEXBOX WHEN:
+- One-dimensional layouts (row or column)
+- Content-driven sizing (items determine layout)
+- Navigation bars, button groups
+- Centering content
+- Equal height columns
+- Component-level layouts
+
+Examples:
+.flexbox-use-cases {
+  // Navigation menus
+  .navbar { display: flex; justify-content: space-between; }
+  
+  // Button groups  
+  .button-group { display: flex; gap: 0.5rem; }
+  
+  // Card content (image, text, button)
+  .card { display: flex; flex-direction: column; }
+  
+  // Equal height sidebar items
+  .sidebar-nav { display: flex; flex-direction: column; }
+}
+*/
+
+/*
+✅ USE GRID WHEN:
+- Two-dimensional layouts (rows and columns)
+- Layout-driven sizing (you define the structure)
+- Page layouts, card grids
+- Overlapping elements
+- Complex responsive patterns
+- Container-level layouts
+
+Examples:
+.grid-use-cases {
+  // Page layout
+  .page-layout { 
+    display: grid; 
+    grid-template-areas: "header header" "sidebar main" "footer footer";
+  }
+  
+  // Photo gallery
+  .photo-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+  }
+  
+  // Dashboard layout
+  .dashboard { 
+    display: grid; 
+    grid-template-columns: repeat(12, 1fr); 
+  }
+}
+*/
+
+/* 🎨 REAL-WORLD DASHBOARD EXAMPLE */
+.dashboard {
+  display: grid;
+  grid-template-columns: 250px 1fr; /* 📊 Sidebar + main */
+  grid-template-rows: 60px 1fr; /* 📏 Header + content */
+  grid-template-areas:
+    "sidebar-header header"
+    "sidebar       main";
+  height: 100vh; /* 📏 Full viewport */
+  gap: 1px; /* 🌌 Minimal gaps */
+  background: #f8f9fa; /* 🎨 Light background */
+}
+
+.dashboard-header {
+  grid-area: header;
+  /* 🧩 FLEXBOX for header content */
+  display: flex; /* 📦 Horizontal layout */
+  justify-content: space-between; /* 📏 Space distribution */
+  align-items: center; /* 📐 Vertical center */
+  padding: 0 2rem; /* 📦 Horizontal padding */
+  background: white; /* 🎨 White background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 🌫️ Subtle shadow */
+}
+
+.dashboard-sidebar {
+  grid-area: sidebar;
+  /* 🧩 FLEXBOX for navigation */
+  display: flex; /* 📦 Vertical layout */
+  flex-direction: column; /* 📐 Stack items */
+  background: #2c3e50; /* 🎨 Dark sidebar */
+  color: white; /* 🔤 White text */
+}
+
+.dashboard-main {
+  grid-area: main;
+  /* 🧩 GRID for widget layout */
+  display: grid; /* 🔲 Widget grid */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(320px, 1fr)
+  ); /* 📊 Responsive widgets */
+  gap: 1.5rem; /* 🌌 Widget spacing */
+  padding: 1.5rem; /* 📦 Content padding */
+  overflow-y: auto; /* 📜 Scrollable content */
+}
+
+.widget {
+  /* 🧩 FLEXBOX for widget content */
+  display: flex; /* 📦 Flexible content */
+  flex-direction: column; /* 📐 Vertical stacking */
+  background: white; /* 🎨 White widget background */
+  border-radius: 8px; /* 🔄 Rounded corners */
+  padding: 1.5rem; /* 📦 Widget padding */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 🌫️ Widget shadow */
+  height: fit-content; /* 📏 Content-based height */
+}
+
+.widget-header {
+  /* 🧩 FLEXBOX for widget header */
+  display: flex; /* 📦 Horizontal header */
+  justify-content: space-between; /* 📏 Title left, actions right */
+  align-items: center; /* 📐 Vertical alignment */
+  margin-bottom: 1rem; /* 🌌 Header spacing */
+  padding-bottom: 0.75rem; /* 📦 Bottom padding */
+  border-bottom: 1px solid #e9ecef; /* 🖼️ Header border */
+}
+
+/*
+🔍 Dashboard layout explanation:
+- Grid: Overall page structure and widget positioning
+- Flexbox: Component-level layouts and content alignment
+- Responsive widgets with auto-fit and minmax
+- Scrollable main area for long content
+- Professional dashboard design pattern
+*/
+```
+
+---
+
+## ⚡ Performance Optimization {#performance-optimization}
+
+CSS performance directly impacts user experience. Understanding rendering optimization and browser behavior is crucial for senior developers.
+
+### **🚀 CSS Rendering Performance**
+
+```css
+/* ⚡ HARDWARE ACCELERATION - GPU optimization */
+.optimized-animations {
+  /* ✅ PREFERRED PROPERTIES for animations */
+  transform: translateX(0); /* 🚀 GPU accelerated */
+  opacity: 1; /* 🚀 Compositor layer */
+  filter: blur(0); /* 🚀 GPU accelerated */
+
+  /* 🎯 PERFORMANCE HINTS */
+  will-change: transform, opacity; /* 🔍 Browser optimization hint */
+
+  /* ⚡ SMOOTH TRANSITIONS */
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s
+      ease-out;
+
+  /* 🏗️ LAYER CREATION */
+  transform-style: preserve-3d; /* 🌍 3D context */
+  backface-visibility: hidden; /* 🚫 Hide backfaces */
+}
+
+.optimized-animations:hover {
+  transform: translateX(10px) scale(1.05); /* ✅ Transform instead of left/width */
+  opacity: 0.9; /* ✅ Opacity instead of background changes */
+}
+
+/*
+🔍 Performance optimization explanation:
+- transform and opacity are composited properties
+- GPU acceleration avoids main thread blocking
+- will-change hints help browser prepare optimizations
+- Avoid animating layout properties (width, height, top, left)
+- Use cubic-bezier for smooth, natural animations
+*/
+
+/* 🚫 PERFORMANCE ANTI-PATTERNS - What to avoid */
+.performance-killers {
+  /* ❌ AVOID ANIMATING THESE PROPERTIES */
+  transition: width 0.3s, /* 🐌 Causes layout recalculation */ height 0.3s,
+    /* 🐌 Triggers reflow */ top 0.3s, /* 🐌 Forces layout updates */ left 0.3s,
+    /* 🐌 Expensive positioning */ margin 0.3s, /* 🐌 Layout-affecting property */
+      padding 0.3s; /* 🐌 Changes box dimensions */
+
+  /* ❌ EXPENSIVE PSEUDO-SELECTORS */
+  /* :nth-child(n+3):nth-child(odd) */ /* 🐌 Complex calculations */
+  /* :not(:nth-child(2n+1)) */ /* 🐌 Double negation */
+
+  /* ❌ UNIVERSAL SELECTORS */
+  /* * { box-sizing: border-box; } */ /* 🐌 Matches every element */
+}
+
+/*
+🔍 Performance anti-patterns explanation:
+- Layout properties force expensive recalculations
+- Complex selectors slow down style matching
+- Universal selectors impact every DOM element
+- Multiple layout-affecting animations compound issues
+*/
+
+/* ✅ OPTIMIZED ALTERNATIVES */
+.performance-optimized {
+  /* ✅ USE TRANSFORMS INSTEAD OF POSITIONING */
+  transform: translateX(var(--offset, 0px)); /* 🚀 GPU accelerated */
+
+  /* ✅ USE OPACITY INSTEAD OF DISPLAY/VISIBILITY */
+  opacity: var(--visibility, 1); /* 🚀 Smooth show/hide */
+
+  /* ✅ USE SCALE INSTEAD OF WIDTH/HEIGHT */
+  transform: scale(var(--size, 1)); /* 🚀 Size changes without layout */
+
+  /* ✅ EFFICIENT SELECTORS */
+  /* .specific-class instead of complex selectors */
+  /* Use classes instead of attribute selectors when possible */
+}
+
+/*
+🔍 Optimized alternatives explanation:
+- CSS custom properties enable dynamic values
+- Transform-based animations are consistently fast
+- Specific selectors are faster than complex ones
+- Predictable performance across devices
+*/
+```
+
+---
+
+## 🧠 Tricky Interview Questions {#interview-questions}
+
+Senior-level CSS interview questions with detailed explanations and practical examples.
+
+### **💡 Advanced CSS Concepts**
+
+```css
+/* ❓ QUESTION 1: Explain CSS specificity calculation */
+/*
+🎯 ANSWER: CSS specificity is calculated using four categories:
+
+SPECIFICITY FORMULA: a-b-c-d
+a = Inline styles (style="...")     = 1000 points
+b = IDs (#header)                   = 100 points  
+c = Classes, attributes, pseudo     = 10 points
+d = Elements and pseudo-elements    = 1 point
+
+EXAMPLES:
+*/
+
+/* Specificity: 0-0-1-1 = 11 points */
+.button:hover {
+}
+
+/* Specificity: 0-1-0-0 = 100 points */
+#header {
+}
+
+/* Specificity: 0-1-2-1 = 121 points */
+#header .nav .item {
+}
+
+/* Specificity: 1-0-0-0 = 1000 points */
+/* style="color: red;" */
+
+/*
+🔍 IMPORTANT RULES:
+- Higher specificity wins
+- If equal, last rule wins (cascade)
+- !important overrides but avoid using it
+- Universal selector (*) has 0 specificity
+- :not() doesn't count, but its arguments do
+*/
+
+/* ❓ QUESTION 2: What happens with this CSS? */
+.container {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.child {
+  width: 150px;
+  height: 150px;
+  margin: 50px;
+  background: red;
+}
+
+/*
+🎯 ANSWER: Margin collapse and overflow interaction
+
+RESULT:
+- Child element will have 25px visible on right and bottom
+- Top and left margins collapse with container
+- Container acts as Block Formatting Context due to overflow: hidden
+- Child's margins don't extend outside container
+
+KEY CONCEPTS:
+- Margin collapse stops at formatting context boundaries
+- overflow: hidden creates Block Formatting Context
+- Margins can extend outside parent in normal flow
+*/
+
+/* ❓ QUESTION 3: Explain this flexbox behavior */
+.flex-container {
+  display: flex;
+  width: 300px;
+}
+
+.flex-item {
+  flex: 1 1 100px; /* grow: 1, shrink: 1, basis: 100px */
+  min-width: 80px;
+}
+
+/*
+🎯 ANSWER: Flexbox sizing with constraints
+
+WITH 3 ITEMS:
+- Initial basis: 3 × 100px = 300px (fits exactly)
+- Available space: 300px - 300px = 0px
+- Each item gets: 100px (basis size)
+
+WITH 4 ITEMS:
+- Initial basis: 4 × 100px = 400px (overflow by 100px)
+- Shrinking space: 100px distributed among 4 items = 25px each
+- Each item gets: 100px - 25px = 75px
+- BUT min-width: 80px prevents shrinking below 80px
+- Actual result: Items will be 80px each, container overflows
+
+KEY CONCEPTS:
+- flex-basis sets initial size before grow/shrink
+- min-width/max-width constraints override flex sizing
+- Items can overflow container if constraints prevent shrinking
+*/
+
+/* ❓ QUESTION 4: CSS Grid implicit behavior */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(2, 100px);
+}
+
+.grid-item:nth-child(7) {
+  grid-column: 1 / 4; /* Spans all 3 columns */
+}
+
+/*
+🎯 ANSWER: Implicit grid creation
+
+RESULT:
+- Grid has 3 explicit columns, 2 explicit rows
+- First 6 items fill the explicit grid
+- 7th item needs to span 3 columns but row 3 doesn't exist
+- Grid automatically creates implicit row 3
+- 7th item spans entire width of row 3
+- Implicit rows use auto sizing (content-based)
+
+LAYOUT:
+Row 1: [Item1] [Item2] [Item3]
+Row 2: [Item4] [Item5] [Item6]
+Row 3: [    Item7 spans all    ] (implicit row)
+
+KEY CONCEPTS:
+- Grid auto-creates tracks for positioned items
+- grid-auto-rows controls implicit row sizing
+- Positioned items can force grid expansion
+*/
+
+/* ❓ QUESTION 5: Complex selector behavior */
+.parent > .child + .sibling ~ .target {
+  color: red;
+}
+
+/*
+🎯 ANSWER: Combinator chain explanation
+
+BREAKDOWN:
+.parent > .child        = Direct child with class "child"
+.child + .sibling      = Immediate sibling after .child with class "sibling"  
+.sibling ~ .target     = Any later sibling after .sibling with class "target"
+
+HTML THAT MATCHES:
+<div class="parent">
+  <div class="child"></div>
+  <div class="sibling"></div>
+  <div class="other"></div>
+  <div class="target"></div>  <!-- This gets red text -->
+</div>
+
+HTML THAT DOESN'T MATCH:
+<div class="parent">
+  <div class="child"></div>
+  <div class="other"></div>    <!-- Breaks the chain -->
+  <div class="sibling"></div>
+  <div class="target"></div>   <!-- Won't match -->
+</div>
+
+KEY CONCEPTS:
+- > = direct child
+- + = immediate adjacent sibling  
+- ~ = general sibling
+- Chain must be unbroken for match
+*/
+
+/* ❓ QUESTION 6: Optimize this inefficient CSS */
+/* 🚫 PROBLEMATIC CODE */
+.inefficient {
+  /* ❌ Expensive animations */
+  transition: width 0.3s, height 0.3s, left 0.3s, top 0.3s;
+
+  /* ❌ Complex selectors */
+  ul li:nth-child(odd):not(:first-child):not(:last-child) a:hover {
+    color: red;
+  }
+
+  /* ❌ Repeated styles */
+  .button-primary {
+    background: #007bff;
+    padding: 10px 15px;
+    border: none;
+  }
+  .button-secondary {
+    background: #6c757d;
+    padding: 10px 15px;
+    border: none;
+  }
+  .button-success {
+    background: #28a745;
+    padding: 10px 15px;
+    border: none;
+  }
+}
+
+/* ✅ OPTIMIZED VERSION */
+.optimized {
+  /* ✅ GPU-accelerated animations */
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+  will-change: transform, opacity;
+
+  /* ✅ Simplified selectors with specific classes */
+  .nav-link-alternate:hover {
+    color: red;
+  }
+
+  /* ✅ DRY principles with SCSS */
+  .button-base {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease-out;
+
+    &--primary {
+      background: #007bff;
+    }
+    &--secondary {
+      background: #6c757d;
+    }
+    &--success {
+      background: #28a745;
+    }
+  }
+}
+
+/*
+🎯 OPTIMIZATION EXPLANATION:
+- Replace layout-affecting animations with transforms
+- Simplify selectors for better performance
+- Use BEM methodology for clear naming
+- Leverage SCSS for maintainable code
+- Add performance hints (will-change)
+*/
+```
+
+### **🎯 Real-World Scenario Questions**
+
+```css
+/* ❓ QUESTION 7: Create a responsive card grid that maintains aspect ratio */
+
+/*
+🎯 ANSWER: CSS Grid with aspect-ratio property
+*/
+
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.card {
+  /* 📐 ASPECT RATIO CONTROL */
+  aspect-ratio: 3 / 4; /* 🖼️ 3:4 aspect ratio (portrait) */
+
+  /* 🎨 CARD STYLING */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  /* 📦 INTERNAL LAYOUT */
+  display: flex;
+  flex-direction: column;
+}
+
+.card-image {
+  /* 🖼️ IMAGE CONTAINER */
+  flex: 0 0 60%; /* 📏 60% of card height */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.card-content {
+  /* 📝 CONTENT AREA */
+  flex: 1; /* 📈 Remaining space */
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/*
+🔍 KEY TECHNIQUES:
+- aspect-ratio: maintains consistent card proportions
+- auto-fit: responsive column count
+- minmax(): flexible sizing with constraints
+- Nested flexbox: internal card layout control
+*/
+
+/* ❓ QUESTION 8: Implement a CSS-only accordion */
+
+/*
+🎯 ANSWER: Using checkbox hack for state management
+*/
+
+.accordion {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #ddd;
+}
+
+.accordion-item:last-child {
+  border-bottom: none;
+}
+
+/* 🔒 HIDDEN CHECKBOX for state */
+.accordion-toggle {
+  display: none; /* 🚫 Hide checkbox */
+}
+
+/* 📋 ACCORDION HEADER */
+.accordion-header {
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+
+  /* ➡️ ARROW INDICATOR */
+  &::after {
+    content: "▶";
+    position: absolute;
+    right: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+}
+
+/* 📄 ACCORDION CONTENT */
+.accordion-content {
+  max-height: 0; /* 📏 Start collapsed */
+  overflow: hidden; /* 🚫 Hide overflow */
+  padding: 0 1.5rem; /* 📦 Horizontal padding only */
+  background: white;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+
+/* ✅ EXPANDED STATE */
+.accordion-toggle:checked + .accordion-header::after {
+  transform: rotate(90deg); /* 🔄 Rotate arrow */
+}
+
+.accordion-toggle:checked ~ .accordion-content {
+  max-height: 500px; /* 📏 Expand (generous max-height) */
+  padding: 1.5rem; /* 📦 Full padding */
+}
+
+/*
+🔍 ACCORDION TECHNIQUE:
+- Checkbox hack: CSS-only state management
+- max-height transition: smooth expand/collapse
+- Adjacent sibling selector: connect checkbox to content
+- Transform: smooth arrow rotation
+- Overflow hidden: clean content clipping
+*/
+
+/* ❓ QUESTION 9: Create a masonry layout with CSS Grid */
+
+/*
+🎯 ANSWER: Grid with subgrid and dense packing
+*/
+
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-auto-rows: 20px; /* 📏 Small row units for flexibility */
+  grid-auto-flow: row dense; /* 🔄 Dense packing algorithm */
+  gap: 1rem;
+}
+
+.masonry-item {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+
+  /* 📏 DYNAMIC ROW SPANNING based on content height */
+  &.small {
+    grid-row: span 8;
+  } /* 📏 8 × 20px = 160px */
+  &.medium {
+    grid-row: span 12;
+  } /* 📏 12 × 20px = 240px */
+  &.large {
+    grid-row: span 16;
+  } /* 📏 16 × 20px = 320px */
+  &.extra-large {
+    grid-row: span 20;
+  } /* 📏 20 × 20px = 400px */
+}
+
+/* 📱 RESPONSIVE MASONRY */
+@media (max-width: 768px) {
+  .masonry-grid {
+    grid-template-columns: 1fr; /* 📱 Single column on mobile */
+  }
+
+  .masonry-item {
+    /* 📏 Reset row spans for mobile */
+    grid-row: span auto;
+  }
+}
+
+/*
+🔍 MASONRY TECHNIQUES:
+- Small row units: flexible height control
+- Span calculations: content-based sizing
+- Dense packing: fills gaps automatically
+- Responsive: single column on mobile
+- Class-based: height variants for different content
+*/
+```
+
+### **🏆 Angular-Specific CSS Questions**
+
+```css
+/* ❓ QUESTION 10: How does Angular handle CSS encapsulation? */
+
+/*
+🎯 ANSWER: ViewEncapsulation strategies
+
+1. ViewEncapsulation.Emulated (default):
+   - Angular adds unique attributes to components
+   - CSS selectors are scoped to component
+   - Prevents style leakage between components
+
+Example generated CSS:
+.my-component[_ngcontent-abc123] {
+  background: red;
+}
+
+2. ViewEncapsulation.ShadowDom:
+   - Uses native Shadow DOM
+   - True encapsulation at browser level
+   - Styles completely isolated
+
+3. ViewEncapsulation.None:
+   - No encapsulation
+   - Styles become global
+   - Use carefully to avoid conflicts
+*/
+
+// Component with encapsulation
+@Component({
+  selector: 'app-card',
+  encapsulation: ViewEncapsulation.Emulated, // Default
+  styles: [`
+    .card {
+      background: white;         // Scoped to this component
+      padding: 1rem;
+    }
+
+    :host {
+      display: block;            // Style the host element
+      margin: 1rem;
+    }
+
+    :host(.highlighted) {
+      border: 2px solid blue;    // Conditional host styling
+    }
+
+    ::ng-deep .global-override {
+      color: red;                // Penetrates child components
+    }
+  `]
+})
+
+/*
+🔍 ANGULAR CSS FEATURES:
+- :host: styles the component host element
+- :host(): conditional host styling
+- ::ng-deep: deep selector (deprecated, use global styles instead)
+- Component-scoped styles prevent conflicts
+*/
+
+/* ❓ QUESTION 11: Optimize Angular component styles for performance */
+
+/*
+🎯 ANSWER: Angular-specific optimization strategies
+*/
+
+// ✅ OPTIMIZED COMPONENT ARCHITECTURE
+@Component({
+  selector: 'app-optimized',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [`
+    :host {
+      display: block;
+      contain: layout style;     // CSS containment for performance
+    }
+
+    .component-container {
+      /* ✅ Use CSS custom properties for dynamic values */
+      background: var(--component-bg, white);
+      padding: var(--component-padding, 1rem);
+
+      /* ✅ Avoid deep selectors */
+      /* Use specific component classes instead */
+    }
+
+    .optimized-animation {
+      /* ✅ Hardware-accelerated properties only */
+      transition: transform 0.3s ease-out;
+      will-change: transform;
+    }
+
+    /* ✅ Mobile-first responsive design */
+    @media (min-width: 768px) {
+      .component-container {
+        padding: var(--component-padding-lg, 2rem);
+      }
+    }
+  `]
+})
+
+/*
+🔍 ANGULAR OPTIMIZATION TECHNIQUES:
+- CSS containment: isolates component rendering
+- Custom properties: dynamic theming without rebuilds
+- OnPush change detection: reduces unnecessary checks
+- Mobile-first: progressive enhancement
+- Hardware acceleration: smooth animations
+- Specific selectors: avoid deep piercing
+*/
+```
+
+## 🎯 Summary & Conclusion
+
+This comprehensive CSS3 & SCSS guide covers:
+
+**✅ Complete Technical Coverage:**
+
+- **CSS Fundamentals** - Box model, positioning, transforms, transitions
+- **Modern Layout Systems** - Flexbox, CSS Grid, responsive design
+- **SCSS/Angular Integration** - Variables, mixins, component architecture
+- **Performance Optimization** - Hardware acceleration, efficient selectors
+- **Real-World Scenarios** - Complex layouts, debugging, browser compatibility
+- **Interview Preparation** - Advanced concepts, tricky questions, practical solutions
+
+**✅ Production-Ready Knowledge:**
+
+- **2,000+ lines** of detailed code examples
+- **Line-by-line explanations** with practical theory
+- **Performance best practices** for enterprise applications
+- **Responsive design patterns** for all device types
+- **Debugging techniques** and common gotcha solutions
+- **Interview questions** with comprehensive answers
+
+**🚀 For Senior Frontend Developers:**
+This guide prepares you for complex technical interviews, challenging project requirements, and architectural decisions in modern frontend development. Every technique is explained with both theory and practical implementation for immediate application in professional projects.
+
+**Total Parts Completed: 6/6** ✅

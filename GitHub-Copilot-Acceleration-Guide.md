@@ -341,97 +341,1010 @@ src/
 
 ---
 
-## 🎨 **Custom Chat Modes**
+## 🎨 **Custom Chat Modes & Custom Agents**
 
-### **4.1 Creating Specialized Chat Sessions**
+### **4.1 Creating Custom Chat Modes**
 
-#### **Frontend Development Mode**
+**What Are Custom Chat Modes?**
+Custom chat modes are specialized configurations that tailor GitHub Copilot's behavior for specific tasks, technologies, or workflows. Think of them as "personas" for different coding scenarios.
 
-Start your chat session with context setting:
+#### **🔧 Step-by-Step Creation Process**
 
-```
-I'm working on a React TypeScript project. For this session:
+**1. Create Custom Instructions Files**
 
-Context:
-- Using React 18 with functional components and hooks
-- TypeScript strict mode enabled
-- Material-UI for component library
-- React Query for data fetching
-- Zustand for state management
+```markdown
+<!-- .copilot/custom-modes/frontend-expert.md -->
 
-Please help me with frontend development following these patterns:
-1. Always provide TypeScript interfaces
-2. Include proper error handling and loading states
-3. Use semantic HTML and accessibility features
-4. Implement responsive design patterns
-5. Optimize for performance with React.memo and useMemo
+# Frontend Expert Mode
 
-Ready to assist with frontend development!
-```
+## Role Definition
 
-#### **Backend API Development Mode**
+You are a senior frontend architect specializing in React, TypeScript, and modern web performance optimization.
 
-```
-I'm building a Node.js Express API with TypeScript. For this session:
+## Response Style
 
-Context:
-- Node.js with Express framework
-- TypeScript with strict mode
-- Prisma ORM with PostgreSQL
-- JWT authentication
-- RESTful API design
+- Always suggest TypeScript-first solutions
+- Include accessibility considerations
+- Provide performance optimization tips
+- Reference latest React patterns (hooks, suspense, etc.)
 
-Please help with backend development focusing on:
-1. Secure API endpoint creation
-2. Proper input validation and sanitization
-3. Database operations with Prisma
-4. Error handling and logging
-5. Authentication and authorization
-6. API documentation generation
+## Code Preferences
 
-Ready for backend development assistance!
+- Use functional components with hooks
+- Implement proper error boundaries
+- Include comprehensive PropTypes/TypeScript interfaces
+- Follow React best practices and performance patterns
+
+## When to Activate
+
+- React component development
+- Frontend architecture decisions
+- Performance optimization tasks
+- Accessibility implementation
 ```
 
-#### **Testing and Quality Assurance Mode**
+**2. VS Code Configuration Setup**
+
+```json
+// .vscode/settings.json
+{
+  "github.copilot.chat.customModes": {
+    "frontend-expert": {
+      "instructionsFile": ".copilot/custom-modes/frontend-expert.md",
+      "shortcut": "fe",
+      "description": "Frontend architecture and React optimization specialist"
+    },
+    "backend-api": {
+      "instructionsFile": ".copilot/custom-modes/backend-expert.md",
+      "shortcut": "be",
+      "description": "Backend API design and database optimization specialist"
+    },
+    "testing-guru": {
+      "instructionsFile": ".copilot/custom-modes/testing-expert.md",
+      "shortcut": "test",
+      "description": "Comprehensive testing strategy and implementation specialist"
+    }
+  }
+}
+```
+
+**3. Advanced Backend Mode Configuration**
+
+```markdown
+<!-- .copilot/custom-modes/backend-expert.md -->
+
+# Backend API Expert Mode
+
+## Technical Expertise
+
+- Node.js/Express.js specialist
+- Database design and optimization
+- API architecture and security
+- Microservices patterns
+
+## Code Generation Rules
+
+- Always include proper error handling
+- Implement comprehensive input validation
+- Add security middleware by default
+- Include database transaction handling
+- Provide OpenAPI documentation examples
+
+## Response Format
+
+1. Security considerations first
+2. Implementation with error handling
+3. Performance optimization notes
+4. Testing recommendations
+5. Documentation snippets
+
+## Activation Triggers
+
+- API endpoint creation
+- Database schema design
+- Security implementation
+- Performance optimization
+- Microservices architecture
+```
+
+#### **🚀 How to Use Custom Chat Modes in VS Code**
+
+**Method 1: Agent Dropdown Selection (Primary Method)**
+
+1. Open GitHub Copilot Chat (`Ctrl+Shift+I`)
+2. Click the **Agent dropdown** (@ symbol) at the top of the chat panel
+3. Your custom chat modes will appear in the dropdown list:
+   ```
+   📋 Available Agents:
+   ├── @workspace (built-in)
+   ├── @vscode (built-in)
+   ├── @terminal (built-in)
+   ├── @frontend-expert (your custom mode)
+   ├── @backend-api (your custom mode)
+   └── @testing-guru (your custom mode)
+   ```
+4. Select your custom mode from the dropdown
+5. Start chatting - all responses will follow your custom mode's behavior
+
+**Method 2: Shortcut Activation**
 
 ```
-I need comprehensive testing assistance. For this session:
-
-Context:
-- Jest testing framework
-- React Testing Library for frontend tests
-- Supertest for API testing
-- TypeScript test files
-- MSW for API mocking
-
-Please help with:
-1. Unit test creation with high coverage
-2. Integration test scenarios
-3. Mock data generation
-4. Test utilities and helpers
-5. Performance testing strategies
-6. Accessibility testing
-
-Focus on thorough test coverage and realistic test scenarios!
+@fe create a responsive navigation component with dark mode toggle
+@be design a user authentication endpoint with rate limiting
+@test write comprehensive tests for the auth flow including edge cases
 ```
 
-### **4.2 Session Persistence Techniques**
+**Method 3: Direct Mode Selection via Command**
 
-#### **Context Preservation Commands**
+1. Open GitHub Copilot Chat (`Ctrl+Shift+I`)
+2. Type `/mode frontend-expert`
+3. Your conversation now uses that specialized persona
+4. Switch modes anytime with `/mode [mode-name]`
+
+**Method 4: Automatic Context Detection**
+
+```json
+// Advanced auto-detection setup
+{
+  "github.copilot.chat.autoModeSelection": {
+    "enabled": true,
+    "rules": [
+      {
+        "filePatterns": ["**/components/**/*.tsx", "**/pages/**/*.tsx"],
+        "mode": "frontend-expert"
+      },
+      {
+        "filePatterns": ["**/api/**/*.js", "**/routes/**/*.js"],
+        "mode": "backend-api"
+      },
+      {
+        "filePatterns": ["**/*.test.js", "**/*.spec.js"],
+        "mode": "testing-guru"
+      }
+    ]
+  }
+}
+```
+
+#### **💡 Benefits of Custom Chat Modes**
+
+**🎯 Specialized Expertise**
+
+- **Consistent Quality**: Every response follows your established patterns
+- **Domain Knowledge**: Deep specialization in specific technologies
+- **Best Practices**: Automatically applies your team's coding standards
+
+**⚡ Productivity Gains**
+
+- **Faster Onboarding**: New team members get expert guidance immediately
+- **Reduced Context Switching**: No need to explain your tech stack repeatedly
+- **Consistent Architecture**: Maintains architectural decisions across the codebase
+
+**🔧 Quality Assurance**
+
+- **Built-in Standards**: Every suggestion follows your quality gates
+- **Security by Default**: Security considerations are always included
+- **Performance Focus**: Performance optimization is automatic
+
+**📊 Real-World Impact Examples**
+
+```javascript
+// Without custom mode - generic response
+"Create a React component for user profile";
+// Results in: Basic component with minimal features
+
+// With frontend-expert mode - specialized response
+const UserProfile = memo(({ userId }: { userId: string }) => {
+  // Includes: TypeScript interfaces, performance optimization,
+  // accessibility attributes, error boundaries, loading states,
+  // proper prop validation, and responsive design
+});
+```
+
+### **4.2 When to Use Custom Chat Modes**
+
+#### **🚀 Project Initialization**
+
+```
+@fe help me set up a new React TypeScript project with optimal performance configuration
+@be design the database schema for a social media platform with proper indexing
+@test create a comprehensive testing strategy for our e-commerce application
+```
+
+#### **🔧 Feature Development**
+
+```
+@fe create a complex data table with sorting, filtering, pagination, and virtualization
+@be implement JWT authentication with refresh token rotation and proper security
+@test write integration tests for the payment processing flow with various scenarios
+```
+
+#### **🐛 Problem Solving**
+
+```
+@fe this React component is causing memory leaks, help me identify and fix the issues
+@be our API is experiencing slow response times, suggest performance improvements
+@test help me mock this complex external service dependency for reliable testing
+```
+
+#### **📚 Learning & Mentoring**
+
+```
+@fe explain React Suspense and Concurrent Features with practical examples
+@be walk me through implementing distributed caching strategies
+@test show me different testing patterns for async operations and error scenarios
+```
+
+### **4.3 Creating Custom Agents**
+
+**What's the Difference?**
+
+- **Custom Chat Modes**: Modify how Copilot responds in chat conversations
+- **Custom Agents**: Create entirely new interactive tools and automated workflows
+
+#### **🤖 Building a Custom Agent: Complete Example**
+
+**1. Agent Definition File**
+
+```typescript
+// .copilot/agents/code-reviewer.ts
+import { Agent, AgentContext } from "@github/copilot-agent-sdk";
+
+export class CodeReviewerAgent extends Agent {
+  name = "code-reviewer";
+  description =
+    "Comprehensive code review with security and performance analysis";
+
+  async execute(context: AgentContext) {
+    const { fileContent, language, target } = context.input;
+
+    const analysis = await this.analyzeCode({
+      content: fileContent,
+      language: language,
+      checks: [
+        "security-vulnerabilities",
+        "performance-bottlenecks",
+        "code-quality",
+        "best-practices",
+        "accessibility",
+      ],
+    });
+
+    return this.generateDetailedReport(analysis);
+  }
+
+  private async analyzeCode(params: AnalysisParams) {
+    return {
+      securityIssues: await this.scanSecurity(params.content),
+      performanceIssues: await this.scanPerformance(params.content),
+      qualityScore: await this.calculateQuality(params.content),
+      suggestions: await this.generateSuggestions(params.content),
+      refactoringSuggestions: await this.suggestRefactoring(params.content),
+    };
+  }
+
+  private generateDetailedReport(analysis: CodeAnalysis) {
+    return {
+      summary: `Code Quality Score: ${analysis.qualityScore}/100`,
+      securityReport: this.formatSecurityIssues(analysis.securityIssues),
+      performanceReport: this.formatPerformanceIssues(
+        analysis.performanceIssues
+      ),
+      suggestions: this.prioritizeSuggestions(analysis.suggestions),
+      actionableItems: this.createActionPlan(analysis),
+    };
+  }
+}
+```
+
+**2. Agent Registration and Configuration**
+
+```json
+// .vscode/copilot-agents.json
+{
+  "agents": [
+    {
+      "name": "code-reviewer",
+      "file": ".copilot/agents/code-reviewer.ts",
+      "triggers": ["@review", "@audit"],
+      "autoActivate": {
+        "onSave": true,
+        "filePatterns": ["src/**/*.{ts,tsx,js,jsx}"]
+      },
+      "capabilities": [
+        "file-analysis",
+        "security-scanning",
+        "performance-analysis"
+      ]
+    },
+    {
+      "name": "architecture-advisor",
+      "file": ".copilot/agents/architecture-advisor.ts",
+      "triggers": ["@arch", "@design"],
+      "contexts": ["project-planning", "refactoring"],
+      "capabilities": [
+        "project-analysis",
+        "pattern-recognition",
+        "migration-planning"
+      ]
+    }
+  ]
+}
+```
+
+**3. Advanced Architecture Agent**
+
+```typescript
+// .copilot/agents/architecture-advisor.ts
+export class ArchitectureAdvisorAgent extends Agent {
+  async execute(context: AgentContext) {
+    const projectStructure = await this.analyzeProject();
+    const recommendations = await this.generateRecommendations(
+      projectStructure
+    );
+
+    return {
+      currentArchitecture: this.visualizeArchitecture(projectStructure),
+      recommendations: recommendations,
+      migrationPlan: this.createMigrationPlan(recommendations),
+      riskAssessment: this.assessRisks(recommendations),
+      implementationSteps: this.generateSteps(recommendations),
+    };
+  }
+
+  async analyzeProject() {
+    const dependencies = await this.scanDependencies();
+    const codeMetrics = await this.calculateMetrics();
+    const patterns = await this.identifyPatterns();
+    const techDebt = await this.assessTechDebt();
+
+    return { dependencies, codeMetrics, patterns, techDebt };
+  }
+
+  createMigrationPlan(recommendations: Recommendation[]) {
+    return recommendations.map((rec) => ({
+      phase: rec.priority,
+      tasks: this.breakDownIntoTasks(rec),
+      timeline: this.estimateTimeline(rec),
+      risks: this.identifyRisks(rec),
+      dependencies: this.mapDependencies(rec),
+    }));
+  }
+}
+```
+
+#### **🛠️ Using Custom Agents in VS Code**
+
+**Method 1: Agent Dropdown Selection (Primary Method)**
+
+1. Open GitHub Copilot Chat (`Ctrl+Shift+I`)
+2. Click the **Agent dropdown** (@ symbol)
+3. Your custom agents will appear alongside built-in agents:
+   ```
+   📋 Available Agents:
+   ├── Built-in Agents:
+   │   ├── @workspace
+   │   ├── @vscode
+   │   └── @terminal
+   ├── Custom Chat Modes:
+   │   ├── @frontend-expert
+   │   ├── @backend-api
+   │   └── @testing-guru
+   └── Custom Agents:
+       ├── @code-reviewer
+       ├── @architecture-advisor
+       ├── @security-scanner
+       └── @performance-analyzer
+   ```
+4. Select your custom agent from the dropdown
+5. The agent will analyze your request and provide specialized assistance
+
+**Method 2: Command Palette Integration**
+
+```
+Ctrl+Shift+P → "Copilot: Run Agent" → Select your custom agent
+```
+
+**Method 3: Chat Integration with @ Symbol**
+
+```
+@code-reviewer analyze this React component for security vulnerabilities and performance issues
+@architecture-advisor suggest architectural improvements for our microservices setup
+@security-scanner check this API endpoint for OWASP security issues
+@performance-analyzer identify bottlenecks in this database query
+```
+
+**Method 4: Automated Triggers (Background Execution)**
+
+```json
+{
+  "autoTriggers": {
+    "onSave": ["code-reviewer"],
+    "onCommit": ["security-scanner", "code-reviewer"],
+    "onPullRequest": ["architecture-advisor", "breaking-change-detector"],
+    "onDeploy": ["performance-analyzer", "security-validator"]
+  }
+}
+```
+
+#### **🎯 Custom Agent Use Cases**
+
+**📋 Development Workflow Agents**
+
+```typescript
+// Sprint planning agent
+@sprint-planner analyze these user stories and suggest implementation approach with time estimates
+
+// Code migration agent
+@migrator help convert this React class component to modern hooks with performance optimization
+
+// Documentation agent
+@docs generate comprehensive API documentation including OpenAPI specs and usage examples
+```
+
+**🔒 Quality & Security Agents**
+
+```typescript
+// Security audit agent
+@security scan this authentication flow for OWASP top 10 vulnerabilities
+
+// Performance analyzer agent
+@perf identify bottlenecks in this data processing function and suggest optimizations
+
+// Accessibility checker agent
+@a11y review this component for WCAG 2.1 AA compliance and screen reader compatibility
+```
+
+**🚀 Deployment & DevOps Agents**
+
+```typescript
+// Infrastructure agent
+@infra suggest optimal deployment configuration for this microservice on AWS/Azure
+
+// Monitoring setup agent
+@monitor create comprehensive logging, metrics, and alerting for this critical API
+
+// CI/CD optimizer agent
+@cicd analyze our build pipeline and suggest optimizations for faster, more reliable deployments
+```
+
+### **4.4 Advanced Configuration and Integration**
+
+#### **Environment-Specific Modes**
+
+```json
+{
+  "github.copilot.chat.environments": {
+    "development": {
+      "defaultMode": "debug-helper",
+      "enableExperimental": true,
+      "verboseLogging": true
+    },
+    "production": {
+      "defaultMode": "security-focused",
+      "enableExperimental": false,
+      "safetyChecks": true
+    },
+    "testing": {
+      "defaultMode": "testing-guru",
+      "autoIncludeCoverage": true,
+      "mockDataGeneration": true
+    }
+  }
+}
+```
+
+**Team Collaboration Setup**
+
+```json
+{
+  "github.copilot.team": {
+    "sharedModes": ["frontend-expert", "backend-api", "testing-guru"],
+    "syncSettings": true,
+    "sharedAgents": [".copilot/agents/team-standards.ts"],
+    "codeStyleEnforcement": true
+  }
+}
+```
+
+**Performance Optimization**
+
+```json
+{
+  "github.copilot.performance": {
+    "cacheAgentResponses": true,
+    "preloadFrequentModes": ["frontend-expert", "backend-api"],
+    "backgroundAnalysis": true,
+    "concurrentAgentExecution": true
+  }
+}
+```
+
+### **4.5 Visual Guide: Using Custom Modes & Agents in VS Code**
+
+#### **📱 VS Code Interface Integration**
+
+**Step 1: Accessing the Agent Dropdown**
+
+```
+🖥️ VS Code Interface:
+┌─────────────────────────────────────────┐
+│ GitHub Copilot Chat                     │
+├─────────────────────────────────────────┤
+│ [@ ▼] Type your message here...        │  ← Click this dropdown!
+├─────────────────────────────────────────┤
+│                                         │
+│ Chat conversation appears here          │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+**Step 2: Dropdown Menu Appears**
+
+```
+🎯 Agent Selection Dropdown:
+┌─────────────────────────────────┐
+│ 🤖 Built-in Agents:            │
+│ ├── @workspace                  │  ← Default agents
+│ ├── @vscode                     │
+│ ├── @terminal                   │
+│                                 │
+│ 🎨 Your Custom Chat Modes:     │
+│ ├── @frontend-expert           │  ← Your custom modes appear here!
+│ ├── @backend-api               │
+│ ├── @testing-guru              │
+│                                 │
+│ 🛠️ Your Custom Agents:         │
+│ ├── @code-reviewer             │  ← Your custom agents appear here!
+│ ├── @architecture-advisor      │
+│ ├── @security-scanner          │
+│ └── @performance-analyzer      │
+└─────────────────────────────────┘
+```
+
+**Step 3: Selected Mode/Agent in Action**
+
+````
+🚀 Active Custom Mode Example:
+┌─────────────────────────────────────────┐
+│ [@frontend-expert] ▼                   │  ← Shows active mode
+├─────────────────────────────────────────┤
+│ You: create a responsive button          │
+├─────────────────────────────────────────┤
+│ Frontend Expert: Here's a TypeScript    │
+│ React button with accessibility...       │
+│                                         │
+│ ```typescript                           │
+│ interface ButtonProps {                 │
+│   variant: 'primary' | 'secondary';    │
+│   // ... (comprehensive implementation) │
+│ }                                       │
+│ ```                                     │
+└─────────────────────────────────────────┘
+````
+
+#### **🎯 Quick Access Methods Comparison**
+
+| Method                 | Speed      | Best For                     | Visual Indicator      |
+| ---------------------- | ---------- | ---------------------------- | --------------------- |
+| **Dropdown Selection** | ⭐⭐⭐     | New users, browsing modes    | Mode name in dropdown |
+| **@ Symbol + Name**    | ⭐⭐⭐⭐⭐ | Power users, quick switching | `@mode-name` in chat  |
+| **Command Palette**    | ⭐⭐       | Agent execution              | Command list          |
+
+#### **✅ Verifying Your Custom Modes & Agents Are Loaded**
+
+**Check 1: Agent Dropdown Verification**
+
+1. Open Copilot Chat (`Ctrl+Shift+I`)
+2. Click the **@ dropdown**
+3. Verify your custom modes appear in the list
+4. If missing, check your `.vscode/settings.json` configuration
+
+**Check 2: Direct @ Mention Test**
+
+```
+# Type in chat (should show auto-completion):
+@frontend-expert
+@backend-api
+@code-reviewer
+
+# If auto-completion doesn't show your custom agents:
+# - Reload VS Code window (Ctrl+Shift+P → "Developer: Reload Window")
+# - Check file paths in configuration
+# - Verify instruction files exist
+```
+
+**Check 3: Configuration Validation**
+
+```powershell
+# Check if your files exist:
+Test-Path ".copilot/custom-modes/frontend-expert.md"  # Should return True
+Test-Path ".vscode/settings.json"                    # Should return True
+
+# View your current VS Code settings:
+Get-Content ".vscode/settings.json" | Select-String "copilot"
+```
+
+**Check 4: VS Code Output Panel**
+
+1. Open Output Panel (`Ctrl+Shift+U`)
+2. Select "GitHub Copilot" from dropdown
+3. Look for loading messages about your custom modes/agents
+4. Check for any error messages during startup
+
+**Troubleshooting Common Issues:**
+
+```json
+// ❌ Common Configuration Mistakes:
+{
+  "github.copilot.chat.customModes": {
+    "frontend expert": {  // ❌ No spaces in keys
+      "instructionsFile": "frontend.md"  // ❌ Wrong path
+    }
+  }
+}
+
+// ✅ Correct Configuration:
+{
+  "github.copilot.chat.customModes": {
+    "frontend-expert": {  // ✅ Use hyphens, not spaces
+      "instructionsFile": ".copilot/custom-modes/frontend-expert.md"  // ✅ Full path
+    }
+  }
+}
+```
+
+#### **🎯 Setting Up Your First Custom Chat Mode**
+
+**Step 1: Create Directory Structure**
 
 ```bash
-# Save current context
-@workspace /save-context "Frontend component development session - User management features"
+mkdir -p .copilot/custom-modes
+mkdir -p .copilot/agents
+```
 
-# Load previous context
-@workspace /load-context "Frontend component development session"
+**Step 2: Create Frontend Expert Mode**
 
-# Context summary
-@workspace /summarize
-Provide a summary of our current development session including:
-- Components created
-- Patterns established
-- Next steps planned
+```powershell
+# Create the frontend expert configuration
+New-Item -Path ".copilot/custom-modes/frontend-expert.md" -ItemType File -Value @"
+# Frontend Expert Mode
+
+You are a senior frontend architect with expertise in:
+- React 18+ with TypeScript
+- Performance optimization
+- Accessibility (WCAG 2.1)
+- Modern CSS (Grid, Flexbox, CSS-in-JS)
+- State management (Redux Toolkit, Zustand)
+
+## Response Guidelines:
+1. Always provide TypeScript interfaces
+2. Include performance considerations
+3. Add accessibility attributes
+4. Suggest testing approaches
+5. Include error boundaries where needed
+
+## Code Style:
+- Functional components with hooks
+- Descriptive variable names
+- Proper JSX formatting
+- Semantic HTML elements
+"@
+```
+
+**Step 3: Configure VS Code Settings**
+
+```json
+// Add to .vscode/settings.json
+{
+  "github.copilot.chat.customModes": {
+    "fe": {
+      "instructionsFile": ".copilot/custom-modes/frontend-expert.md",
+      "description": "Frontend React TypeScript expert"
+    },
+    "be": {
+      "instructionsFile": ".copilot/custom-modes/backend-expert.md",
+      "description": "Backend Node.js API expert"
+    }
+  }
+}
+```
+
+**Step 4: Test Your Custom Mode**
+
+```
+# In Copilot Chat:
+@fe create a reusable Button component with multiple variants
+
+# Expected output includes:
+- TypeScript interface for props
+- Multiple button variants (primary, secondary, danger)
+- Accessibility attributes
+- Performance optimizations
+- Usage examples
+```
+
+#### **🚀 Real-World Usage Examples**
+
+**Example 1: Building a Dashboard Component**
+
+```
+@fe I need a responsive dashboard layout with:
+- Header with navigation
+- Sidebar with collapsible menu
+- Main content area with grid layout
+- Dark/light theme support
+
+Requirements:
+- Mobile-first responsive design
+- Keyboard navigation support
+- Performance optimized for large datasets
+- TypeScript with proper interfaces
+```
+
+**Expected Custom Mode Response:**
+
+```typescript
+interface DashboardProps {
+  user: User;
+  theme: "light" | "dark";
+  sidebarCollapsed?: boolean;
+  onThemeChange: (theme: "light" | "dark") => void;
+}
+
+const Dashboard = memo<DashboardProps>(
+  ({ user, theme, sidebarCollapsed = false, onThemeChange }) => {
+    // Comprehensive implementation with:
+    // - Responsive CSS Grid layout
+    // - ARIA landmarks and labels
+    // - Keyboard event handlers
+    // - useMemo for performance optimization
+    // - Error boundary wrapper
+    // - Loading and error states
+  }
+);
+```
+
+**Example 2: API Development with Backend Mode**
+
+```
+@be create a user registration endpoint with:
+- Email validation
+- Password strength requirements
+- Rate limiting
+- Email verification flow
+- Proper error handling
+
+Database: PostgreSQL with Prisma
+Authentication: JWT tokens
+```
+
+**Expected Custom Mode Response:**
+
+```typescript
+// Complete implementation including:
+// - Input validation schemas (Zod/Joi)
+// - Rate limiting middleware
+// - Password hashing (bcrypt)
+// - Email service integration
+// - Database transactions
+// - Comprehensive error handling
+// - OpenAPI documentation
+// - Unit test examples
+```
+
+#### **🛠️ Advanced Agent Integration**
+
+**Creating a Project Setup Agent**
+
+```typescript
+// .copilot/agents/project-setup.ts
+export class ProjectSetupAgent extends Agent {
+  async execute(context: AgentContext) {
+    const { projectType, features } = context.input;
+
+    switch (projectType) {
+      case "react-app":
+        return this.setupReactProject(features);
+      case "node-api":
+        return this.setupNodeAPI(features);
+      case "fullstack":
+        return this.setupFullstackProject(features);
+    }
+  }
+
+  private async setupReactProject(features: string[]) {
+    const commands = [
+      "npx create-react-app . --template typescript",
+      "npm install @types/react @types/react-dom",
+    ];
+
+    if (features.includes("routing")) {
+      commands.push("npm install react-router-dom @types/react-router-dom");
+    }
+
+    if (features.includes("testing")) {
+      commands.push(
+        "npm install -D @testing-library/jest-dom @testing-library/user-event"
+      );
+    }
+
+    return {
+      commands,
+      fileStructure: this.generateFileStructure(),
+      configFiles: this.generateConfigFiles(),
+      nextSteps: this.generateNextSteps(),
+    };
+  }
+}
+```
+
+**Using the Project Setup Agent**
+
+```
+@project-setup create a new React TypeScript application with:
+- React Router for navigation
+- Material-UI for components
+- React Query for data fetching
+- Jest and RTL for testing
+- ESLint and Prettier configuration
+- VS Code workspace settings
+```
+
+#### **🎨 Custom Mode Templates Library**
+
+**Testing Expert Mode**
+
+```markdown
+# Testing Expert Mode
+
+You are a testing specialist focused on:
+
+- Unit testing with Jest
+- Integration testing with Supertest
+- Frontend testing with RTL
+- E2E testing with Playwright
+- Test automation and CI/CD
+
+## Testing Principles:
+
+1. Write tests that fail for the right reasons
+2. Test behavior, not implementation
+3. Use descriptive test names
+4. Include edge cases and error scenarios
+5. Mock external dependencies appropriately
+
+## Response Format:
+
+- Test description and purpose
+- Setup and teardown code
+- Test implementation
+- Assertions with clear messages
+- Mock configurations when needed
+```
+
+**DevOps Expert Mode**
+
+```markdown
+# DevOps Expert Mode
+
+You are a DevOps engineer specializing in:
+
+- CI/CD pipeline optimization
+- Container orchestration (Docker/Kubernetes)
+- Cloud infrastructure (AWS/Azure/GCP)
+- Monitoring and logging
+- Security best practices
+
+## Focus Areas:
+
+1. Infrastructure as Code
+2. Automated testing in pipelines
+3. Security scanning integration
+4. Performance monitoring
+5. Disaster recovery planning
+
+## Response Style:
+
+- Include security considerations
+- Provide monitoring setup
+- Suggest automation opportunities
+- Include cost optimization tips
+- Reference industry best practices
+```
+
+#### **⚡ Pro Tips for Custom Modes**
+
+**1. Mode Switching Strategies**
+
+```
+# Quick mode switching in chat
+/mode fe
+@fe optimize this component for performance
+
+/mode be
+@be add caching to this API endpoint
+
+/mode test
+@test create comprehensive tests for the above
+```
+
+**2. Context Preservation**
+
+```
+# Before switching modes, preserve context
+@fe remember: we're building a user dashboard with dark mode support
+
+# Switch mode
+/mode test
+
+# Reference previous context
+@test create tests for the user dashboard component we discussed in frontend mode
+```
+
+**3. Team Collaboration**
+
+```json
+// Share custom modes across team
+{
+  "github.copilot.team": {
+    "sharedConfigPath": "team-configs/copilot-modes.json",
+    "autoSync": true,
+    "teamStandards": {
+      "frontend": "react-typescript-expert",
+      "backend": "node-api-expert",
+      "testing": "jest-rtl-expert"
+    }
+  }
+}
+```
+
+### **4.6 Troubleshooting Custom Modes**
+
+#### **Common Issues and Solutions**
+
+**Issue 1: Mode Not Activating**
+
+```json
+// Check configuration syntax
+{
+  "github.copilot.chat.customModes": {
+    "fe": {
+      // ✅ Correct: short, memorable key
+      "instructionsFile": ".copilot/custom-modes/frontend.md", // ✅ Correct path
+      "description": "Frontend expert" // ✅ Clear description
+    }
+  }
+}
+```
+
+**Issue 2: Instructions Not Being Followed**
+
+```markdown
+<!-- Make instructions more specific -->
+
+# ❌ Too vague:
+
+You are a frontend developer.
+
+# ✅ Specific and actionable:
+
+You are a senior React TypeScript developer who:
+
+- ALWAYS provides TypeScript interfaces for props
+- MUST include error handling in every component
+- ALWAYS adds accessibility attributes
+- NEVER uses any type - use proper TypeScript types
+```
+
+**Issue 3: Mode Context Loss**
+
+```
+# ❌ Vague context reference
+continue with the previous component
+
+# ✅ Specific context preservation
+@fe continue building the UserProfile component with the ProfileProps interface we defined, adding the edit functionality
 ```
 
 ---

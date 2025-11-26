@@ -29,6 +29,247 @@ ECS Fargate ↔ ElastiCache Redis ↔ MongoDB Atlas
 
 ---
 
+## 🏗️ **Detailed Architecture Diagram**
+
+```mermaid
+graph TB
+    %% External Users
+    User[👤 End Users<br/>Web Browsers]
+
+    %% DNS and Domain Management
+    subgraph "🌐 DNS & Domain Layer"
+        Domain[yourdomain.com<br/>📍 Custom Domain]
+        R53[Route 53<br/>🛣️ DNS Service<br/>• A Record: yourdomain.com → CloudFront<br/>• CNAME: www.yourdomain.com → CloudFront<br/>• A Record: api.yourdomain.com → ALB]
+        ACM[Certificate Manager<br/>🔒 SSL/TLS Certificates<br/>• *.yourdomain.com<br/>• yourdomain.com<br/>• api.yourdomain.com]
+    end
+
+    %% Frontend Infrastructure
+    subgraph "📱 Frontend Layer - Region: us-east-1"
+        CF[CloudFront<br/>🌍 Global CDN<br/>• Custom Domain: yourdomain.com<br/>• SSL Certificate from ACM<br/>• Cache Policy: CachingOptimized<br/>• Origin: S3 Static Website]
+        S3[S3 Bucket<br/>📦 Static Hosting<br/>• Bucket: yourdomain-frontend<br/>• Static Website Hosting Enabled<br/>• Angular Build Files<br/>• Public Read Policy]
+    end
+
+    %% Security Layer
+    subgraph "🛡️ Security & Monitoring"
+        WAF[AWS WAF<br/>🚫 Web Application Firewall<br/>• Rate Limiting<br/>• SQL Injection Protection<br/>• XSS Protection]
+        CW[CloudWatch<br/>📊 Monitoring & Logging<br/>• ECS Container Insights<br/>• ALB Access Logs<br/>• CloudFront Logs<br/>• Custom Metrics & Alarms]
+    end
+
+    %% Backend Infrastructure
+    subgraph "🏗️ Backend Layer - VPC: 10.0.0.0/16"
+
+        %% Load Balancing
+        subgraph "Public Subnets"
+            ALB[Application Load Balancer<br/>⚖️ Load Balancer<br/>• HTTPS Listener (443)<br/>• HTTP → HTTPS Redirect<br/>• Target Group: ECS Tasks<br/>• Health Check: /health]
+            IGW[Internet Gateway<br/>🌐 Internet Access]
+        end
+
+        %% Application Layer
+        subgraph "Private Subnets - Multi-AZ"
+            subgraph "AZ: us-east-1a"
+                ECS1[ECS Fargate Task 1<br/>🐳 Node.js Container<br/>• CPU: 0.25 vCPU<br/>• Memory: 0.5 GB<br/>• Port: 3000<br/>• Health Check Endpoint]
+                NAT1[NAT Gateway 1<br/>🔄 Outbound Internet<br/>for Private Subnet 1]
+            end
+
+            subgraph "AZ: us-east-1b"
+                ECS2[ECS Fargate Task 2<br/>🐳 Node.js Container<br/>• CPU: 0.25 vCPU<br/>• Memory: 0.5 GB<br/>• Port: 3000<br/>• Auto Scaling Enabled]
+                NAT2[NAT Gateway 2<br/>🔄 Outbound Internet<br/>for Private Subnet 2]
+            end
+
+            ECSCluster[ECS Cluster<br/>📋 fullstackapp-cluster<br/>• Launch Type: Fargate<br/>• Service: 2 Tasks<br/>• Auto Scaling: 1-10 tasks<br/>• Container Insights Enabled]
+        end
+
+        %% Data Layer
+        subgraph "🗄️ Data & Cache Layer"
+            Redis[ElastiCache Redis<br/>⚡ In-Memory Cache<br/>• Node Type: cache.t3.micro<br/>• Port: 6379<br/>• Encryption: At Rest & Transit<br/>• Subnet Group: Private Subnets]
+
+            MongoDB[MongoDB Atlas<br/>🍃 Primary Database<br/>• Cluster: M0 Sandbox (Free)<br/>• Region: us-east-1<br/>• Network Access: 0.0.0.0/0<br/>• Database: fullstackapp]
+        end
+    end
+
+    %% Security Groups
+    subgraph "🔒 Security Groups"
+        ALBSG[ALB Security Group<br/>• Inbound: 80, 443 from 0.0.0.0/0<br/>• Outbound: All traffic]
+        ECSSG[ECS Security Group<br/>• Inbound: 3000 from ALB-SG<br/>• Outbound: All traffic]
+        RedisS[Redis Security Group<br/>• Inbound: 6379 from ECS-SG<br/>• Outbound: All traffic]
+    end
+
+    %% CI/CD Pipeline
+    subgraph "🚀 CI/CD Pipeline"
+        GitHub[GitHub Repository<br/>📂 Source Code<br/>• Frontend: Angular App<br/>• Backend: Node.js API<br/>• Infrastructure: Docker Files]
+        Actions[GitHub Actions<br/>⚙️ Build & Deploy<br/>• Frontend: Build → S3 → CloudFront<br/>• Backend: Docker → ECR → ECS<br/>• Auto Invalidation]
+        ECR[Elastic Container Registry<br/>📦 Docker Images<br/>• Backend Node.js Images<br/>• Automatic Builds<br/>• Image Scanning]
+    end
+
+    %% Environment Variables
+    subgraph "🔧 Configuration Management"
+        SSM[Systems Manager<br/>🔐 Parameter Store<br/>• MongoDB Connection String<br/>• JWT Secrets<br/>• Redis Configuration<br/>• Environment Variables]
+    end
+
+    %% Flow Connections
+    User -->|1. HTTPS Request<br/>yourdomain.com| Domain
+    Domain -->|2. DNS Resolution| R53
+    R53 -->|3. Route to CloudFront<br/>A Record| CF
+    CF -->|4. SSL Termination<br/>Certificate from ACM| ACM
+    CF -->|5. Serve Static Content| S3
+
+    %% API Flow
+    User -->|🔄 API Requests<br/>api.yourdomain.com| R53
+    R53 -->|Route to ALB<br/>A Record| ALB
+    ALB -->|Load Balance<br/>Health Check /health| ECS1
+    ALB -->|Load Balance<br/>Health Check /health| ECS2
+
+    %% Backend Connections
+    ECS1 <-->|Cache Operations<br/>Port 6379| Redis
+    ECS2 <-->|Cache Operations<br/>Port 6379| Redis
+    ECS1 <-->|Database Operations<br/>MongoDB Atlas| MongoDB
+    ECS2 <-->|Database Operations<br/>MongoDB Atlas| MongoDB
+
+    %% Security & Monitoring
+    WAF -->|Protect| CF
+    CW -->|Monitor| CF
+    CW -->|Monitor| ALB
+    CW -->|Monitor| ECS1
+    CW -->|Monitor| ECS2
+    CW -->|Monitor| Redis
+
+    %% Infrastructure Connections
+    ALB -.->|Uses| ALBSG
+    ECS1 -.->|Uses| ECSSG
+    ECS2 -.->|Uses| ECSSG
+    Redis -.->|Uses| RedisS
+
+    %% CI/CD Flow
+    GitHub -->|Trigger Build<br/>on Push| Actions
+    Actions -->|Deploy Frontend<br/>S3 + CloudFront| S3
+    Actions -->|Build & Push<br/>Docker Images| ECR
+    ECR -->|Deploy to ECS<br/>Rolling Update| ECS1
+    ECR -->|Deploy to ECS<br/>Rolling Update| ECS2
+
+    %% Configuration
+    ECS1 <-->|Fetch Secrets<br/>Environment Variables| SSM
+    ECS2 <-->|Fetch Secrets<br/>Environment Variables| SSM
+
+    %% Internet Access for Private Subnets
+    ECS1 -->|Outbound Internet<br/>Package Updates, API Calls| NAT1
+    ECS2 -->|Outbound Internet<br/>Package Updates, API Calls| NAT2
+    NAT1 -->|Internet Access| IGW
+    NAT2 -->|Internet Access| IGW
+
+    %% Styling
+    classDef frontend fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef backend fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef database fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef security fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef cicd fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef dns fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+
+    class S3,CF frontend
+    class ALB,ECS1,ECS2,ECSCluster backend
+    class Redis,MongoDB database
+    class WAF,CW,ALBSG,ECSSG,RedisS,ACM security
+    class GitHub,Actions,ECR,SSM cicd
+    class Domain,R53 dns
+```
+
+### 🔍 **Architecture Components Details**
+
+#### **🌐 DNS & Domain Management**
+
+- **Custom Domain**: Your purchased domain (yourdomain.com)
+- **Route 53**: DNS service with A records for main site and API subdomain
+- **Certificate Manager**: SSL certificates for HTTPS across all services
+- **Domain Routing**:
+  - `yourdomain.com` → CloudFront Distribution
+  - `www.yourdomain.com` → CloudFront Distribution
+  - `api.yourdomain.com` → Application Load Balancer
+
+#### **📱 Frontend Infrastructure**
+
+- **CloudFront**: Global CDN for Angular app with custom domain SSL
+- **S3 Bucket**: Static website hosting for Angular build files
+- **WAF**: Web Application Firewall protecting CloudFront
+- **SSL Termination**: Certificate Manager handles all HTTPS
+
+#### **🏗️ Backend Infrastructure - VPC Architecture**
+
+- **VPC**: 10.0.0.0/16 CIDR block across 2 Availability Zones
+- **Public Subnets**: ALB and Internet Gateway (10.0.1.0/24, 10.0.2.0/24)
+- **Private Subnets**: ECS Tasks and Redis (10.0.11.0/24, 10.0.12.0/24)
+- **NAT Gateways**: Provide internet access for private subnet resources
+- **Application Load Balancer**: HTTPS termination and health checking
+- **ECS Fargate**: Serverless container hosting for Node.js API
+
+#### **🗄️ Data Layer**
+
+- **MongoDB Atlas**: Primary database with AWS integration
+- **ElastiCache Redis**: In-memory caching for performance
+- **Systems Manager**: Secure parameter storage for secrets
+
+#### **🔒 Security Architecture**
+
+- **Security Groups**: Network-level firewalling
+  - ALB: Allows 80/443 from internet
+  - ECS: Allows 3000 from ALB only
+  - Redis: Allows 6379 from ECS only
+- **IAM Roles**: Least privilege access for ECS tasks
+- **Encryption**: At rest and in transit for all data
+
+#### **🚀 CI/CD Pipeline**
+
+- **GitHub**: Source code repository
+- **GitHub Actions**: Automated build and deployment
+- **ECR**: Docker image registry for backend
+- **Automated Deployment**:
+  - Frontend: Build → S3 → CloudFront invalidation
+  - Backend: Docker build → ECR → ECS rolling update
+
+### 💰 **Cost Breakdown by Component**
+
+| Component               | Monthly Cost        | Usage                   |
+| ----------------------- | ------------------- | ----------------------- |
+| **Route 53**            | $0.50               | Hosted zone             |
+| **Certificate Manager** | Free                | SSL certificates        |
+| **S3 + CloudFront**     | $1-3                | Static hosting + CDN    |
+| **ALB**                 | $22                 | Load balancer           |
+| **ECS Fargate**         | $15-25              | 2 small tasks           |
+| **NAT Gateways**        | $90                 | 2 gateways (major cost) |
+| **ElastiCache**         | $10-15              | t3.micro Redis          |
+| **MongoDB Atlas**       | Free                | M0 sandbox tier         |
+| **Total**               | **~$140-155/month** | Full production setup   |
+
+### 🎯 **Traffic Flow Examples**
+
+#### **Frontend User Request:**
+
+1. User visits `https://yourdomain.com`
+2. DNS query to Route 53 → Returns CloudFront IP
+3. Request to CloudFront → SSL termination with ACM certificate
+4. CloudFront serves cached content or fetches from S3
+5. Response delivered globally via edge locations
+
+#### **Backend API Request:**
+
+1. Frontend makes API call to `https://api.yourdomain.com/users`
+2. DNS query to Route 53 → Returns ALB IP address
+3. Request to ALB → SSL termination and health check
+4. ALB forwards to healthy ECS task in private subnet
+5. ECS task processes request:
+   - Checks Redis cache first
+   - Queries MongoDB Atlas if cache miss
+   - Updates cache and returns response
+6. Response flows back through ALB to frontend
+
+#### **Deployment Flow:**
+
+1. Developer pushes code to GitHub
+2. GitHub Actions triggered automatically
+3. **Frontend**: Angular build → Upload to S3 → CloudFront invalidation
+4. **Backend**: Docker build → Push to ECR → ECS rolling update
+5. Health checks ensure zero-downtime deployment
+
+---
+
 ## 📚 **Table of Contents**
 
 ### **Part 1: AWS Account Setup & Prerequisites** _(✅ Complete)_

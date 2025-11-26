@@ -170,7 +170,9 @@ graph TB
     class WAF,CW,ALBSG,ECSSG,RedisS,ACM security
     class GitHub,Actions,ECR,SSM cicd
     class Domain,R53 dns
-```### 🔍 **Architecture Components Details**
+```
+
+### 🔍 **Architecture Components Details**
 
 #### **🌐 DNS & Domain Management**
 

@@ -31,7 +31,7 @@ ECS Fargate ↔ ElastiCache Redis ↔ MongoDB Atlas
 
 ## 🏗️ **Detailed Architecture Diagram**
 
-````mermaid
+```mermaid
 graph TB
     %% External Users
     User[End Users - Web Browsers]
@@ -173,7 +173,6 @@ graph TB
 ```
 
 ### 🔍 **Architecture Components Details**
-
 
 #### **🌐 DNS & Domain Management**
 
@@ -4107,7 +4106,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application
 CMD ["npm", "start"]
-````
+```
 
 ### **2.2 Create .dockerignore**
 

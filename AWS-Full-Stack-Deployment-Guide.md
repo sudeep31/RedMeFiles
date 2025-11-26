@@ -174,6 +174,7 @@ graph TB
 
 ### 🔍 **Architecture Components Details**
 
+
 #### **🌐 DNS & Domain Management**
 
 - **Custom Domain**: Your purchased domain (yourdomain.com)

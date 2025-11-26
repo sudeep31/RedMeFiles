@@ -31,99 +31,99 @@ ECS Fargate ↔ ElastiCache Redis ↔ MongoDB Atlas
 
 ## 🏗️ **Detailed Architecture Diagram**
 
-```mermaid
+````mermaid
 graph TB
     %% External Users
-    User[👤 End Users<br/>Web Browsers]
+    User[End Users - Web Browsers]
 
     %% DNS and Domain Management
-    subgraph "🌐 DNS & Domain Layer"
-        Domain[yourdomain.com<br/>📍 Custom Domain]
-        R53[Route 53<br/>🛣️ DNS Service<br/>• A Record: yourdomain.com → CloudFront<br/>• CNAME: www.yourdomain.com → CloudFront<br/>• A Record: api.yourdomain.com → ALB]
-        ACM[Certificate Manager<br/>🔒 SSL/TLS Certificates<br/>• *.yourdomain.com<br/>• yourdomain.com<br/>• api.yourdomain.com]
+    subgraph DNS["DNS and Domain Layer"]
+        Domain[yourdomain.com - Custom Domain]
+        R53[Route 53 DNS Service<br/>A Record yourdomain.com to CloudFront<br/>CNAME www.yourdomain.com to CloudFront<br/>A Record api.yourdomain.com to ALB]
+        ACM[Certificate Manager SSL/TLS<br/>*.yourdomain.com<br/>yourdomain.com<br/>api.yourdomain.com]
     end
 
     %% Frontend Infrastructure
-    subgraph "📱 Frontend Layer - Region: us-east-1"
-        CF[CloudFront<br/>🌍 Global CDN<br/>• Custom Domain: yourdomain.com<br/>• SSL Certificate from ACM<br/>• Cache Policy: CachingOptimized<br/>• Origin: S3 Static Website]
-        S3[S3 Bucket<br/>📦 Static Hosting<br/>• Bucket: yourdomain-frontend<br/>• Static Website Hosting Enabled<br/>• Angular Build Files<br/>• Public Read Policy]
+    subgraph Frontend["Frontend Layer - Region us-east-1"]
+        CF[CloudFront Global CDN<br/>Custom Domain yourdomain.com<br/>SSL Certificate from ACM<br/>Cache Policy CachingOptimized<br/>Origin S3 Static Website]
+        S3[S3 Bucket Static Hosting<br/>Bucket yourdomain-frontend<br/>Static Website Hosting Enabled<br/>Angular Build Files<br/>Public Read Policy]
     end
 
     %% Security Layer
-    subgraph "🛡️ Security & Monitoring"
-        WAF[AWS WAF<br/>🚫 Web Application Firewall<br/>• Rate Limiting<br/>• SQL Injection Protection<br/>• XSS Protection]
-        CW[CloudWatch<br/>📊 Monitoring & Logging<br/>• ECS Container Insights<br/>• ALB Access Logs<br/>• CloudFront Logs<br/>• Custom Metrics & Alarms]
+    subgraph Security["Security and Monitoring"]
+        WAF[AWS WAF Web Application Firewall<br/>Rate Limiting<br/>SQL Injection Protection<br/>XSS Protection]
+        CW[CloudWatch Monitoring<br/>ECS Container Insights<br/>ALB Access Logs<br/>CloudFront Logs<br/>Custom Metrics and Alarms]
     end
 
     %% Backend Infrastructure
-    subgraph "🏗️ Backend Layer - VPC: 10.0.0.0/16"
+    subgraph Backend["Backend Layer - VPC 10.0.0.0/16"]
 
         %% Load Balancing
-        subgraph "Public Subnets"
-            ALB[Application Load Balancer<br/>⚖️ Load Balancer<br/>• HTTPS Listener (443)<br/>• HTTP → HTTPS Redirect<br/>• Target Group: ECS Tasks<br/>• Health Check: /health]
-            IGW[Internet Gateway<br/>🌐 Internet Access]
+        subgraph PublicSubnets["Public Subnets"]
+            ALB[Application Load Balancer<br/>HTTPS Listener 443<br/>HTTP to HTTPS Redirect<br/>Target Group ECS Tasks<br/>Health Check /health]
+            IGW[Internet Gateway<br/>Internet Access]
         end
 
         %% Application Layer
-        subgraph "Private Subnets - Multi-AZ"
-            subgraph "AZ: us-east-1a"
-                ECS1[ECS Fargate Task 1<br/>🐳 Node.js Container<br/>• CPU: 0.25 vCPU<br/>• Memory: 0.5 GB<br/>• Port: 3000<br/>• Health Check Endpoint]
-                NAT1[NAT Gateway 1<br/>🔄 Outbound Internet<br/>for Private Subnet 1]
+        subgraph PrivateSubnets["Private Subnets - Multi-AZ"]
+            subgraph AZ1["AZ us-east-1a"]
+                ECS1[ECS Fargate Task 1<br/>Node.js Container<br/>CPU 0.25 vCPU<br/>Memory 0.5 GB<br/>Port 3000<br/>Health Check Endpoint]
+                NAT1[NAT Gateway 1<br/>Outbound Internet<br/>for Private Subnet 1]
             end
 
-            subgraph "AZ: us-east-1b"
-                ECS2[ECS Fargate Task 2<br/>🐳 Node.js Container<br/>• CPU: 0.25 vCPU<br/>• Memory: 0.5 GB<br/>• Port: 3000<br/>• Auto Scaling Enabled]
-                NAT2[NAT Gateway 2<br/>🔄 Outbound Internet<br/>for Private Subnet 2]
+            subgraph AZ2["AZ us-east-1b"]
+                ECS2[ECS Fargate Task 2<br/>Node.js Container<br/>CPU 0.25 vCPU<br/>Memory 0.5 GB<br/>Port 3000<br/>Auto Scaling Enabled]
+                NAT2[NAT Gateway 2<br/>Outbound Internet<br/>for Private Subnet 2]
             end
 
-            ECSCluster[ECS Cluster<br/>📋 fullstackapp-cluster<br/>• Launch Type: Fargate<br/>• Service: 2 Tasks<br/>• Auto Scaling: 1-10 tasks<br/>• Container Insights Enabled]
+            ECSCluster[ECS Cluster<br/>fullstackapp-cluster<br/>Launch Type Fargate<br/>Service 2 Tasks<br/>Auto Scaling 1-10 tasks<br/>Container Insights Enabled]
         end
 
         %% Data Layer
-        subgraph "🗄️ Data & Cache Layer"
-            Redis[ElastiCache Redis<br/>⚡ In-Memory Cache<br/>• Node Type: cache.t3.micro<br/>• Port: 6379<br/>• Encryption: At Rest & Transit<br/>• Subnet Group: Private Subnets]
+        subgraph DataLayer["Data and Cache Layer"]
+            Redis[ElastiCache Redis<br/>In-Memory Cache<br/>Node Type cache.t3.micro<br/>Port 6379<br/>Encryption At Rest and Transit<br/>Subnet Group Private Subnets]
 
-            MongoDB[MongoDB Atlas<br/>🍃 Primary Database<br/>• Cluster: M0 Sandbox (Free)<br/>• Region: us-east-1<br/>• Network Access: 0.0.0.0/0<br/>• Database: fullstackapp]
+            MongoDB[MongoDB Atlas<br/>Primary Database<br/>Cluster M0 Sandbox Free<br/>Region us-east-1<br/>Network Access 0.0.0.0/0<br/>Database fullstackapp]
         end
     end
 
     %% Security Groups
-    subgraph "🔒 Security Groups"
-        ALBSG[ALB Security Group<br/>• Inbound: 80, 443 from 0.0.0.0/0<br/>• Outbound: All traffic]
-        ECSSG[ECS Security Group<br/>• Inbound: 3000 from ALB-SG<br/>• Outbound: All traffic]
-        RedisS[Redis Security Group<br/>• Inbound: 6379 from ECS-SG<br/>• Outbound: All traffic]
+    subgraph SecurityGroups["Security Groups"]
+        ALBSG[ALB Security Group<br/>Inbound 80 443 from 0.0.0.0/0<br/>Outbound All traffic]
+        ECSSG[ECS Security Group<br/>Inbound 3000 from ALB-SG<br/>Outbound All traffic]
+        RedisS[Redis Security Group<br/>Inbound 6379 from ECS-SG<br/>Outbound All traffic]
     end
 
     %% CI/CD Pipeline
-    subgraph "🚀 CI/CD Pipeline"
-        GitHub[GitHub Repository<br/>📂 Source Code<br/>• Frontend: Angular App<br/>• Backend: Node.js API<br/>• Infrastructure: Docker Files]
-        Actions[GitHub Actions<br/>⚙️ Build & Deploy<br/>• Frontend: Build → S3 → CloudFront<br/>• Backend: Docker → ECR → ECS<br/>• Auto Invalidation]
-        ECR[Elastic Container Registry<br/>📦 Docker Images<br/>• Backend Node.js Images<br/>• Automatic Builds<br/>• Image Scanning]
+    subgraph CICD["CI/CD Pipeline"]
+        GitHub[GitHub Repository<br/>Source Code<br/>Frontend Angular App<br/>Backend Node.js API<br/>Infrastructure Docker Files]
+        Actions[GitHub Actions<br/>Build and Deploy<br/>Frontend Build to S3 to CloudFront<br/>Backend Docker to ECR to ECS<br/>Auto Invalidation]
+        ECR[Elastic Container Registry<br/>Docker Images<br/>Backend Node.js Images<br/>Automatic Builds<br/>Image Scanning]
     end
 
     %% Environment Variables
-    subgraph "🔧 Configuration Management"
-        SSM[Systems Manager<br/>🔐 Parameter Store<br/>• MongoDB Connection String<br/>• JWT Secrets<br/>• Redis Configuration<br/>• Environment Variables]
+    subgraph Config["Configuration Management"]
+        SSM[Systems Manager<br/>Parameter Store<br/>MongoDB Connection String<br/>JWT Secrets<br/>Redis Configuration<br/>Environment Variables]
     end
 
     %% Flow Connections
-    User -->|1. HTTPS Request<br/>yourdomain.com| Domain
+    User -->|1. HTTPS Request yourdomain.com| Domain
     Domain -->|2. DNS Resolution| R53
-    R53 -->|3. Route to CloudFront<br/>A Record| CF
-    CF -->|4. SSL Termination<br/>Certificate from ACM| ACM
+    R53 -->|3. Route to CloudFront A Record| CF
+    CF -->|4. SSL Termination Certificate from ACM| ACM
     CF -->|5. Serve Static Content| S3
 
     %% API Flow
-    User -->|🔄 API Requests<br/>api.yourdomain.com| R53
-    R53 -->|Route to ALB<br/>A Record| ALB
-    ALB -->|Load Balance<br/>Health Check /health| ECS1
-    ALB -->|Load Balance<br/>Health Check /health| ECS2
+    User -->|API Requests api.yourdomain.com| R53
+    R53 -->|Route to ALB A Record| ALB
+    ALB -->|Load Balance Health Check /health| ECS1
+    ALB -->|Load Balance Health Check /health| ECS2
 
     %% Backend Connections
-    ECS1 <-->|Cache Operations<br/>Port 6379| Redis
-    ECS2 <-->|Cache Operations<br/>Port 6379| Redis
-    ECS1 <-->|Database Operations<br/>MongoDB Atlas| MongoDB
-    ECS2 <-->|Database Operations<br/>MongoDB Atlas| MongoDB
+    ECS1 <-->|Cache Operations Port 6379| Redis
+    ECS2 <-->|Cache Operations Port 6379| Redis
+    ECS1 <-->|Database Operations MongoDB Atlas| MongoDB
+    ECS2 <-->|Database Operations MongoDB Atlas| MongoDB
 
     %% Security & Monitoring
     WAF -->|Protect| CF
@@ -140,19 +140,19 @@ graph TB
     Redis -.->|Uses| RedisS
 
     %% CI/CD Flow
-    GitHub -->|Trigger Build<br/>on Push| Actions
-    Actions -->|Deploy Frontend<br/>S3 + CloudFront| S3
-    Actions -->|Build & Push<br/>Docker Images| ECR
-    ECR -->|Deploy to ECS<br/>Rolling Update| ECS1
-    ECR -->|Deploy to ECS<br/>Rolling Update| ECS2
+    GitHub -->|Trigger Build on Push| Actions
+    Actions -->|Deploy Frontend S3 + CloudFront| S3
+    Actions -->|Build and Push Docker Images| ECR
+    ECR -->|Deploy to ECS Rolling Update| ECS1
+    ECR -->|Deploy to ECS Rolling Update| ECS2
 
     %% Configuration
-    ECS1 <-->|Fetch Secrets<br/>Environment Variables| SSM
-    ECS2 <-->|Fetch Secrets<br/>Environment Variables| SSM
+    ECS1 <-->|Fetch Secrets Environment Variables| SSM
+    ECS2 <-->|Fetch Secrets Environment Variables| SSM
 
     %% Internet Access for Private Subnets
-    ECS1 -->|Outbound Internet<br/>Package Updates, API Calls| NAT1
-    ECS2 -->|Outbound Internet<br/>Package Updates, API Calls| NAT2
+    ECS1 -->|Outbound Internet Package Updates API Calls| NAT1
+    ECS2 -->|Outbound Internet Package Updates API Calls| NAT2
     NAT1 -->|Internet Access| IGW
     NAT2 -->|Internet Access| IGW
 
@@ -170,9 +170,7 @@ graph TB
     class WAF,CW,ALBSG,ECSSG,RedisS,ACM security
     class GitHub,Actions,ECR,SSM cicd
     class Domain,R53 dns
-```
-
-### 🔍 **Architecture Components Details**
+```### 🔍 **Architecture Components Details**
 
 #### **🌐 DNS & Domain Management**
 
@@ -1224,19 +1222,21 @@ Navigate to Bucket Permissions:
 Enter Bucket Policy:
 Replace "yourdomainname-frontend" with your actual bucket name:
 
-```
+````
+
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicReadGetObject",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::yourdomainname-frontend/*"
-        }
-    ]
+"Version": "2012-10-17",
+"Statement": [
+{
+"Sid": "PublicReadGetObject",
+"Effect": "Allow",
+"Principal": "*",
+"Action": "s3:GetObject",
+"Resource": "arn:aws:s3:::yourdomainname-frontend/*"
 }
+]
+}
+
 ```
 
 Save Policy:
@@ -1568,7 +1568,9 @@ Upload with Content Types:
 AWS CLI with Content Types:
 
 ```
+
 aws s3 sync . s3://yourdomainname-frontend --delete --content-type-by-extension
+
 ```
 
 ### **7.3 Verify Upload**
@@ -3657,26 +3659,32 @@ Common Query Examples:
 Error Analysis Query:
 
 ```
+
 fields @timestamp, @message
 | filter @message like /ERROR/
 | sort @timestamp desc
 | limit 100
+
 ```
 
 Performance Query:
 
 ```
+
 fields @timestamp, @message
 | filter @message like /response_time/
 | stats avg(response_time) by bin(5m)
+
 ```
 
 Security Events Query:
 
 ```
+
 fields @timestamp, action, terminatingRuleId
 | filter action = "BLOCK"
 | stats count() by terminatingRuleId
+
 ```
 
 ---
@@ -4036,22 +4044,24 @@ Connect Local to Remote:
 Organize your repository:
 
 ```
+
 fullstackapp-deployment/
-├── frontend/                 # Angular application
-│   ├── src/
-│   ├── package.json
-│   └── angular.json
-├── backend/                  # Node.js application
-│   ├── src/
-│   ├── package.json
-│   └── Dockerfile
+├── frontend/ # Angular application
+│ ├── src/
+│ ├── package.json
+│ └── angular.json
+├── backend/ # Node.js application
+│ ├── src/
+│ ├── package.json
+│ └── Dockerfile
 ├── .github/
-│   └── workflows/
-│       ├── frontend-deploy.yml
-│       ├── backend-deploy.yml
-│       └── full-deploy.yml
-└── infrastructure/           # Terraform or CloudFormation (optional)
-```
+│ └── workflows/
+│ ├── frontend-deploy.yml
+│ ├── backend-deploy.yml
+│ └── full-deploy.yml
+└── infrastructure/ # Terraform or CloudFormation (optional)
+
+````
 
 ---
 
@@ -4094,7 +4104,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application
 CMD ["npm", "start"]
-```
+````
 
 ### **2.2 Create .dockerignore**
 

@@ -103,7 +103,16 @@ Summary and where to go from here.
 - Always include comments explaining what the code does
 - Provide context about when/why to use this approach
 - Show both simple and advanced versions
-- Explain any complex concepts in plain English
+- Explain each line with help of comments
+- Include testing strategies or example tests
+- Suggest performance considerations if relevant
+- Provide alternative implementations if applicable
+- Show expected output/results
+- Include troubleshooting tips for common issues
+- Link to related documentation or resources
+- Explain dependencies and environment setup
+- Suggest best practices for maintainability
+- Explain the logic behind key decisions in the code
 
 **For Architecture/Process Content:**
 
@@ -120,6 +129,7 @@ Summary and where to go from here.
 - Define technical terms when first used
 - Use inclusive language (avoid assuming prior knowledge)
 - Provide multiple learning paths for different experience levels
+- if response limit hit please divide in to parts
 
 **Content Organization:**
 

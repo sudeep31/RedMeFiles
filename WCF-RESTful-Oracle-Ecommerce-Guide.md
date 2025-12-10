@@ -48,7 +48,9 @@ flowchart TD
     style DL fill:#e8f5e8
     style WS fill:#ffeb3b
     style ODB fill:#ff9800
-```### **Service Architecture Details**
+```
+
+### **Service Architecture Details**
 
 ```mermaid
 flowchart TB

@@ -20,61 +20,78 @@ This guide demonstrates building a **WCF RESTful service** that connects to **Or
 
 ### **Overall Architecture Diagram**
 
+````mermaid
+flowchart TD
+    subgraph PL["🌐 Presentation Layer"]
+        WC["📱 Web Client"]
+        MC["📱 Mobile Client"]
+    end
+
+    subgraph SL["🛡️ Service Layer"]
+        WS["⚡ WCF REST Service"]
+        BL["🧠 Business Logic"]
+    end
+
+    subgraph DL["🗄️ Data Layer"]
+        CP["🔗 Connection Pool"]
+        ODB["🏛️ Oracle Database"]
+    end
+
+    WC --> WS
+    MC --> WS
+    WS --> BL
+    BL --> CP
+    CP --> ODB
+
+    style PL fill:#e1f5fe
+    style SL fill:#f3e5f5
+    style DL fill:#e8f5e8
+    style WS fill:#ffeb3b
+    style ODB fill:#ff9800
+```### **Service Architecture Details**
+
 ```mermaid
-architecture-beta
-    group presentation(cloud)[Presentation Layer]
-    group service(server)[Service Layer]
-    group data(database)[Data Layer]
+flowchart TB
+    subgraph CLIENT["👥 Client Applications"]
+        WA["🌐 Web Application"]
+        MA["📱 Mobile App"]
+    end
 
-    service webclient(internet)[Web Client] in presentation
-    service mobileclient(internet)[Mobile Client] in presentation
+    subgraph WCF_LAYER["🛡️ WCF Service Layer"]
+        WH["🏠 WCF Host (IIS)"]
+        SC["📋 Service Contracts"]
+        DC["📄 Data Contracts"]
+    end
 
-    service wcfservice(server)[WCF REST Service] in service
-    service businesslogic(server)[Business Logic] in service
+    subgraph DAL["🔗 Data Access Layer"]
+        RP["📦 Repository Pattern"]
+        EM["🎯 Entity Models"]
+        OC["🔌 Oracle Connection"]
+    end
 
-    service oracledb(database)[Oracle Database] in data
-    service connectionpool(database)[Connection Pool] in data
+    subgraph DATABASE["🗄️ Oracle Database"]
+        CAT["📊 PRODUCT_CATEGORIES"]
+        SUB["📊 PRODUCT_SUBCATEGORIES"]
+    end
 
-    webclient:B --> T:wcfservice
-    mobileclient:B --> T:wcfservice
-    wcfservice:B --> T:businesslogic
-    businesslogic:B --> T:connectionpool
-    connectionpool:B --> T:oracledb
-```
+    WA --> WH
+    MA --> WH
+    WH --> SC
+    SC --> DC
+    SC --> RP
+    RP --> EM
+    RP --> OC
+    OC --> CAT
+    OC --> SUB
 
-### **Service Architecture Details**
-
-```mermaid
-architecture-beta
-    group client[Client Applications]
-    group wcf[WCF Service Layer]
-    group dal[Data Access Layer]
-    group oracle[Oracle Database]
-
-    service webapp(internet)[Web Application] in client
-    service mobileapp(internet)[Mobile App] in client
-
-    service wcfhost(server)[WCF Host (IIS)] in wcf
-    service servicecontract(server)[Service Contracts] in wcf
-    service datacontract(server)[Data Contracts] in wcf
-
-    service repository(database)[Repository Pattern] in dal
-    service entitymodel(database)[Entity Models] in dal
-    service oracleconnection(database)[Oracle Connection] in dal
-
-    service categorytable(database)[PRODUCT_CATEGORIES] in oracle
-    service subcategorytable(database)[PRODUCT_SUBCATEGORIES] in oracle
-
-    webapp:R --> L:wcfhost
-    mobileapp:R --> L:wcfhost
-    wcfhost:B --> T:servicecontract
-    servicecontract:B --> T:repository
-    repository:B --> T:oracleconnection
-    oracleconnection:B --> T:categorytable
-    oracleconnection:B --> T:subcategorytable
-```
-
-## 🗄️ **Database Design**
+    style CLIENT fill:#e3f2fd
+    style WCF_LAYER fill:#fce4ec
+    style DAL fill:#e8f5e8
+    style DATABASE fill:#fff3e0
+    style WH fill:#ffeb3b
+    style CAT fill:#ff9800
+    style SUB fill:#ff9800
+```## 🗄️ **Database Design**
 
 ### **1. 📊 Table Structure Design**
 
@@ -102,7 +119,7 @@ CREATE TABLE PRODUCT_CATEGORIES (
         FOREIGN KEY (PARENT_CATEGORY_ID)
         REFERENCES PRODUCT_CATEGORIES(CATEGORY_ID)
 );
-```
+````
 
 **📝 Line-by-Line Explanation:**
 
